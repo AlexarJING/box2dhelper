@@ -28,26 +28,40 @@ function helper.draw(world)
 	love.graphics.setLineJoin( "none")
 	for i,body in ipairs(world:getBodyList()) do
 		local color
-		if not body:isAwake() then
-			color={100, 100, 100, 255}
-		else
-			color={100, 200, 255, 255}
-		end
+		
 		local bodyX=body:getX()
 		local bodyY=body:getY()
+		love.graphics.setColor(255, 0, 255, 255)
+		love.graphics.circle("line", bodyX, bodyY, 4)
 		local bodyAngle=body:getAngle()
 		for i,fixture in ipairs(body:getFixtureList()) do
 			local shape=fixture:getShape()
 			local shapeType = shape:type()
 			local shapeR=shape:getRadius()
+			local isSensor = fixture:isSensor()
+			if  body:isAwake() then
+				if isSensor then		
+					color={200, 200, 0, 255}
+				else
+					color={100, 200, 255, 255}
+				end
+			else
+				color={100, 100, 100, 255}
+			end
+
+			if body:getUserData() then
+				color={255,255,0,255}
+			end
 			if shapeType=="CircleShape" then
 				color[4]=255
+				local offx,offy= shape:getPoint()
 				love.graphics.setColor(color)
-				love.graphics.circle("line", bodyX, bodyY, shapeR)
-				love.graphics.line(bodyX,bodyY,bodyX+math.cos(bodyAngle)*shapeR,bodyY+math.sin(bodyAngle)*shapeR)
+				love.graphics.circle("line", bodyX+offx, bodyY+offy, shapeR)
+				love.graphics.line(bodyX+offx,bodyY+offy,
+					bodyX+math.cos(bodyAngle)*shapeR+offx,bodyY+math.sin(bodyAngle)*shapeR+offy)
 				color[4]=50
 				love.graphics.setColor(color)
-				love.graphics.circle("fill", bodyX, bodyY, shapeR)
+				love.graphics.circle("fill", bodyX+offx, bodyY+offy, shapeR)
 			elseif shapeType=="ChainShape" or shapeType=="EdgeShape" then
 				color[4]=255
 				love.graphics.setColor(color)
@@ -95,25 +109,27 @@ function helper.draw(world)
 				love.graphics.polygon("line", verts)
 			elseif jointType=="PrismaticJoint" then
 				local bodyA,bodyB = joint:getBodies()
-				local aX,aY,bX,bY=joint:getAnchors()
+				local aX,aY= bodyA:getPosition()
 				local bX,bY = bodyB:getPosition()
-				local abDirection = getRot (bodyA:getX(),bodyA:getY(),bX,bY)
-				local dist = getDist(aX,aY,bX,bY)
+				local jX,jY = joint:getAnchors()
+				local abDirection = getRot (bX,bY,aX,aY)
+				--local dist = getDist(aX,aY,bX,bY)
 				local lower, upper = joint:getLimits( )
 				lower= lower<-100 and 100 or lower
 				upper= upper>100 and 100 or upper
 				if lower~=-100 then
-					love.graphics.line(polygonTrans(aX,aY,abDirection,1,{-10,lower-10,10,lower-10}))
+					love.graphics.line(polygonTrans(jX,jY,abDirection,1,{-10,lower-10,10,lower-10}))
 				end
 
 				if upper~=100 then
-					love.graphics.line(polygonTrans(aX,aY,abDirection,1,{-10,upper+10,10,upper+10}))
+					love.graphics.line(polygonTrans(jX,jY,abDirection,1,{-10,upper+10,10,upper+10}))
 				end
 				love.graphics.circle("line", bX,bY,8)
-				love.graphics.line(polygonTrans(aX,aY,abDirection,1,{-10,lower-10,-10,upper+10}))
-				love.graphics.line(polygonTrans(aX,aY,abDirection,1,{10,lower-10,10,upper+10}))
-				love.graphics.line(bodyA:getX(),bodyA:getY(),bX,bY)
-			
+				love.graphics.line(polygonTrans(jX,jY,abDirection,1,{-10,lower-10,-10,upper+10}))
+				love.graphics.line(polygonTrans(jX,jY,abDirection,1,{10,lower-10,10,upper+10}))
+				love.graphics.line(aX,aY,bX,bY)
+				love.graphics.line(jX, jY, aX, aY)
+				love.graphics.line(jX, jY, bX, bY)
 			elseif jointType=="RevoluteJoint" then
 				local jX,jY=joint:getAnchors()
 				local jAngle=joint:getJointAngle( )
@@ -178,62 +194,79 @@ function helper.draw(world)
 				table.insert(verts, realDist)
 				verts=polygonTrans(aX,aY,abDirection,1,verts)
 				love.graphics.line(verts)
-				love.graphics.circle("line", bX, bY, 3)
-				love.graphics.circle("line", aX, aY, 3)	
+				love.graphics.circle("line", bX, bY, 8)
 				love.graphics.line(polygonTrans(aX,aY,abDirection,1,{-10,0,-10,realDist}))
 				love.graphics.line(polygonTrans(aX,aY,abDirection,1,{10,0 ,10,realDist}))
+				love.graphics.line(polygonTrans(aX,aY,abDirection,1,{10,0 ,-10,0}))
 			end
-
-
 		end
 	end
 end
 
 
-function helper.save(world)
-	local group={}
-	group.obj=helper.getObjInfo(world)
-	group.joint=helper.getJointInfo(world)
-	return table.save(group)
+function helper.save(world,asTable)
+	local group=helper.getWorldData(world)
+	if asTable then
+		return group
+	else
+		return table.save(group)
+	end
+	
 end
 
 
-function helper.load(world,data)
-	data= loadstring(data)()
-	helper.createObj(world,data)
+
+function helper.load(world,data,asTable)
+	if not asTable then data= loadstring(data)() end
+	return helper.createWorld(world,data)
 end
 
-function helper.createObj(world,data)
+function helper.createWorld(world,data,offx,offy)
+	offx=offx or 0
+	offy=offy or 0
 	local group={}
 	for i,v in ipairs(data.obj) do
 		local obj={}
 		table.insert(group, obj)
 		obj.body = love.physics.newBody(world)
+		---set prop
 		for prop,value in pairs(v.body) do
 			if obj.body["set"..prop] then
 				obj.body["set"..prop](obj.body,value)
-			elseif obj.body["is"..prop] then
-				obj.body["is"..prop](obj.body,value)
 			end
 		end
+
+		local bx,by= obj.body:getPosition() ---set offside
+		obj.body:setPosition(bx+offx,by+offy)
 
 		obj.fixtures={}
 		for i,param in ipairs(v.fixtures) do
 			local shell={}
-			local type=param.shape.type
-			if type== "CircleShape" then
-				shell.shape = love.physics.newCircleShape(0, 0, param.shape.Radius)
-			elseif type== "EdgeShape" then
+			local Type=param.shape.Type
+			if Type== "circle" then
+				local cx,cy = unpack(param.shape.Point)
+				shell.shape = love.physics.newCircleShape(cx, cy, param.shape.Radius)
+			elseif Type== "edge" then
 				shell.shape = love.physics.newEdgeShape(unpack(param.shape.Points))
-			elseif type== "ChainShape" then
+			elseif Type== "chain" then
 				shell.shape = love.physics.newChainShape(false, param.shape.Points)
-			elseif type== "PolygonShape" then
+			elseif Type== "polygon" then
 				shell.shape = love.physics.newPolygonShape(param.shape.Points)
 			end
+			
 			shell.fixture = love.physics.newFixture(obj.body, shell.shape)
-			shell.fixture:setSensor(param.fixture.Sensor)
-			shell.fixture:setDensity(param.fixture.Density)
-			shell.fixture:setRestitution(param.fixture.Restitution)
+
+			for prop,value in pairs(param.fixture) do
+				if shell.fixture["set"..prop] then
+					if type(value)=="table" then
+						shell.fixture["set"..prop](shell.fixture,unpack(value))
+					else
+						shell.fixture["set"..prop](shell.fixture,value)
+					end
+					
+				end
+			end
+			
 			table.insert(obj.fixtures, shell)
 		end
 		if #v.fixtures==1 then
@@ -243,70 +276,66 @@ function helper.createObj(world,data)
 	end
 
 	for i,joint in ipairs(data.joint) do
-		--if joint.type~="MouseJoint" then 
-		--	print(joint.bodies[1],group[joint.bodies[1]].body:getFixtureList()[1]:getShape():type(),
-		--		joint.bodies[2],group[joint.bodies[2]].body:getFixtureList()[1]:getShape():type()) 
-		--end
-		if joint.type=="DistanceJoint" then
+		if joint.Type=="distance" then
 			local j = love.physics.newDistanceJoint(
-				group[joint.bodies[1]].body, 
-				group[joint.bodies[2]].body, 
-				joint.anchors[1], joint.anchors[2], joint.anchors[3],joint.anchors[4],
+				group[joint.Bodies[1]].body, 
+				group[joint.Bodies[2]].body, 
+				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
 				joint.CollideConnected)
 			j:setDampingRatio(joint.DampingRatio)
 			j:setFrequency(joint.Frequency)
-		elseif joint.type=="PrismaticJoint" then
-			local angle= getRot(joint.anchors[1], joint.anchors[2], joint.anchors[3], joint.anchors[4])
+		elseif joint.Type=="prismatic" then
+			local angle= getRot(joint.Anchors[1], joint.Anchors[2], joint.Anchors[3], joint.Anchors[4])
 			local j = love.physics.newPrismaticJoint(
-				group[joint.bodies[1]].body, 
-				group[joint.bodies[2]].body,
-				joint.anchors[1], joint.anchors[2], joint.anchors[3], joint.anchors[4],
+				group[joint.Bodies[1]].body, 
+				group[joint.Bodies[2]].body,
+				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3], joint.Anchors[4],
 				math.cos(angle), 
 				math.sin(angle),
 				joint.CollideConnected)
 			j:setLimits(unpack(joint.Limits))
 			j:setMaxMotorForce(joint.MaxMotorForce)
 			j:setMotorSpeed(joint.MotorSpeed)
-		elseif joint.type=="PulleyJoint" then
+		elseif joint.Type=="pulley" then
 			local j = love.physics.newPulleyJoint(
-				group[joint.bodies[1]].body, 
-				group[joint.bodies[2]].body, 
+				group[joint.Bodies[1]].body, 
+				group[joint.Bodies[2]].body, 
 				joint.GroundAnchors[1], joint.GroundAnchors[2], joint.GroundAnchors[3],joint.GroundAnchors[4],
-				joint.anchors[1], joint.anchors[2], joint.anchors[3],joint.anchors[4],
+				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
 				joint.Ratio,joint.CollideConnected)
-		elseif joint.type=="RevoluteJoint" then
+		elseif joint.Type=="revolute" then
 			local j = love.physics.newRevoluteJoint(
-				group[joint.bodies[1]].body, 
-				group[joint.bodies[2]].body,  
-				joint.anchors[1], joint.anchors[2],
+				group[joint.Bodies[1]].body, 
+				group[joint.Bodies[2]].body,  
+				joint.Anchors[1], joint.Anchors[2],
 				joint.CollideConnected)
 			j:setLimits(unpack(joint.Limits))
 			j:setMaxMotorTorque(joint.MaxMotorTorque)
 			j:setMotorSpeed(joint.MotorSpeed)
-		elseif joint.type=="RopeJoint" then
+		elseif joint.Type=="rope" then
 			local j = love.physics.newRopeJoint(
-				group[joint.bodies[1]].body, 
-				group[joint.bodies[2]].body,
-				joint.anchors[1], joint.anchors[2], joint.anchors[3],joint.anchors[4], 
+				group[joint.Bodies[1]].body, 
+				group[joint.Bodies[2]].body,
+				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4], 
 				joint.MaxLength, joint.CollideConnected)
-		elseif joint.type=="WeldJoint" then
+		elseif joint.Type=="weld" then
 			local j = love.physics.newWeldJoint(
-				group[joint.bodies[1]].body, 
-				group[joint.bodies[2]].body, 
-				joint.anchors[1], joint.anchors[2], joint.anchors[3],joint.anchors[4],
+				group[joint.Bodies[1]].body, 
+				group[joint.Bodies[2]].body, 
+				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
 				joint.CollideConnected)
 			j:setDampingRatio(joint.DampingRatio)
 			j:setFrequency(joint.Frequency)
-		elseif joint.type=="WheelJoint" then
+		elseif joint.Type=="wheel" then
 			local angle= getRot(
-				joint.anchors[1], joint.anchors[2],
-			group[joint.bodies[1]].body:getX(), 
-			group[joint.bodies[1]].body:getY()
+				joint.Anchors[1], joint.Anchors[2],
+			group[joint.Bodies[1]].body:getX(), 
+			group[joint.Bodies[1]].body:getY()
 			 )
 			local j = love.physics.newWheelJoint(
-				group[joint.bodies[1]].body, 
-				group[joint.bodies[2]].body,
-				joint.anchors[1], joint.anchors[2],
+				group[joint.Bodies[1]].body, 
+				group[joint.Bodies[2]].body,
+				joint.Anchors[1], joint.Anchors[2],
 				math.sin(angle), 
 				math.cos(angle),
 				joint.CollideConnected)
@@ -316,18 +345,27 @@ function helper.createObj(world,data)
 			j:setMotorSpeed(joint.MotorSpeed)
 		end
 	end
+	return group
 end
 
 
-function helper.getObjInfo(world)
+function helper.getWorldData(world)
+	local bodyList --如果不是world 那么就是body list
+	if type(world)=="userdata" then
+		bodyList=world:getBodyList()
+	else
+		bodyList=world
+	end
+	local group={}
 	local tab={}
+	local userData={}
 	local index=0
-	for i,body in ipairs(world:getBodyList()) do
+	for i,body in ipairs(bodyList) do
 		local obj={}
 		table.insert(tab, obj)
 		index=index+1
-		body:setUserData(index)
-		--print(index,body:getFixtureList()[1]:getShape():type())
+		table.insert(userData, {body=body,data=body:getUserData()}) --转存原有的userdata
+		body:setUserData(index) --存储标号
 		local status=helper.getStatus(body,"body")
 		obj.body=status
 		obj.fixtures={}
@@ -338,99 +376,55 @@ function helper.getObjInfo(world)
 		end
 		
 	end
-	return tab
-end
+	group.obj=tab
 
-function helper.getJointInfo(world)
 	local tab={}
 	local index=0
-	for i,body in ipairs(world:getBodyList()) do	
+	for i,body in ipairs(bodyList) do	
+		for i,joint in ipairs(body:getJointList()) do
+			joint:setUserData(nil)
+		end
+	end
+
+	for i,body in ipairs(bodyList) do	
 		for i,joint in ipairs(body:getJointList()) do
 			local check = joint:getUserData()
 			if tab[check]==nil then 
 				index=index+1
-				local status={}
+				local status=helper.getStatus(joint,"joint")
+				status.Bodies={status.Bodies[1]:getUserData(),status.Bodies[2]:getUserData()}
 				table.insert(tab, status)
 				joint:setUserData(index)
-				status.type=joint:type()
-				status.CollideConnected =joint:getCollideConnected( )
-				if status.type~="MouseJoint" then
-					local bodyA,bodyB = joint:getBodies()
-					status.bodies={bodyA:getUserData(),bodyB:getUserData()}
-					status.anchors={joint:getAnchors()}
-				end
-				
-				if status.type=="DistanceJoint" then
-					status.DampingRatio=joint:getDampingRatio()
-					status.Frequency = joint:getFrequency()	
-				elseif status.type=="WeldJoint" then
-					status.DampingRatio=joint:getDampingRatio()
-					status.Frequency = joint:getFrequency()	
-				elseif status.type=="PrismaticJoint" then
-					status.Limits={joint:getLimits( )}
-					status.MaxMotorForce=joint:getMaxMotorForce()
-					status.MotorSpeed = joint:getMotorSpeed()
-				
-				elseif status.type=="RevoluteJoint" then
-					status.Limits={joint:getLimits( )}
-					status.MaxMotorTorque=joint:getMaxMotorTorque()
-					status.MotorSpeed = joint:getMotorSpeed()
-				
-				elseif status.type=="RopeJoint" then
-					status.MaxLength = joint:getMaxLength()
-				elseif status.type=="PulleyJoint" then
-					status.GroundAnchors = {joint:getGroundAnchors()}
-					status.Ratio = joint:getRatio() 
-				elseif status.type=="WheelJoint" then
-					status.SpringDampingRatio=joint:getSpringDampingRatio()
-					status.SpringFrequency = joint:getSpringFrequency()	
-					status.MaxMotorTorque=joint:getMaxMotorTorque()
-					status.MotorSpeed = joint:getMotorSpeed()
-				end
 			end
 		end
 	end
-	return tab
-end
-helper.getList={
-		body={
-	"X","Y","Angle",
-	"AngularDamping","LinearDamping",
-	"Type"
-	},
-		fixture={
-	"Restitution",
-	"Density",
-	},
-}
+	
+	group.joint=tab
+	
+	for i,v in ipairs(userData) do
+		v.body:setUserData(v.data)
+	end
+	return group
 
-helper.isList={
-	body={
-"Bullet","FixedRotation"
-},
-	fixture={
-"Sensor"	
-}
-}
+end
+
+
+
+
 
 
 
 function helper.getStatus(obj,type)
 	local status={}
-	if type=="shape" then
-		status.type= obj:type()		
-		if status.type=="CircleShape" then
-			status.Radius=obj:getRadius()
-		else
-			status.Points={obj:getPoints()}
+	for i,prop in ipairs(helper.properties[type]) do
+		local func=obj["get"..prop] or obj["is"..prop] or obj["has"..prop]
+		if func then
+			local value,value2=func(obj,1)
+			if value2 then
+				value={func(obj,1)}
+			end
+			status[prop]=value
 		end
-		return status
-	end
-	for i,v in ipairs(helper.getList[type]) do
-		status[v]=obj["get"..v](obj)
-	end
-	for i,v in ipairs(helper.isList[type]) do
-		status[v]=obj["is"..v](obj)
 	end
 	return status
 end
@@ -471,5 +465,68 @@ function table.save(tab,name)
 	output=output.."}\nreturn "..name
 	return output 
 end
+
+helper.properties={
+		body={
+	"X","Y","Angle",
+	"AngularDamping",
+	"LinearDamping",
+	"GravityScale",
+	"Type",
+	"UserData",
+	"Bullet",
+	"FixedRotation",
+	"SleepingAllowed",
+	},
+		fixture={
+	"Category",
+	"Restitution",
+	"Density",
+	"FilterData",
+	"Friction",
+	"GroupIndex",
+	"Mask",
+	"Sensor",
+	"UserData"
+	},
+		shape={
+	"Point",
+	"Points",
+	"Type",
+	"Radius"
+	},
+		joint={
+	"Bodies",
+	"Anchors",
+	"GroundAnchors",
+	"Limits",
+	"CollideConnected",
+	"Type",
+	"UserData",
+	"DampingRatio",
+	"Frequency",
+	"Length",
+	"MaxForce",
+	"MaxTorque",
+	"Joints",
+	"Ratio",
+	"AngularOffset",
+	"LinearOffset",
+	"Target",
+	"MaxMotorForce",
+	"MotorSpeed",
+	"Constant",
+	"MaxLengths",
+	"MaxMotorTorque",
+	"MotorSpeed",
+	"LimitsEnabled", --has
+	"MotorEnabled",
+	"MaxLength",
+	"SpringDampingRatio",
+	"SpringFrequency",
+
+	}
+}
+
 
 return helper
