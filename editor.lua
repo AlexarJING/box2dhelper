@@ -101,7 +101,6 @@ function editor:update(dt)
 end
 
 function editor:updateRelativeFrame()
-
 	if not self.selection or self.oPop~=self.selection[1][1] then
 		self:popRelativeFrame()
 	end
@@ -222,7 +221,6 @@ function editor:popCreateFrame()
 	end
 
 end
-
 
 
 
@@ -411,6 +409,9 @@ end
 function editor:toggleUI()
 	self.showUI=not self.showUI
 	self.createFrame:SetVisible(self.showUI)
+	if self.popFrame then
+		self.popFrame:SetVisible(self.showUI)
+	end
 end
 
 function editor:toggleMouse()
@@ -506,7 +507,7 @@ function editor:keypress(key)
 			if love.keyboard.isDown("lctrl") then 
 				self:duplicate() 
 			else
-				self.createFrame:SetVisible(not self.createFrame:GetVisible())
+				self:toggleUI()
 			end
 		elseif key=="f" then
 			if love.keyboard.isDown("lctrl") then self:fix() end
@@ -592,25 +593,25 @@ end
 function editor:downCreate()
 	if love.keyboard.isDown("c") then
 		self.createTag="circle"
-		self:getPoints()
+		self.needPoints=true
 	elseif love.keyboard.isDown("b") then
 		self.createTag="box"
-		self:getPoints()		
+		self.needPoints=true		
 	elseif love.keyboard.isDown("l") then
 		self.createTag="line"
-		self:getPoints()
+		self.needPoints=true
 	elseif love.keyboard.isDown("e") then
 		self.createTag="edge"
-		self:getVerts()
+		self.needVerts=true
 	elseif love.keyboard.isDown("p") then
 		self.createTag="polygon"
-		self:getVerts()
+		self.needVerts=true
 	elseif love.keyboard.isDown("f") then
 		self.createTag="freeLine"
-		self:freeDraw()
+		self.needLines=true
 	elseif love.keyboard.isDown("t") then
 		self:rotate()
-	elseif not self.uiCreaete then
+	elseif not self.uiCreate then
 		self.createOX=nil
 		self.createTag=nil
 		return false
