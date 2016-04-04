@@ -28,41 +28,59 @@ end
 
 
 
-world = love.physics.newWorld(0, 9.8*64, false)
-love.physics.setMeter(64)
-editor.world = world
-editor.objects={}
-editor.selection=nil
-editor.inEditMode=true
-editor.undoStack={}
-editor.undoIndex=0
-editor.action="initialize"
-editor.units={}
-editor.preview={}
-editor.preview.cam=require("libs.gamera").new(-5000,-5000,10000,10000)
-editor.preview.world=love.physics.newWorld(0, 9.8*64, false)
-editor.preview.cam:setWindow(w()-300,0,300,300)
-editor.preview.cam:setScale(0.3)
-editor.preview.cam:setPosition(0,0)
 
-editor.popTags={"body","shape","fixture","joint"}
-editor.popTagIndex=1
-editor.popItemIndex=1
 
-editor.mouseBall={enable=false}
+function editor:init()
+	world = love.physics.newWorld(0, 9.8*64, false)
+	love.physics.setMeter(64)
+	self.world = world
+	self.objects={}
+	self.selection=nil
+	self.inEditMode=true
+	self.undoStack={}
+	self.undoIndex=0
+	self.action="initialize"
+	self.units={}
+	self.preview={}
+	self.preview.cam=require("libs.gamera").new(-5000,-5000,10000,10000)
+	self.preview.world=love.physics.newWorld(0, 9.8*64, false)
+	self.preview.cam:setWindow(w()-300,0,300,300)
+	self.preview.cam:setScale(0.3)
+	self.preview.cam:setPosition(0,0)
 
-editor.showHelp=false
+	self.popTags={"body","shape","fixture","joint"}
+	self.popTagIndex=1
+	self.popItemIndex=1
+
+	self.mouseBall={enable=false}
+
+	self.showHelp=false
+	self.shouUI=true
+
+	self:popCreateFrame()
+
+end
+
 
 function editor:update(dt)
 	
 	self:pushUndo()
 	if self.inEditMode then
 		if self:vertMode() then return end
-		if self:downCreate() then return end
-		if not self.dragSelecting and self:dragMove() then return end
-		self:dragSelect()
+		if self.createTag then 
+			self:getPoints()
+			self:getVerts()
+			self:freeDraw()
+			return 
+		end
+		if not self.dragSelecting and self:dragMove() then 
+			--return 
+		else
+			self:dragSelect()
+		end
+		
 		self:updateRelativeFrame()
-
+		self:unpdatePopValue()
 	else
 		if self.mouseBall.enable then
 			self.mouseBall.joint:setTarget(mouseX,mouseY)
@@ -124,6 +142,89 @@ function editor:unpdatePopValue()
 	end
 
 end
+local createShape={
+	"circle","box","polygon","line","freeLine","edge",
+	
+}
+
+local createJoint={
+	"distance","rope","revolute","prismatic","weld","wheel","pully"
+}
+
+function editor:popCreateFrame()
+	self.createFrame= ui.Create("frame")
+	local frame = self.createFrame
+	frame:SetName("Creator")
+	frame:SetSize(100, 440)
+	frame:SetPos(10, 100)
+	frame:ShowCloseButton(false)
+	self.popList=ui.Create("list", frame)
+	local list = self.popList
+	list:SetPos(5, 30)
+	list:SetSize(85, 400)
+	list:SetSpacing(3)
+	local title = ui.Create("text")
+	title:SetText("      shape")
+	list:AddItem(title)
+	self.createList={}
+	local createList=self.createList
+	for i,v in ipairs(createShape) do
+		local b= ui.Create("button")
+		b:SetText(v)
+		b:SetToggleable(true)
+		table.insert(self.createList, b)
+		list:AddItem(b)
+		b.OnClick=function(obj)
+			for i,v in ipairs(createList) do
+				if v~=self then
+					v.toggle=false
+				end
+				
+			end	
+			self.createTag=obj:GetText()
+			self.uiCreate=true
+			self.createOX=nil
+			if self.createTag=="circle" then
+				self.needPoints=true
+				--self:getPoints()
+			elseif self.createTag=="line" then
+				self.needPoints=true
+				--self:getPoints()
+			elseif self.createTag=="edge" then
+				self.needVerts=true
+				--self:getVerts()
+			elseif self.createTag=="polygon" then
+				self.needVerts=true
+				--self:getVerts()
+			elseif self.createTag=="freeLine" then
+				self.needLines=true
+				--self:freeDraw()
+			elseif self.createTag=="box" then
+				self.needPoints=true
+				--self:getPoints()
+			end
+			
+		end
+	end
+
+	local title = ui.Create("text")
+	title:SetText("       joint")
+	list:AddItem(title)
+
+	for i,v in ipairs(createJoint) do
+		local b= ui.Create("button")
+		b:SetText(v)
+		table.insert(self.createList, b)
+		list:AddItem(b)
+		b.OnClick=function(obj)
+			self[obj:GetText()](self)
+		end
+	end
+
+end
+
+
+
 
 function editor:saveToFile()
 	if self.popFrame then
@@ -307,6 +408,11 @@ function editor:popRelativeFrame() --弹出选中的第一个body,fixture,joint
 
 end
 
+function editor:toggleUI()
+	self.showUI=not self.showUI
+	self.createFrame:SetVisible(self.showUI)
+end
+
 function editor:toggleMouse()
 	self.mouseBall.enable=not self.mouseBall.enable
 	if self.mouseBall.enable then
@@ -397,7 +503,11 @@ function editor:keypress(key)
 		elseif key=="delete" then
 			self:delete()
 		elseif key=="v" then
-			if love.keyboard.isDown("lctrl") then self:duplicate() end
+			if love.keyboard.isDown("lctrl") then 
+				self:duplicate() 
+			else
+				self.createFrame:SetVisible(not self.createFrame:GetVisible())
+			end
 		elseif key=="f" then
 			if love.keyboard.isDown("lctrl") then self:fix() end
 		elseif key=="a" then
@@ -500,7 +610,7 @@ function editor:downCreate()
 		self:freeDraw()
 	elseif love.keyboard.isDown("t") then
 		self:rotate()
-	else
+	elseif not self.uiCreaete then
 		self.createOX=nil
 		self.createTag=nil
 		return false
@@ -1002,6 +1112,7 @@ end
 
 
 function editor:getPoints()
+	if not self.needPoints then return end
 	if not self.createOX and love.mouse.isDown(1) then
 		self.createOX,self.createOY= mouseX,mouseY	
 		self.createTX,self.createTY=self.createOX,self.createOY
@@ -1015,10 +1126,12 @@ function editor:getPoints()
 		self.createOY=nil
 		self.createTX=nil
 		self.createTY=nil
+		self.needPoints=false
 	end
 end
 
 function editor:getVerts()
+	if not self.needVerts then return end 
 	if not self.createOX and love.mouse.isDown(1) then
 		self.createOX,self.createOY= mouseX,mouseY	
 		self.createTX,self.createTY=self.createOX,self.createOY
@@ -1038,10 +1151,12 @@ function editor:getVerts()
 		self.createOY=nil
 		self.createTX=nil
 		self.createTY=nil
+		self.needVerts=false
 	end
 end
 
 function editor:freeDraw()
+	if not self.needLines then return end
 	if not self.createOX and love.mouse.isDown(1) then
 		self.createOX,self.createOY= mouseX,mouseY	
 		self.createTX,self.createTY=self.createOX,self.createOY
@@ -1059,6 +1174,7 @@ function editor:freeDraw()
 		self.createOY=nil
 		self.createTX=nil
 		self.createTY=nil
+		self.needLines=false
 	end
 
 
@@ -1242,6 +1358,13 @@ end
 function editor:create()
 	local obj=self[self.createTag](self)
 	table.insert(self.objects,obj)
+	for i,v in ipairs(self.createList) do
+		if v~=self then
+			v.toggle=false
+		end
+		
+	end
+	self.createTag=nil
 end
 
 

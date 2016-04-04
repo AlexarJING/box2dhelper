@@ -9,7 +9,7 @@ cam = require("libs.gamera").new(-5000,-5000,10000,10000)
 require "camera"
 editor=require "editor"
 --require "demo"
-
+editor:init()
 
 function love.update(dt)
 	cam:update()	
