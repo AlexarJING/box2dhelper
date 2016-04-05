@@ -23,35 +23,55 @@ local polygonTrans= function(x,y,rot,size,v)
 	return tab
 end
 
+local defaultStyle= {
+		dynamic={100, 200, 255, 255},
+		static={100, 100, 100, 255},
+		kinematic={100, 255, 200, 255},
+		sensor={0,0,-255,0},
+		joint={255, 100, 100, 150},
+		body={255, 0, 255, 255}
+	}
 
-function helper.draw(world)
+function helper.draw(world,colorStyle)
+	colorStyle=colorStyle or defaultStyle
+
+	if type(world)=="userdata" then
+		bodyList=world:getBodyList()
+	else
+		bodyList=world
+	end
+
 	love.graphics.setLineJoin( "none")
-	for i,body in ipairs(world:getBodyList()) do
+	for i,body in ipairs(bodyList) do
 		local color
 		
 		local bodyX=body:getX()
 		local bodyY=body:getY()
-		love.graphics.setColor(255, 0, 255, 255)
-		love.graphics.circle("line", bodyX, bodyY, 4)
+		love.graphics.setColor(colorStyle.body)
+		love.graphics.circle("fill", bodyX, bodyY, 4)
 		local bodyAngle=body:getAngle()
+		local bodyType= body:getType()
 		for i,fixture in ipairs(body:getFixtureList()) do
 			local shape=fixture:getShape()
 			local shapeType = shape:type()
 			local shapeR=shape:getRadius()
 			local isSensor = fixture:isSensor()
-			if  body:isAwake() then
-				if isSensor then		
-					color={200, 200, 0, 255}
-				else
-					color={100, 200, 255, 255}
-				end
-			else
-				color={100, 100, 100, 255}
+			if  bodyType=="dynamic" then
+				color=colorStyle.dynamic
+			elseif bodyType=="static" then
+				color=colorStyle.static
+			elseif bodyType=="kinematic" then
+				color=colorStyle.kinematic
 			end
 
-			if body:getUserData() then
-				color={255,255,0,255}
+
+			if isSensor then		
+				for i=1,4 do
+					color[i]=color[i]-colorStyle.sensor[i]
+				end
 			end
+
+
 			if shapeType=="CircleShape" then
 				color[4]=255
 				local offx,offy= shape:getPoint()
@@ -75,7 +95,7 @@ function helper.draw(world)
 				love.graphics.polygon("fill", body:getWorldPoints(shape:getPoints()))
 			end
 		end
-		love.graphics.setColor(255, 100, 100, 150)
+		love.graphics.setColor(colorStyle.joint)
 		for i,joint in ipairs(body:getJointList()) do
 			local jointType=joint:type()
 			if jointType=="DistanceJoint" then

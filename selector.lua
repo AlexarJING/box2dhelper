@@ -1,0 +1,180 @@
+local selector={}
+local editor
+local mouseX,mouseY
+local clamp= function (a,low,high)
+	if low>high then 
+		return math.max(high,math.min(a,low))
+	else
+		return math.max(low,math.min(a,high))
+	end
+end
+local getDist = function(x1,y1,x2,y2) return math.sqrt((x1-x2)^2+(y1-y2)^2) end
+
+selector.colorStyle={
+		dynamic={100, 200, 0, 255},
+		static={100, 100, 0, 255},
+		kinematic={100, 255, 0, 255},
+		sensor={0,0,-255,0},
+		joint={255, 100, 0, 150},
+		body={255, 0, 0, 255}
+	}
+
+function selector:update()
+	mouseX,mouseY=editor.mouseX,editor.mouseY
+	self:dragSelect()
+end
+
+function selector:draw()
+	love.graphics.setColor(255, 255, 255, 255)
+	if self.dragSelecting then
+		love.graphics.polygon("line",
+			self.dragOX,self.dragOY,
+			self.dragOX,self.dragTY,
+			self.dragTX,self.dragTY,
+			self.dragTX,self.dragOY)
+	end
+
+	if self.selection then
+		editor.helper.draw(self.selection,self.colorStyle)
+	end
+end
+
+
+function selector:selectAll()
+	self.selection={}
+	for i,obj in ipairs(editor.objects) do
+		self.selection[i]=obj.body
+	end
+	self.selectIndex=1
+end
+
+function selector:clearSelection()
+	self.selection=nil
+	self.selectToggle=nil
+end
+
+function selector:inRect(x,y)
+	if x==clamp(x,self.dragOX,self.dragTX) 
+		and y==clamp(y,self.dragOY,self.dragTY) then
+		return true
+	end
+end
+
+
+
+
+function selector:dragSelect()
+
+	if love.mouse.isDown(1) and not self.dragSelecting then
+		self.dragOX,self.dragOY=mouseX,mouseY
+		self.dragSelecting=true	
+		self.dragTX,self.dragTY=mouseX,mouseY
+	elseif love.mouse.isDown(1) and self.dragSelecting then
+		self.dragTX,self.dragTY=mouseX,mouseY
+	elseif not love.mouse.isDown(1) and self.dragSelecting then
+		local selection={}
+		for i,obj in ipairs(editor.objects) do
+			for i,fix in ipairs(obj.body:getFixtureList()) do
+				local shape=fix:getShape()
+				if shape:type()=="CircleShape" then
+					local x,y=obj.body:getPosition()
+					local r=shape:getRadius()
+					if self:inRect(x,y) and self:inRect(x+r,y) and self:inRect(x-r,y)
+						and self:inRect(x,y+r) and self:inRect(x,y-r) then
+						table.insert(selection,obj.body)
+					end
+				elseif shape:type()~="ChainShape" then
+					local points={shape:getPoints()}
+					local check=true
+					for i=1,#points/2,2 do
+						if not self:inRect(shape:getPoints()) then
+							check=false
+							break
+						end
+					end
+					if check then
+						table.insert(selection, obj.body)
+					end
+				end
+			end
+		end
+		if selection[1] then
+			self:clearSelection()
+			self.selection=selection
+		end
+		self.dragSelecting=false
+	end
+end
+
+function selector:click(key)
+	--if self.mouseBall.enable then return end
+	print(1)
+	if editor.state=="Create Mode" or editor.state=="Vertex Mode" then return end
+
+	if editor.editMode.dragMoving then return end
+
+	if self.dragOX~=self.dragTX or self.dragOY~=self.dragTY then return end
+	if key=="l" then
+		local selectTest={}
+		for i,obj in ipairs(editor.objects) do
+			for i,fix in ipairs(obj.body:getFixtureList()) do
+				if fix:testPoint( mouseX, mouseY ) then
+					if not table.getIndex(selectTest,obj.body) then --避免重复加入同一个body
+						table.insert(selectTest, obj.body)
+					end
+				end
+			end
+		end
+		
+		if selectTest[1] then
+			if  love.keyboard.isDown("lctrl") then
+				
+				if not self.selection then
+					self.selection={}
+				end
+
+				local index=table.getIndex(self.selection,selectTest[1]) 
+				if index then --避免重复加入同一个body
+					table.remove(self.selection, index)
+				else
+					table.insert(self.selection, selectTest[1])
+				end	
+
+				self.selectIndex=1
+				
+			else
+				self:clearSelection()
+				self.selection={}
+				self.selection[1]=selectTest[1]
+				self.selectIndex=1
+			end
+			self.selectToggle=selectTest
+		end
+		--if self.selection then print(#self.selection) end
+	elseif key=="r" then
+		if not self.selectToggle then return end
+		self.selectIndex=self.selectIndex+1
+		if not self.selectToggle[self.selectIndex] then self.selectIndex=1 end
+		local target=self.selectToggle[self.selectIndex]
+		local index=table.getIndex(self.selection,target) 
+		if index then
+			table.remove(self.selection, index)
+		else
+			table.remove(self.selection, #self.selection)
+			table.insert(self.selection, target)
+		end	
+
+	end
+end
+
+
+
+
+
+
+
+
+return function(parent) 
+	editor=parent
+	return selector
+end

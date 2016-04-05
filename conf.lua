@@ -1,3 +1,4 @@
+io.stdout:setvbuf("no")
 function love.conf(t)
     t.identity = nil                    -- The name of the save directory (string)
     t.version = "0.10.0"                -- The LÖVE version this game was made for (string)

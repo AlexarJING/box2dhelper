@@ -1,10 +1,12 @@
+local cam = require("libs.gamera").new(-5000,-5000,10000,10000)
+local editor
 cam:setPosition(0,0)
 
 function cam:update()
 	self:shakeProcess()
 	--self:edgeMove()
 	self :holdMove()
-	mouseX,mouseY = cam.x+ (love.mouse.getX()-w()/2)/cam.scale,cam.y+(love.mouse.getY()-h()/2)/cam.scale
+	editor.mouseX,editor.mouseY = cam.x+ (love.mouse.getX()-w()/2)/cam.scale,cam.y+(love.mouse.getY()-h()/2)/cam.scale
 end
 
 function cam:shakeProcess()
@@ -64,4 +66,4 @@ function cam:scrollScale(y)
 	end
 end
 
-return cam
+return function(parent) cam.editor=parent; editor=parent return cam end
