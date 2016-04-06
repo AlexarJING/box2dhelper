@@ -41,10 +41,8 @@ end
 
 
 function selector:selectAll()
-	self.selection={}
-	for i,obj in ipairs(editor.objects) do
-		self.selection[i]=obj.body
-	end
+	self.selection=editor.world:getBodyList()
+	if #self.selection==0 then self.selection=nil end
 	self.selectIndex=1
 end
 
@@ -73,15 +71,15 @@ function selector:dragSelect()
 		self.dragTX,self.dragTY=mouseX,mouseY
 	elseif not love.mouse.isDown(1) and self.dragSelecting then
 		local selection={}
-		for i,obj in ipairs(editor.objects) do
-			for i,fix in ipairs(obj.body:getFixtureList()) do
+		for i,body in ipairs(editor.world:getBodyList()) do
+			for i,fix in ipairs(body:getFixtureList()) do
 				local shape=fix:getShape()
 				if shape:type()=="CircleShape" then
-					local x,y=obj.body:getPosition()
+					local x,y=body:getPosition()
 					local r=shape:getRadius()
 					if self:inRect(x,y) and self:inRect(x+r,y) and self:inRect(x-r,y)
 						and self:inRect(x,y+r) and self:inRect(x,y-r) then
-						table.insert(selection,obj.body)
+						table.insert(selection,body)
 					end
 				elseif shape:type()~="ChainShape" then
 					local points={shape:getPoints()}
@@ -93,7 +91,7 @@ function selector:dragSelect()
 						end
 					end
 					if check then
-						table.insert(selection, obj.body)
+						table.insert(selection, body)
 					end
 				end
 			end
@@ -108,7 +106,6 @@ end
 
 function selector:click(key)
 	--if self.mouseBall.enable then return end
-	print(1)
 	if editor.state=="Create Mode" or editor.state=="Vertex Mode" then return end
 
 	if editor.editMode.dragMoving then return end
@@ -116,11 +113,11 @@ function selector:click(key)
 	if self.dragOX~=self.dragTX or self.dragOY~=self.dragTY then return end
 	if key=="l" then
 		local selectTest={}
-		for i,obj in ipairs(editor.objects) do
-			for i,fix in ipairs(obj.body:getFixtureList()) do
+		for i,body in ipairs(editor.world:getBodyList()) do
+			for i,fix in ipairs(body:getFixtureList()) do
 				if fix:testPoint( mouseX, mouseY ) then
-					if not table.getIndex(selectTest,obj.body) then --避免重复加入同一个body
-						table.insert(selectTest, obj.body)
+					if not table.getIndex(selectTest,body) then --避免重复加入同一个body
+						table.insert(selectTest, body)
 					end
 				end
 			end

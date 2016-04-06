@@ -21,7 +21,7 @@ function love.mousereleased(x, y, button)
 	editor:mousereleased(x, y, button)
 end
 
-function love.keypressed(key, isrepeat)
+function love.keypressed(key, scancode, isrepeat )
 	editor:keypressed(key, isrepeat)
 end
 

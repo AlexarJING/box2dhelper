@@ -369,7 +369,9 @@ function helper.createWorld(world,data,offx,offy)
 end
 
 
-function helper.getWorldData(world)
+function helper.getWorldData(world,offx,offy)
+	offx =offx or 0
+	offy =offy or 0
 	local bodyList --如果不是world 那么就是body list
 	if type(world)=="userdata" then
 		bodyList=world:getBodyList()
@@ -387,6 +389,8 @@ function helper.getWorldData(world)
 		table.insert(userData, {body=body,data=body:getUserData()}) --转存原有的userdata
 		body:setUserData(index) --存储标号
 		local status=helper.getStatus(body,"body")
+		status.X=status.X-offx
+		status.Y=status.Y-offy
 		obj.body=status
 		obj.fixtures={}
 		for i,fixture in ipairs(body:getFixtureList()) do

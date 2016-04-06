@@ -37,6 +37,8 @@ function creator:update()
 end
 
 function creator:new(cType)
+	editor:cancel()
+	editor.state="Create Mode"; 
 	self.createTag=cType
 	if cType=="circle" or cType=="box" or cType=="line" then
 		self.needPoints=true
@@ -156,7 +158,7 @@ end
 
 
 function creator:circle()
-	self.action="create circle"
+	editor.action="create circle"
 	local body = love.physics.newBody(world, self.createOX, self.createOY,"dynamic")
 	local shape = love.physics.newCircleShape(self.createR)
 	local fixture = love.physics.newFixture(body, shape)
@@ -165,7 +167,7 @@ function creator:circle()
 end
 
 function creator:box()
-	self.action="create box"
+	editor.action="create box"
 	local body = love.physics.newBody(self.world, (self.createOX+self.createTX)/2, 
 		(self.createTY+self.createOY)/2,"dynamic")
 	local shape = love.physics.newRectangleShape(math.abs(self.createOX-self.createTX),math.abs(self.createTY-self.createOY))
@@ -175,7 +177,7 @@ function creator:box()
 end
 
 function creator:line()
-	self.action="create line"
+	editor.action="create line"
 	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
 	local shape = love.physics.newEdgeShape(0,0,self.createTX-self.createOX,self.createTY-self.createOY)
 	local fixture = love.physics.newFixture(body, shape)
@@ -188,7 +190,7 @@ end
 
 function creator:edge()
 	if #self.createVerts<6 then return end
-	self.action="create edge"
+	editor.action="create edge"
 	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
 	local shape = love.physics.newChainShape(false, polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
 	local fixture = love.physics.newFixture(body, shape)
@@ -201,7 +203,7 @@ end
 
 function creator:freeline()
 	if #self.createVerts<6 then return end
-	self.action="create freeline"
+	editor.action="create freeline"
 	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
 	local shape = love.physics.newChainShape(false, polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
 	local fixture = love.physics.newFixture(body, shape)
@@ -223,7 +225,7 @@ function creator:polygon()
 			self.createVerts[i]=nil
 		end
 	end
-	self.action="create polygon"	
+	editor.action="create polygon"	
 	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"dynamic")
 	local shape = love.physics.newPolygonShape(polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
 	local fixture = love.physics.newFixture(body, shape)
@@ -237,34 +239,18 @@ function creator:polygon()
 end
 
 function creator:getBodies()
-	if not self.selection then return end
-	local body1,body2,check
-	for i,tab in ipairs(self.selection) do
-		local obj
-		if i==#self.selection then
-			obj=tab[self.selectIndex]
-		else
-			obj=tab[1]
-		end
-		if not body1 then 
-			body1=obj.body 
-		elseif not body2 then 
-			body2=obj.body
-		elseif not check then
-			check=obj.body:getUserData()
-			break
-		end
-	end
-	if body1 and body2 and not check then 
+	local selection=editor.selector.selection
+	if not selection then return end
+	local body1,body2=selection[1],selection[2]
+	if body1 and body2 then 
 		return body1,body2 
 	end
 end
 
 function creator:rope()
-	
 	local body1,body2=self:getBodies()
 	if not body1 then return end
-	self.action="create rope joint"
+	editor.action="create rope joint"
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
 	local joint=love.physics.newRopeJoint(body1, body2, x1, y1, x2, y2, getDist(x1, y1, x2, y2), false)
@@ -275,7 +261,7 @@ function creator:distance()
 	
 	local body1,body2=self:getBodies()
 	if not body1 then return end
-	self.action="create distance joint"
+	editor.action="create distance joint"
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
 	local joint = love.physics.newDistanceJoint(body1, body2, x1, y1, x2, y2, false)
@@ -286,7 +272,7 @@ function creator:weld()
 	
 	local body1,body2=self:getBodies()
 	if not body1 then return end
-	self.action="create weld joint"
+	editor.action="create weld joint"
 	local x1,y1 = body1:getPosition()
 	local joint = love.physics.newWeldJoint(body1, body2, x1, y1, false)
 	joint:setFrequency(10)
@@ -295,7 +281,7 @@ end
 function creator:prismatic()
 	local body1,body2=self:getBodies()
 	if not body1 then return end
-	self.action="create prismatic joint"
+	editor.action="create prismatic joint"
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
 	local angle= getRot(x1,y1,x2,y2)
@@ -306,7 +292,7 @@ end
 function creator:revolute()
 	local body1,body2=self:getBodies()
 	if not body1 then return end
-	self.action="create revolute joint"
+	editor.action="create revolute joint"
 	local x,y = body2:getPosition()
 	local joint = love.physics.newRevoluteJoint(body1, body2, x, y, false)
 end
@@ -314,7 +300,7 @@ end
 function creator:pully()
 	local body1,body2=self:getBodies()
 	if not body1 then return end
-	self.action="create pully joint"
+	editor.action="create pully joint"
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
 	local joint = love.physics.newPulleyJoint(body1, body2, x1, y1-200, x2, y2-200, x1, y1, x2, y2, 1, false)
@@ -323,7 +309,7 @@ end
 function creator:wheel()
 	local body2,body1=self:getBodies()
 	if not body1 then return end
-	self.action="create wheel joint"
+	editor.action="create wheel joint"
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
 	local angle= getRot(x1,y1,x2,y2)
@@ -332,7 +318,7 @@ end
 
 
 function creator:setMaterial(fixture,m_type)
-	--self.action="set material"..m_type
+	--editor.action="set material"..m_type
 	if m_type=="wood" then
 		fixture:setDensity(1)
 		fixture:setFriction(1)
@@ -359,8 +345,7 @@ function creator:create()
 	if self.createOX==self.createTX and self.createOY==self.createTY then
 		--do nothing?
 	else
-		local obj=self[self.createTag](self)
-		table.insert(editor.objects,obj)
+		self[self.createTag](self)
 	end
 	
 	--[[
@@ -387,192 +372,3 @@ return function(parent)
 	creator.world=world
 	return creator 
 end
-
-
---[[
-function editor:circle()
-	self.action="create circle"
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"dynamic")
-	local shape = love.physics.newCircleShape(self.createR)
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	return {body=body,shape=shape,fixture=fixture}
-end
-
-function editor:box()
-	self.action="create box"
-	local body = love.physics.newBody(self.world, (self.createOX+self.createTX)/2, 
-		(self.createTY+self.createOY)/2,"dynamic")
-	local shape = love.physics.newRectangleShape(math.abs(self.createOX-self.createTX),math.abs(self.createTY-self.createOY))
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	return {body=body,shape=shape,fixture=fixture}
-end
-
-function editor:line()
-	self.action="create line"
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
-	local shape = love.physics.newEdgeShape(0,0,self.createTX-self.createOX,self.createTY-self.createOY)
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	shape = love.physics.newCircleShape(5)
-	sensor = love.physics.newFixture(body, shape)
-	sensor:setSensor(true)
-	return {body=body,shape=shape,fixture=fixture}
-end
-
-function editor:edge()
-	if #self.createVerts<6 then return end
-	self.action="create edge"
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
-	local shape = love.physics.newChainShape(false, polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	shape = love.physics.newCircleShape(5)
-	fixture = love.physics.newFixture(body, shape)
-	fixture:setSensor(true)
-	return {body=body,shape=shape,fixture=fixture}
-end
-
-function editor:freeLine()
-	if #self.createVerts<6 then return end
-	self.action="create freeline"
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
-	local shape = love.physics.newChainShape(false, polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	shape = love.physics.newCircleShape(5)
-	fixture = love.physics.newFixture(body, shape)
-	fixture:setSensor(true)
-	return {body=body,shape=shape,fixture=fixture}
-end
-
-
-
-
-function editor:polygon()
-	if #self.createVerts<6 then return end
-	if #self.createVerts>16 then
-		for i=16,#self.createVerts do
-			self.createVerts[i]=nil
-		end
-	end
-	self.action="create polygon"	
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"dynamic")
-	local shape = love.physics.newPolygonShape(polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
-	local fixture = love.physics.newFixture(body, shape)
-	local x,y=body:getWorldPoint(fixture:getMassData( ))
-	body:destroy()
-	local body = love.physics.newBody(self.world, x, y,"dynamic")
-	local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,self.createVerts))
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	return {body=body,shape=shape,fixture=fixture}
-end
-
-function editor:getBodies()
-	if not self.selection then return end
-	local body1,body2,check
-	for i,tab in ipairs(self.selection) do
-		local obj
-		if i==#self.selection then
-			obj=tab[self.selectIndex]
-		else
-			obj=tab[1]
-		end
-		if not body1 then 
-			body1=obj.body 
-		elseif not body2 then 
-			body2=obj.body
-		elseif not check then
-			check=obj.body:getUserData()
-			break
-		end
-	end
-	if body1 and body2 and not check then 
-		return body1,body2 
-	end
-end
-
-function editor:rope()
-	
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	self.action="create rope joint"
-	local x1,y1 = body1:getPosition()
-	local x2,y2 = body2:getPosition()
-	local joint=love.physics.newRopeJoint(body1, body2, x1, y1, x2, y2, getDist(x1, y1, x2, y2), false)
-	return joint
-end
-
-function editor:distance()
-	
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	self.action="create distance joint"
-	local x1,y1 = body1:getPosition()
-	local x2,y2 = body2:getPosition()
-	local joint = love.physics.newDistanceJoint(body1, body2, x1, y1, x2, y2, false)
-	joint:setFrequency(10)
-end
-
-function editor:weld()
-	
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	self.action="create weld joint"
-	local x1,y1 = body1:getPosition()
-	local joint = love.physics.newWeldJoint(body1, body2, x1, y1, false)
-	joint:setFrequency(10)
-end
-
-function editor:prismatic()
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	self.action="create prismatic joint"
-	local x1,y1 = body1:getPosition()
-	local x2,y2 = body2:getPosition()
-	local angle= getRot(x1,y1,x2,y2)
-	local joint = love.physics.newPrismaticJoint(body1, body2, x2, y2, math.sin(angle), -math.cos(angle), false)
-	--joint:setLimits(-90,50)
-end
-
-function editor:revolute()
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	self.action="create revolute joint"
-	local x,y = body2:getPosition()
-	local joint = love.physics.newRevoluteJoint(body1, body2, x, y, false)
-end
-
-function editor:pully()
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	self.action="create pully joint"
-	local x1,y1 = body1:getPosition()
-	local x2,y2 = body2:getPosition()
-	local joint = love.physics.newPulleyJoint(body1, body2, x1, y1-200, x2, y2-200, x1, y1, x2, y2, 1, false)
-end
-
-function editor:wheel()
-	local body2,body1=self:getBodies()
-	if not body1 then return end
-	self.action="create wheel joint"
-	local x1,y1 = body1:getPosition()
-	local x2,y2 = body2:getPosition()
-	local angle= getRot(x1,y1,x2,y2)
-	local joint = love.physics.newWheelJoint(body2, body1, x1, y1, math.sin(angle), -math.cos(angle), false)
-end
-
-function editor:create()
-	local obj=self[self.createTag](self)
-	table.insert(self.objects,obj)
-	for i,v in ipairs(self.createList) do
-		if v~=self then
-			v.toggle=false
-		end
-		
-	end
-	self.createTag=nil
-end
-]]
