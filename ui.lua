@@ -83,10 +83,8 @@ function editor:popCreateFrame()
 			self.createOX=nil
 			if self.createTag=="circle" then
 				self.needPoints=true
-				--self:getPoints()
 			elseif self.createTag=="line" then
 				self.needPoints=true
-				--self:getPoints()
 			elseif self.createTag=="edge" then
 				self.needVerts=true
 				--self:getVerts()

@@ -527,6 +527,8 @@ function skin.DrawImageButton(object)
 		love.graphics.print(text, x + width/2 - twidth/2 + 1, y + height - theight - 5 + 1)
 		love.graphics.setColor(textdowncolor)
 		love.graphics.print(text, x + width/2 - twidth/2 + 1, y + height - theight - 6 + 1)
+		love.graphics.setColor(bordercolor)
+			skin.OutlinedRectangle(x, y, width, height)
 	elseif hover then
 		if image then
 			love.graphics.setColor(imagecolor)
@@ -537,6 +539,8 @@ function skin.DrawImageButton(object)
 		love.graphics.print(text, x + width/2 - twidth/2, y + height - theight - 5)
 		love.graphics.setColor(texthovercolor)
 		love.graphics.print(text, x + width/2 - twidth/2, y + height - theight - 6)
+		love.graphics.setColor(bordercolor)
+			skin.OutlinedRectangle(x, y, width, height)
 	else
 		if image then
 			love.graphics.setColor(imagecolor)
@@ -547,6 +551,8 @@ function skin.DrawImageButton(object)
 		love.graphics.print(text, x + width/2 - twidth/2, y + height - theight - 5)
 		love.graphics.setColor(textnohovercolor)
 		love.graphics.print(text, x + width/2 - twidth/2, y + height - theight - 6)
+		love.graphics.setColor(bordercolor)
+			skin.OutlinedRectangle(x, y, width, height)
 	end
 
 end

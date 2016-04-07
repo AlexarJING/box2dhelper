@@ -970,7 +970,7 @@ function newobject:UpdateIndicator()
 		self.indicatorx = textx + width
 		self.indicatory	= texty
 	end
-	if self.focus then setPos(self.indicatorx,self.indicatory) end
+	--if self.focus then setPos(self.indicatorx,self.indicatory) end
 	-- indicator should be visible, so correcting scrolls
 	if self.focus and self.trackindicator then
 		local indicatorRelativeX = width + self.textoffsetx - self.offsetx

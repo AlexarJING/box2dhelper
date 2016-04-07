@@ -2,10 +2,10 @@ local preview={}
 
 
 self.preview.cam=require("libs.gamera").new(-5000,-5000,10000,10000)
-	self.preview.world=love.physics.newWorld(0, 9.8*64, false)
-	self.preview.cam:setWindow(w()-300,0,300,300)
-	self.preview.cam:setScale(0.3)
-	self.preview.cam:setPosition(0,0)
+self.preview.world=love.physics.newWorld(0, 9.8*64, false)
+self.preview.cam:setWindow(w()-300,0,300,300)
+self.preview.cam:setScale(0.3)
+self.preview.cam:setPosition(0,0)
 
 function preview:draw()
 	self.preview.cam:draw(function()

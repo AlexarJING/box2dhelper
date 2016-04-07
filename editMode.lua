@@ -231,6 +231,12 @@ function edit:mouseTest()
 	return check
 end
 
+function edit:clear()
+	editor.world =love.physics.newWorld(0, 9.8*64, false)
+	editor.action = "clear the world"
+end
+
+
 return function(parent) 
 	editor=parent
 	return edit

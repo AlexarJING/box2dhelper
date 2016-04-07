@@ -4,8 +4,52 @@
 		"selected_items":
 		[
 			[
+				"hover",
+				"hoverobject"
+			],
+			[
+				"brick",
+				"brickW"
+			],
+			[
+				"isdow",
+				"love.mouse.isDown"
+			],
+			[
+				"drag",
+				"dragTY"
+			],
+			[
+				"dragT",
+				"dragTX"
+			],
+			[
+				"changeR",
+				"changeNormal"
+			],
+			[
+				"tab",
+				"table.insert	(table, [pos,] value)"
+			],
+			[
+				"isdonw",
+				"love.keyboard.isDown"
+			],
+			[
+				"selectg",
+				"selectToggle"
+			],
+			[
+				"selectT",
+				"selectToggle"
+			],
+			[
 				"for",
 				"fori	for i,v in ipairs()"
+			],
+			[
+				"commad",
+				"commadName"
 			],
 			[
 				"swithPo",
@@ -17,10 +61,6 @@
 			],
 			[
 				"ta",
-				"table.insert	(table, [pos,] value)"
-			],
-			[
-				"tab",
 				"table.insert	(table, [pos,] value)"
 			],
 			[
@@ -474,74 +514,75 @@
 			[
 				"we",
 				"while	while cond"
-			],
-			[
-				"setcl",
-				"love.graphics.setColor"
-			],
-			[
-				"gr",
-				"love.graphics.rectangle"
-			],
-			[
-				"drawf",
-				"drawFromOpDeck"
-			],
-			[
-				"selfk",
-				"selfkill10"
-			],
-			[
-				"onAtta",
-				"onAttack"
-			],
-			[
-				"attack",
-				"attackweak"
-			],
-			[
-				"alway",
-				"cardsAlways_update"
-			],
-			[
-				"cost_",
-				"cost_lvl0"
-			],
-			[
-				"inter",
-				"interceptTab"
-			],
-			[
-				"minion",
-				"minionTab"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "main.lua",
+			"file": "newEditor.lua",
 			"settings":
 			{
-				"buffer_size": 1181,
+				"buffer_size": 6530,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "bg.lua",
+			"contents": "local interface={}\nlocal editor\nlocal ui\n\ninterface.propTagIndex=1\ninterface.propItemIndex=1\n\n\nfunction interface:init()\n	ui=editor.LoveFrames\n	--self.preview=require \"preview\"(editor)\n	self:createBuildFrame()\n	self:createJointFrame()\n	self:createSystemFrame()\nend\n\nfunction interface:update(dt)\n	ui.update(dt)\n	if ui.util.GetHover() and love.mouse.isDown(1) then\n		self.hover=true\n	elseif not ui.util.GetHover() and not love.mouse.isDown(1) then\n		self.hover=false\n	end\n    local hoverobject = ui.util.GetHoverObject()\n    if hoverobject and hoverobject.type==\"textinput\" then\n    	if hoverobject.focus then\n    		self.hover=true\n    	end\n    end\nend\n\nfunction interface:draw()\n\n\nend\n\nfunction interface:isHover()\n	return self.hover\nend\n\n------------------prop------------------\n\n\n\n----------------build-------------------\n\nlocal createShape={\"circle\",\"box\",\"polygon\",\"line\",\"edge\",\"freeline\"}\nfunction interface:createBuildFrame()\n	self.createFrame= ui.Create(\"frame\")\n	local frame = self.createFrame\n	frame:SetName(\"Shape\")\n	frame:SetSize(50, 250)\n	frame:SetPos(10, 100)\n	frame:ShowCloseButton(false)\n	self.createList=ui.Create(\"list\", frame)\n	local list = self.createList\n	list:SetPos(5, 30)\n	list:SetSize(39, 215)\n	list:SetSpacing(3)\n	list:SetPadding(3)\n	self.createButtons={}\n	local createButtons=self.createButtons\n	for i,v in ipairs(createShape) do\n		local b= ui.Create(\"imagebutton\")\n		b:SetImage(\"icons/\".. v ..\".png\")\n		b:SetText(\"\")\n		b:SizeToImage()\n		table.insert(self.createButtons, b)\n		list:AddItem(b)\n		b.OnClick=function(obj)\n			editor.createMode:new(v)\n		end\n	end\nend\n\nlocal createJoint={\"distance\",\"rope\",\"revolute\",\"prismatic\",\"weld\",\"wheel\",\"pully\"}\nfunction interface:createJointFrame()\n	self.jointFrame= ui.Create(\"frame\")\n	local frame = self.jointFrame\n	frame:SetName(\"Joint\")\n	frame:SetSize(50, 290)\n	frame:SetPos(10, 380)\n	frame:ShowCloseButton(false)\n	self.jointList=ui.Create(\"list\", frame)\n	local list = self.jointList\n	list:SetPos(5, 30)\n	list:SetSize(39, 250)\n	list:SetSpacing(3)\n	list:SetPadding(3)\n	self.jointButtons={}\n	local jointButtons=self.jointButtons\n	for i,v in ipairs(createJoint) do\n		local b= ui.Create(\"imagebutton\")\n		b:SetImage(\"icons/\".. v ..\".png\")\n		b:SetText(\"\")\n		b:SizeToImage()\n		table.insert(self.jointButtons, b)\n		list:AddItem(b)\n		b.OnClick=function()\n			editor.createMode[v](editor.createMode)\n		end\n	end\n\nend\n\n--save,load, undo, redo,\n--mode toggle edit/test/vert\n--show/hide shape/joint/prop/unit/history/miniMap/world/grid\n\nfunction interface:createSystemFrame()\n	self.sysFrame= ui.Create(\"frame\")\n	local frame = self.sysFrame\n	frame:SetName(\"System\")\n	frame:SetSize(300, 75)\n	frame:SetPos(10, 10)\n	frame:ShowCloseButton(false)\n	self.sysList=ui.Create(\"list\", frame)\n	local list = self.sysList\n	list:SetPos(5, 30)\n	list:SetSize(300, 40)\n	list:SetSpacing(5)\n	list:SetPadding(3)\n	list:SetDisplayType(\"horizontal\")\n\n	self.sysButtons={}\n	local sysButtons=self.sysButtons\n	\n	local b= ui.Create(\"imagebutton\")\n	b:SetImage(\"icons/circle.png\")\n	b:SetText(\"\")\n	b:SizeToImage()\n	list:AddItem(b)\n	b.OnClick=function()\n		print(\"save\")\n	end\n	sysButtons.save=b\n	local b= ui.Create(\"imagebutton\")\n	b:SetImage(\"icons/circle.png\")\n	b:SetText(\"\")\n	b:SizeToImage()\n	list:AddItem(b)\n	b.OnClick=function()\n		print(\"load\")\n	end\n	sysButtons.save=b\n	local b= ui.Create(\"imagebutton\")\n	b:SetImage(\"icons/circle.png\")\n	b:SetText(\"\")\n	b:SizeToImage()\n	list:AddItem(b)\n	b.OnClick=function()\n		print(\"undo\")\n	end\n	sysButtons.save=b\n	local b= ui.Create(\"imagebutton\")\n	b:SetImage(\"icons/circle.png\")\n	b:SetText(\"\")\n	b:SizeToImage()\n	list:AddItem(b)\n	b.OnClick=function()\n		print(\"redo\")\n	end\n	sysButtons.save=b\n	local b= ui.Create(\"imagebutton\")\n	b:SetImage(\"icons/circle.png\")\n	b:SetText(\"\")\n	b:SizeToImage()\n	list:AddItem(b)\n	b.OnClick=function()\n		print(\"ui toggle\")\n	end\n	sysButtons.save=b\n	local b= ui.Create(\"imagebutton\")\n	b:SetImage(\"icons/circle.png\")\n	b:SetText(\"\")\n	b:SizeToImage()\n	list:AddItem(b)\n	b.OnClick=function()\n		print(\"\")\n	end\n	sysButtons.save=b\nend\n\nfunction interface:createUnitFrame(files)\n\n\nend\n\nfunction interface:createLoadWorldFrame()\n	local frame =ui.Create(\"frame\")\n	frame:SetName(\"save to file...\")\n	frame:SetSize(300,80)\n	frame:CenterWithinArea(0,0,w(),h())\n	local input = ui.Create(\"textinput\",frame)\n	input:SetSize(280,30)\n	input:SetPos(10,40)\n	input.OnEnter=function()\n		love.filesystem.createDirectory(\"save\")\n		local file = love.filesystem.newFile(\"save/\"..input:GetText()..\".lua\")\n		file:open(\"w\")\n		file:write(table.save(self.undoStack[self.undoIndex].world))\n		file:close()\n		frame:Remove()\n	end\nend\n\nfunction interface:createSaveWorldFrame()\n	local files = love.filesystem.getDirectoryItems(\"save\")\n	local frame =ui.Create(\"frame\")\n	local count=#files\n	frame:SetName(\"select a file to load...\")\n	frame:SetSize(300,30*count+30)\n	frame:CenterWithinArea(0,0,w(),h())\n	local list = ui.Create(\"list\",frame)\n	list:SetDisplayType(\"vertical\")\n	list:SetPos(5, 30)\n	list:SetSize(280, 28*count)\n	for i,v in ipairs(files) do\n		local b= ui.Create(\"button\")\n		b:SetText(v)\n		list:AddItem(b)\n		b.OnClick=function()\n			if love.keyboard.isDown(\"lctrl\") and love.keyboard.isDown(\"lalt\") then\n				love.filesystem.remove( \"save/\"..b:GetText() )\n				frame:Remove()\n				system:loadFromFile()\n			else\n				local file = love.filesystem.newFile(\"save/\"..b:GetText())\n				file:open(\"r\")\n				local str=file:read()\n				editor.world = love.physics.newWorld(0, 9.8*64, false)\n				editor.helper.createWorld(editor.world,loadstring(str)())\n				editor.selector.selction=nil\n				frame:Remove()\n			end\n		end\n	end\n\nend\n\n\nlocal propTagList={\"body\",\"shape\",\"fixture\",\"joint\",\"userdata\"}\n\nfunction editor:createPropFrame() --弹出选中的第一个body,fixture,joint\n	if self.propFrame then\n		self.propList:Remove()\n		self.propFrame:Remove() \n	end\n\n	if not editor.selector.selection then return end\n\n	local tag=propTagList[self.popTagIndex]\n	local index=self.propItemIndex\n	local selectedBody=self.selection[1]\n	\n	local target\n	if tag==\"body\" then\n		self.popItem=nil\n		target=selectedBody\n	elseif tag==\"shape\" then\n		self.propItems=selectedBody:getFixtureList()\n		target=self.propItems[index] and self.propItems[index]:getShape() or self.propItems[1]:getShape()\n	elseif tag==\"fixture\" then\n		self.propItems=selectedBody:getFixtureList()\n		target=self.propItems[index] or self.propItems[1]\n	elseif tag==\"joint\" then\n		self.popItem=self.selection[1][1].body:getJointList()\n		target=self.propItems[index] or self.propItems[1]\n	elseif tag==\"userdata\" then\n		self.propItems=selectedBody:getFixtureList()\n		local fixture=self.propItems[index] or self.propItems[1]\n		target=fixture:getUserData()\n		if not target then\n			target={\n			{prop=\"name\",value=\"default\"},\n			{prop=\"name\",value=\"default\"},\n			{prop=\"name\",value=\"default\"},\n			{prop=\"name\",value=\"default\"},\n		}\n		fixture:setUserData(target)\n		end\n	end	\n\n	if not target then\n		self.propItems=nil\n		self.propItemIndex=1\n		self.propTagIndex=1\n		tag=\"body\"\n		target=selectedBody\n	end\n	self.propTarget=target\n\n\n	\n	if tag==\"userdata\" then\n		self.propData=target\n	else\n		self.propData={}\n		local tmp=editor.helper.getStatus(target,tag)\n		for i,v in ipairs(editor.helper.properties[tag]) do\n			if tmp[v]~=nil then table.insert(self.propData,{prop=v,value=tmp[v]}) end\n		end\n	end\n\n	\n\n\n	self.popFrame= ui.Create(\"frame\")\n	local frame = self.popFrame\n	frame:SetName(tag)\n	frame:SetSize(250, 35+#data*30)\n	frame:SetPos(w()*0.8, 300)\n	frame:ShowCloseButton(false)\n	self.popList=ui.Create(\"grid\", frame)\n	local list = self.popList\n	list:SetPos(5, 30)\n	list:SetSize(240, #data*20)\n	list:SetCellWidth(110)\n	list:SetCellHeight(20)\n	list:SetRows(#data)\n	list:SetColumns(2)\n	list:SetItemAutoSize(true)\n\n	self.popGrid={}\n	for i,v in ipairs(data) do\n		local key = ui.Create(\"button\")\n		key:SetText(v.prop)\n		local value\n		if type(v.value)==\"number\" then\n			value = ui.Create(\"textinput\")\n			value:SetText(tostring(v.value))\n			value.OnEnter=function()\n				local text=value:GetText()\n				local num=tonumber(text)\n				if num then\n					target[\"set\"..v.prop](target,num)\n					self.action=\"change property\"\n				end\n			end\n			--value.OnFocusLost=value.OnEnter\n		elseif type(v.value)==\"table\" then\n			value = ui.Create(\"textinput\")\n			local str=\"\"\n			for i,v in ipairs(v.value) do\n				str=str..tostring(v)..\",\"\n			end\n			value:SetText(str)\n			value.OnEnter=function()\n				local text=value:GetText()\n				local tab= string.split(text,\",\")\n				target[\"set\"..v.prop](target,unpack(tab)) \n				self.action=\"change property\"\n			end\n			--value.OnFocusLost=value.OnEnter\n		elseif type(v.value)==\"boolean\" then\n			value = ui.Create(\"checkbox\")\n			value:SetChecked(v.value)\n			value.OnChanged=function()\n				target[\"set\"..v.prop](target,value:GetChecked()) \n				self.action=\"change propert\"\n			end\n			\n		elseif type(v.value)==\"string\" then\n			value = ui.Create(\"textinput\")\n			value:SetText(tostring(v.value))\n			value.OnEnter=function()\n				local text=value:GetText()\n				target[\"set\"..v.prop](target,text) \n				self.action=\"change property\"\n			end\n			--value.OnFocusLost=value.OnEnter\n		end\n		if not target[\"set\"..v.prop] then \n			if value.SetEditable then\n				value:SetEditable(false)\n			else\n				value:SetEnabled(false)\n			end\n		end\n		list:AddItem(key,i,1)\n		list:AddItem(value,i,2)\n		table.insert(self.popGrid, {key,value})\n	end\n\n\nend\n\n\n\n\nreturn function(parent) \n	editor=parent\n	return interface\nend",
+			"file": "interface.lua",
+			"file_size": 4352,
+			"file_write_time": 131044939375802797,
 			"settings":
 			{
-				"buffer_size": 815,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "editor.lua",
-			"settings":
-			{
-				"buffer_size": 42798,
+				"buffer_size": 9338,
 				"line_ending": "Windows",
-				"name": "editor.lua"
+				"name": "interface.lua"
+			}
+		},
+		{
+			"file": "system.lua",
+			"settings":
+			{
+				"buffer_size": 1400,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "local units={}\nlocal editor\n\nunits.cam=require(\"libs.gamera\").new(-5000,-5000,10000,10000)\nunits.world=love.physics.newWorld(0, 9.8*64, false)\nunits.cam:setWindow(w()-300,0,300,300)\nunits.cam:setScale(0.3)\nunits.cam:setPosition(0,0)\n\nfunction units:draw()\n	self.units.cam:draw(function()\n		love.graphics.setColor(255, 0, 0, 255)\n		love.graphics.rectangle(\"line\", -300, -299, 599, 599)\n		love.graphics.line(-20,0,20,0)\n		love.graphics.line(0,-20,0,20)\n		helper.draw(self.units.world)\n	end)\n\nend\n\nfunction units:switch(slot)\n	if not self.units[slot] then return end\n	self.units.world=love.physics.newWorld(0, 9.8*64, false)\n	helper.createWorld(self.units.world,self.units[slot])\nend\n\nfunction units:save(slot)\n	if not self.selection then return end\n	self.action=\"save unit in slot \"..slot\n	local bodyList={}\n\n	for i,v in ipairs(self:getSelected()) do\n\n		bodyList[i]=v[1].body\n	end\n	\n	self.units[slot]=helper.getWorldData(bodyList)\nend\n\nfunction units:load(slot)\n	if not self.units[slot] then return end\n	self.action=\"load unit from slot\"..slot\n	local add=helper.createWorld(self.world,self.units[slot],mouseX,mouseY)\n	local selection = {}\n	for i,v in ipairs(add) do\n		table.insert(self.objects, v)\n		selection[i]={v}\n	end\n	self:clearSelection()\n	self.selection=selection\n	for i=1,#selection do\n		self.selection[i][1].body:setUserData(true)\n	end\n	self.selectIndex=1\nend\n\nreturn function(parent) \n	editor=parent\n	return units\nend",
+			"file": "preview.lua",
+			"file_size": 1473,
+			"file_write_time": 131044813484552869,
+			"settings":
+			{
+				"buffer_size": 1425,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "local conf={\n	cancel=\"escape\",\n\n	createCircle=\"c\",\n	createBox=\"b\",\n	createLine=\"l\",\n	createEdge=\"e\",\n	createPolygon=\"p\",\n	createFreeline=\"f\",\n\n	createDistance=\"d\",\n	createRope=\"r\",\n	createWeld=\"w\",\n	createRevolute=\"o\",\n	createPrismatic=\"m\",\n	createWheel=\"i\",\n	createPully=\"u\",\n\n	selectAll=\"ctrl+a\",\n\n	alineHorizontal=\"h\",\n	alineVerticle=\"v\",\n\n	clear=\"home\",\n	removeBody=\"delete\",\n	removeJoint=\"end\",\n	copy=\"ctrl+c\",\n	paste=\"ctrl+v\",\n	combine=\"ctrl+b\",\n	divide=\"ctrl+d\",\n	toggleBodyType=\"ctrl+tab\",\n	undo=\"ctrl+z\",\n	redo=\"ctrl+y\",\n\n	vertexMode=\"ctrl+t\",\n\n	test=\"f1\",\n	pause=\"f3\",\n	toggleMouse=\"f2\",\n	reset=\"f4\",\n\n	toggleUI=\"f9\",\n	togglePropFrameStyle=\"f10\", \n	toggleLog=\"f11\",\n	toggleInfo=\"f12\",\n\n	loadWorld=\"ctrl+l\",\n	saveWorld=\"ctrl+s\",\n\n	saveUnit=\"alt+s\"\n}\n\nreturn conf",
+			"file": "keyconf.lua",
+			"file_size": 805,
+			"file_write_time": 131044855258734908,
+			"settings":
+			{
+				"buffer_size": 771,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "ui.lua",
+			"settings":
+			{
+				"buffer_size": 6400,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "testMode.lua",
+			"settings":
+			{
+				"buffer_size": 3161,
+				"line_ending": "Windows"
 			}
 		}
 	],
@@ -642,32 +683,47 @@
 	"expanded_folders":
 	[
 		"/F/Love2D Project/box2d",
-		"/F/Love2D Project/box2d/libs"
+		"/F/Love2D Project/box2d/libs/loveframes/objects"
 	],
 	"file_history":
 	[
-		"/C/Users/Alexar/AppData/Roaming/LOVE/box2d/abc",
+		"/F/Love2D Project/box2d/libs/loveframes/objects/textinput.lua",
+		"/F/Love2D Project/box2d/newEditor.lua",
+		"/F/Love2D Project/box2d/editor.lua",
+		"/F/Love2D Project/box2d/editMode.lua",
 		"/F/Love2D Project/box2d/b2helper.lua",
+		"/F/Love2D Project/box2d/libs/loveframes/skins/Blue/skin.lua",
+		"/F/Love2D Project/box2d/libs/loveframes/libraries/util.lua",
+		"/F/Love2D Project/box2d/selector.lua",
+		"/F/Love2D Project/box2d/vertMode.lua",
+		"/F/Love2D Project/box2d/main.lua",
+		"/F/Love2D Project/box2d/preview.lua",
+		"/F/Love2D Project/box2d/system.lua",
+		"/F/Love2D Project/box2d/bg.lua",
+		"/F/Love2D Project/box2d/createMode.lua",
+		"/F/Love2D Project/box2d/log.lua",
+		"/F/Love2D Project/box2d/vertEditor.lua",
+		"/F/Love2D Project/box2d/camera.lua",
+		"/F/Love2D Project/box2d/keyconf.lua",
+		"/F/Love2D Project/box2d/ui.lua",
+		"/F/Love2D Project/box2d/testMode.lua",
+		"/F/Love2D Project/box2d/[string \"boot.lua\"]",
+		"/C/Program Files (x86)/Sublime Text 3/Data/Packages/Default/Default (Windows).sublime-keymap",
+		"/F/Love2D Project/box2d/libs/gamera.lua",
+		"/F/Love2D Project/box2d/conf.lua",
+		"/C/Users/Alexar/AppData/Roaming/LOVE/box2d/abc",
 		"/F/Love2D Project/box2d/libs/loveframes/objects/checkbox.lua",
 		"/F/Love2D Project/box2d/libs/loveframes/objects/grid.lua",
-		"/F/Love2D Project/box2d/libs/gamera.lua",
-		"/F/Love2D Project/box2d/camera.lua",
-		"/F/Love2D Project/box2d/bg.lua",
 		"/F/Love2D Project/box2d/libs/util.lua",
 		"/F/Love2D Project/box2d/demo.lua",
-		"/C/Program Files (x86)/Sublime Text 3/Data/Packages/Default/Default (Windows).sublime-keymap",
-		"/F/Love2D Project/box2d/[string \"boot.lua\"]",
 		"/F/Love2D Project/box2d/create.lua",
 		"/F/Love2D Project/box2d/libs/camera.lua",
-		"/F/Love2D Project/box2d/main.lua",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk_unsafe.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk_private.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk_ffi.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/cpBB.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/src/chipmunk.c",
-		"/F/Love2D Project/box2d/ui.lua",
-		"/F/Love2D Project/box2d/conf.lua",
 		"/F/Love2D Project/box2d/libs/loveframes/init.lua",
 		"/C/Users/Alexar/AppData/Local/Temp/Rar$DIa0.286/rube.json",
 		"/C/Users/Alexar/AppData/Local/Temp/Rar$DIa0.294/snapshot.json",
@@ -758,22 +814,7 @@
 		"/F/Love2D Project/chinchilla/slime.lua",
 		"/F/Love2D Project/slimemustdie/soft.lua",
 		"/F/Love2D Project/slimemustdie/ball.lua",
-		"/F/Love2D Project/slimemustdie/gameSetting.lua",
-		"/F/Love2D Project/slimemustdie/main.lua",
-		"/D/Program Files/Egret/EgretWing/helloworld/src/Main.ts",
-		"/F/Love2D Project/slimemustdie/rect.lua",
-		"/F/Love2D Project/slimemustdie/slime.lua",
-		"/F/Love2D Project/killthatjelly/main.lua",
-		"/F/Love2D Project/killthatjelly/slime.lua",
-		"/F/Love2D Project/particles/main.lua",
-		"/F/Love2D Project/particles/particles.lua",
-		"/C/Users/Administrator/Desktop/liquidfun-1.1.0(1)/liquidfun-1.1.0/liquidfun/Box2D/swig/java/liquidfun.swig",
-		"/C/Collision/Shapes/b2Shape.swig",
-		"/C/swigwin/Lib/lua/wchar.i",
-		"/C/swigwin/Lib/lua/lua.swg",
-		"/F/Love2D Project/particles/liquid.java",
-		"/F/Love2D Project/love soft body/main.lua",
-		"/F/Love2D Project/love soft body/loveballs/init.lua"
+		"/F/Love2D Project/slimemustdie/gameSetting.lua"
 	],
 	"find":
 	{
@@ -792,6 +833,29 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"preview",
+			"print",
+			"setpos",
+			"focus",
+			"hover",
+			"button",
+			"rest",
+			"mousetest",
+			"editor",
+			"polygon",
+			"polygonr",
+			"editor.objects",
+			"self.action",
+			"creator",
+			"mouseTest",
+			"self.action",
+			"editor",
+			"inrect",
+			"editor",
+			"mouseY",
+			"mouseX",
+			"love",
+			"editor",
 			"unpdatePopValue",
 			"print",
 			"remove",
@@ -896,30 +960,7 @@
 			"game.time",
 			"time",
 			"draw",
-			"print",
-			"set",
-			"newDown",
-			"print",
-			"input",
-			"frame",
-			"bordercolor",
-			"frame",
-			"print",
-			"partsDat",
-			"ui",
-			"pos=",
-			"circle",
-			"polygon",
-			"require ",
-			"flag",
-			"get",
-			"dual",
-			"drift",
-			"last",
-			"print",
-			"self.las",
-			"self.last",
-			"getLast"
+			"print"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -927,6 +968,18 @@
 		"regex": false,
 		"replace_history":
 		[
+			"units",
+			"test",
+			"system",
+			"editor.action",
+			"createMode",
+			"editor.action",
+			"edit",
+			"selector",
+			"editor.mouseY",
+			"editor.mouseX",
+			"editor",
+			"creator",
 			"Anchors",
 			"group[joint.Bodies[2]].body",
 			"group[joint.Bodies[1]].body",
@@ -1042,19 +1095,7 @@
 			"\"green\"",
 			"green",
 			"upper",
-			"绿",
-			"nil",
-			"",
-			"hero",
-			"hand",
-			"field",
-			"deck",
-			"bank",
-			"cards",
-			"upper.",
-			"deck",
-			"hero",
-			"hand"
+			"绿"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -1065,24 +1106,114 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "main.lua",
+					"file": "newEditor.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1181,
+						"buffer_size": 6530,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								290,
-								290
+								3342,
+								3342
+							]
+						],
+						"settings":
+						{
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2007.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "interface.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9338,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7204,
+								7204
+							]
+						],
+						"settings":
+						{
+							"auto_name": "interface.lua",
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 5780.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "system.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1400,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								427,
+								427
+							]
+						],
+						"settings":
+						{
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 840.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "preview.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1425,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								680,
+								680
 							]
 						],
 						"settings":
@@ -1095,24 +1226,53 @@
 						"translation.y": 60.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "bg.lua",
-					"semi_transient": true,
+					"buffer": 4,
+					"file": "keyconf.lua",
+					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 815,
+						"buffer_size": 771,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								756,
+								756
+							]
+						],
+						"settings":
+						{
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 660.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "ui.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6400,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6026,
+								2777
 							]
 						],
 						"settings":
@@ -1122,41 +1282,40 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2160.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "editor.lua",
+					"buffer": 6,
+					"file": "testMode.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 42798,
+						"buffer_size": 3161,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4444,
-								4444
+								480,
+								480
 							]
 						],
 						"settings":
 						{
-							"auto_name": "editor.lua",
 							"origin_encoding": "ASCII",
-							"spell_check": false,
-							"syntax": "Packages/Lua Love/LuaLove.tmLanguage"
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2947.0,
+						"translation.y": 120.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 5,
 					"type": "text"
 				}
 			]

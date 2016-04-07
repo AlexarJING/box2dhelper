@@ -29,7 +29,7 @@ local defaultStyle= {
 		kinematic={100, 255, 200, 255},
 		sensor={0,0,-255,0},
 		joint={255, 100, 100, 150},
-		body={255, 0, 255, 255}
+		body={255, 0, 255, 50}
 	}
 
 function helper.draw(world,colorStyle)

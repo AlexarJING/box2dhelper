@@ -11,16 +11,16 @@ editor.testMode= require "testMode"(editor)
 editor.selector= require "selector"(editor)
 editor.system= require "system"(editor)
 --editor.preview = require "preview"
+editor.interface= require "interface"(editor)
 editor.log = require "log"
-
+love.physics.setMeter(64)
 function editor:init()
 	self.W = w()
 	self.H = h()
 	self.bg:init()
 	self.state="Edit Mode"
 	self.keys= self:keyBound()	
-	love.physics.setMeter(64)
-	self.objects={}
+	self.interface:init()
 	self.action="system start"
 	editor.log:push("welcome to LoveBox2D editor !")
 end
@@ -29,25 +29,31 @@ end
 function editor:update(dt)
 	self.bg:update()
 	self.cam:update()
-	self.LoveFrames.update(dt)
+	self.interface:update(dt)
 
-	if self.state=="Create Mode" then
-		self.createMode:update()
-	elseif self.state=="Test Mode" then
-		self.testMode:update(dt)
-		if not self.selector.selection then self.selector:update() end
-	elseif self.state=="Vertex Mode" then
-		self.vertMode:update()
-	else
-		if not self.selector.dragSelecting then self.editMode:update() end
-		if not self.editMode.dragMoving then self.selector:update() end
+	if not  self.interface:isHover() then --如果鼠标在ui上 而且是按下状态 则不更新系统
+
+		if self.state=="Create Mode" then
+			self.createMode:update()
+		elseif self.state=="Test Mode" then
+			self.testMode:update(dt)
+			if not self.selector.selection then self.selector:update() end
+		elseif self.state=="Vertex Mode" then
+			self.vertMode:update()
+		else
+			if not self.selector.dragSelecting then self.editMode:update() end
+			if not self.editMode.dragMoving then self.selector:update() end
+		end
 	end
+
 
 	if self.action then
 		editor.log:push(self.action)
 		editor.system:pushUndo()
 		self.action=nil
 	end
+
+	if self.state=="Test Mode" and not self.testMode.pause then self.world:update(dt) end
 
 end
 
@@ -68,7 +74,7 @@ function editor:draw()
 	self.LoveFrames.draw()
 
 
-	self:drawKeyBounds()
+	--self:drawKeyBounds()
 	self.log:draw(300,600)
 
 	
@@ -103,19 +109,19 @@ end
 
 function editor:keypressed(key, isrepeat)
 	if isrepeat then return end
+	self.LoveFrames.keypressed(key, isrepeat)
+	if self.interface:isHover() then return end
 	for i,v in ipairs(self.keys) do
 		if string.sub(v.key,1,5)=="ctrl+" then
 			local tkey=string.sub(v.key,6,-1)
 			if love.keyboard.isDown("lctrl") and key==tkey then
 				v.commad()
-				print(v.name)
 				break
 			end
 		elseif string.sub(v.key,1,4)=="alt+" then
 			local tkey=string.sub(v.key,5,-1)
 			if love.keyboard.isDown("lalt") and key==tkey then
 				v.commad()
-				print(v.name)
 				break
 			end
 		else
@@ -125,7 +131,6 @@ function editor:keypressed(key, isrepeat)
 			end
 		end
 	end
-	self.LoveFrames.keypressed(key, isrepeat)
 end
 
 function editor:keyreleased(key)
@@ -193,6 +198,10 @@ function editor:keyBound()
 		pause=function() self.testMode:togglePause() end,
 		toggleMouse=function() self.testMode:toggleMouse() end,
 		reset=function() self.testMode:reset() end,
+
+		loadWorld=function() self.system:loadFromFile() end,
+		saveWorld=function() self.system:saveToFile() end,
+		
 	}
 
 	local keys ={}
@@ -204,7 +213,33 @@ function editor:keyBound()
 	
 	return keys
 end
+--[[
+local data  = love.image.newImageData("1.png")
+local width, height = data:getDimensions()
+local brickW=1
+local brickH=1
+local offx
+local count=0
+local scale=5
+local step=5
 
+for x=0,width-3,step do
+	for y=0, height-3,step do
+		if y%2==0 then 
+			offx=0
+		else
+			offx=1
+		end
+		local r,g,b,a=data:getPixel( x, y )
+		
+		if r<250 or b<250 or g<250 then
+			local body = love.physics.newBody(editor.world, x*scale-width*scale/2, y*scale-height*scale/2,"dynamic")
+			local shape = love.physics.newRectangleShape(brickW*scale*step,brickH*scale*step)
+			local fixture = love.physics.newFixture(body, shape)
+		end
+	end
+end
+]]
 
 return editor
 

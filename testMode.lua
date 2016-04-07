@@ -25,14 +25,16 @@ function test:update(dt)
 		self.mouseBall.joint:setTarget(editor.mouseX,editor.mouseY)
 	end
 	self:downForce()
-	if not self.pause then editor.world:update(dt) end
 end
 
 function test:togglePause()
 	self.pause=not self.pause
 end
 
-
+function test:reset()
+	editor.log:push("rest world")
+	editor.system:redo()
+end
 
 function test:toggleMouse()
 	self.mouseMode=self.mouseMode=="power" and "ball" or "power"

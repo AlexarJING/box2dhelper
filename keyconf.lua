@@ -21,6 +21,7 @@ local conf={
 	alineHorizontal="h",
 	alineVerticle="v",
 
+	clear="home",
 	removeBody="delete",
 	removeJoint="end",
 	copy="ctrl+c",
@@ -33,10 +34,19 @@ local conf={
 
 	vertexMode="ctrl+t",
 
-	test="f5",
-	pause="f4",
+	test="f1",
+	pause="f3",
 	toggleMouse="f2",
-	reset="f3",
+	reset="f4",
+
+	toggleUI="f9",
+	togglePropFrameStyle="f10", 
+	toggleLog="f11",
+	toggleInfo="f12",
+
+	loadWorld="ctrl+l",
+	saveWorld="ctrl+s",
+	
 }
 
 return conf
