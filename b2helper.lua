@@ -368,6 +368,37 @@ function helper.createWorld(world,data,offx,offy)
 	return group
 end
 
+local function getUserData(obj)
+	local raw=obj:getUserData()
+	if raw==nil then return end
+	if type(raw)=="table" then
+		return {type(raw),table.save(raw)}
+	elseif type(raw)=="function" then
+		return {type(raw),string.dump(raw)}
+	else
+		return {type(raw),tostring(raw)}
+	end
+end
+
+local function setUserData(obj,raw)
+	if raw[1]=="table" then
+		obj:setUserData(loadstring(raw[2])())
+	elseif raw[1]=="number" then
+		obj:setUserData(tonumber(raw[2]))
+	elseif raw[1]=="function" then
+		obj:setUserData(loadstring(raw[3]))
+	elseif raw[1]=="boolean" then
+		if raw[2]=="false" then
+			obj:setUserData(false)
+		else
+			obj:setUserData(true)
+		end
+	elseif raw==nil then
+		obj:setUserData(nil)
+	else
+		obj:setUserData(tostring(raw[2]))
+	end
+end
 
 function helper.getWorldData(world,offx,offy)
 	offx =offx or 0
@@ -380,32 +411,38 @@ function helper.getWorldData(world,offx,offy)
 	end
 	local group={}
 	local tab={}
-	local userData={}
+	local userdata={}
 	local index=0
+	userdata.body={}
 	for i,body in ipairs(bodyList) do
 		local obj={}
+		local data={}
+		data.body=getUserData(body)
 		table.insert(tab, obj)
 		index=index+1
-		table.insert(userData, {body=body,data=body:getUserData()}) --转存原有的userdata
+		table.insert(userdata.body, data) --转存原有的userdata
 		body:setUserData(index) --存储标号
 		local status=helper.getStatus(body,"body")
 		status.X=status.X-offx
 		status.Y=status.Y-offy
 		obj.body=status
 		obj.fixtures={}
+		data.fixtures={}
 		for i,fixture in ipairs(body:getFixtureList()) do
 			table.insert(obj.fixtures, {
 			shape=helper.getStatus(fixture:getShape(),"shape"),
 			fixture=helper.getStatus(fixture,"fixture")})
+			table.insert(data.fixtures,getUserData(fixture))
 		end
 		
 	end
 	group.obj=tab
-
+	userdata.joint={}
 	local tab={}
 	local index=0
 	for i,body in ipairs(bodyList) do	
 		for i,joint in ipairs(body:getJointList()) do
+			table.insert(userdata.joint, getUserData(joint))
 			joint:setUserData(nil)
 		end
 	end
@@ -424,8 +461,8 @@ function helper.getWorldData(world,offx,offy)
 	end
 	
 	group.joint=tab
-	
-	for i,v in ipairs(userData) do
+	group.userdata=userdata
+	for i,v in ipairs(userdata.body) do
 		v.body:setUserData(v.data)
 	end
 	return group
@@ -453,35 +490,43 @@ function helper.getStatus(obj,type)
 	return status
 end
 
-function table.save(tab,name)
+function table.save(tab,name,ifCopyFunction)
 	name=name or "test"
+	tableList=tablelist or {{name="root",tab=tab}} --to protect loop
 	local output="local "..name.."=\n"
 	local function ergodic(target,time)
 		time=time+1
 		output=output.."{\n"
 		for k,v in pairs(target) do
 			output=output .. string.rep("\t",time)
+			local name
+			if type(k)=="number" then
+				name="["..k.."]"
+			elseif type(k)=="string" then
+				name="[\""..k.."\"]"
+			end 
 			if type(v)=="table" then
-				if type(k)=="number" then
-					output=output.."["..k.."]".."="
-				elseif type(k)=="string" then
-					output=output.."[\""..k.."\"]="
-				end 
-				ergodic(v,time)
-				output=output .. string.rep("\t",time)
-				output=output.."},\n"
+				output=output .. name .."="
+				local checkRepeat
+				for _,p in ipairs(tableList) do
+					if v==p.tab then
+						checkRepeat=true;break
+					end
+				end
+				if checkRepeat then
+					output=output.. name .."=table^"..p.name..",\n"
+				else
+					table.insert(tableList,{name=name,tab=v})
+					ergodic(v,time)
+					output=output .. string.rep("\t",time)
+					output=output.."},\n"
+				end
 			elseif type(v)=="string" then
-				if type(k)=="number" then
-					output=output.."["..k.."]".."=\""..v.."\",\n"
-				elseif type(k)=="string" then
-					output=output.."[\""..k.."\"]=\""..v.."\",\n"
-				end 
+				output=output.. name .."=\""..v.."\",\n"
 			elseif type(v)=="number" or type(v)=="boolean" then
-				if type(k)=="number" then
-					output=output.."["..k.."]".."="..tostring(v)..",\n"
-				elseif type(k)=="string" then
-					output=output.."[\""..k.."\"]="..tostring(v)..",\n"
-				end 
+					output=output..name.."="..tostring(v)..",\n"
+			elseif type(v)=="function" and ifCopyFunction then
+				output=output .. name .."=".."loadstring(\""..string.dump(v).."\")"..",\n"			
 			end
 		end
 	end
@@ -497,7 +542,6 @@ helper.properties={
 	"LinearDamping",
 	"GravityScale",
 	"Type",
-	"UserData",
 	"Bullet",
 	"FixedRotation",
 	"SleepingAllowed",
@@ -511,7 +555,6 @@ helper.properties={
 	"GroupIndex",
 	"Mask",
 	"Sensor",
-	"UserData"
 	},
 		shape={
 	"Point",

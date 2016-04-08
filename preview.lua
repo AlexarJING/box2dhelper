@@ -1,30 +1,30 @@
-local preview={}
+local units={}
+local editor
 
+units.cam=require("libs.gamera").new(-5000,-5000,10000,10000)
+units.world=love.physics.newWorld(0, 9.8*64, false)
+units.cam:setWindow(w()-300,0,300,300)
+units.cam:setScale(0.3)
+units.cam:setPosition(0,0)
 
-self.preview.cam=require("libs.gamera").new(-5000,-5000,10000,10000)
-self.preview.world=love.physics.newWorld(0, 9.8*64, false)
-self.preview.cam:setWindow(w()-300,0,300,300)
-self.preview.cam:setScale(0.3)
-self.preview.cam:setPosition(0,0)
-
-function preview:draw()
-	self.preview.cam:draw(function()
+function units:draw()
+	self.units.cam:draw(function()
 		love.graphics.setColor(255, 0, 0, 255)
 		love.graphics.rectangle("line", -300, -299, 599, 599)
 		love.graphics.line(-20,0,20,0)
 		love.graphics.line(0,-20,0,20)
-		helper.draw(self.preview.world)
+		helper.draw(self.units.world)
 	end)
 
 end
 
-function editor:switchPreview(slot)
+function units:switch(slot)
 	if not self.units[slot] then return end
-	self.preview.world=love.physics.newWorld(0, 9.8*64, false)
-	helper.createWorld(self.preview.world,self.units[slot])
+	self.units.world=love.physics.newWorld(0, 9.8*64, false)
+	helper.createWorld(self.units.world,self.units[slot])
 end
 
-function editor:saveUnit(slot)
+function units:save(slot)
 	if not self.selection then return end
 	self.action="save unit in slot "..slot
 	local bodyList={}
@@ -37,7 +37,7 @@ function editor:saveUnit(slot)
 	self.units[slot]=helper.getWorldData(bodyList)
 end
 
-function editor:loadUnit(slot)
+function units:load(slot)
 	if not self.units[slot] then return end
 	self.action="load unit from slot"..slot
 	local add=helper.createWorld(self.world,self.units[slot],mouseX,mouseY)
@@ -52,4 +52,9 @@ function editor:loadUnit(slot)
 		self.selection[i][1].body:setUserData(true)
 	end
 	self.selectIndex=1
+end
+
+return function(parent) 
+	editor=parent
+	return units
 end

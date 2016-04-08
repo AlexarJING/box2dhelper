@@ -23,6 +23,7 @@ function editor:init()
 	self.interface:init()
 	self.action="system start"
 	editor.log:push("welcome to LoveBox2D editor !")
+
 end
 
 
@@ -201,6 +202,8 @@ function editor:keyBound()
 
 		loadWorld=function() self.system:loadFromFile() end,
 		saveWorld=function() self.system:saveToFile() end,
+
+		togglePropFrameStyle=function() self.interface:nextTag() end,
 		
 	}
 

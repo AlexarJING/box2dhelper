@@ -39,14 +39,16 @@ local conf={
 	toggleMouse="f2",
 	reset="f4",
 
+	toggleSystem="lalt",
 	toggleUI="f9",
-	togglePropFrameStyle="f10", 
+	togglePropFrameStyle="tab", 
 	toggleLog="f11",
 	toggleInfo="f12",
 
 	loadWorld="ctrl+l",
 	saveWorld="ctrl+s",
-	
+
+	saveUnit="alt+s"
 }
 
 return conf
