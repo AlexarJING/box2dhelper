@@ -32,6 +32,39 @@ local defaultStyle= {
 		body={255, 0, 255, 50}
 	}
 
+local function getUserData(obj)
+	local raw=obj:getUserData()
+	if raw==nil then return end
+	if type(raw)=="table" then
+		return {type(raw),table.save(raw)}
+	elseif type(raw)=="function" then
+		return {type(raw),string.dump(raw)}
+	else
+		return {type(raw),tostring(raw)}
+	end
+end
+
+local function setUserData(obj,raw)
+	if raw==nil then return end
+	if raw[1]=="table" then
+		obj:setUserData(loadstring(raw[2])())
+	elseif raw[1]=="number" then
+		obj:setUserData(tonumber(raw[2]))
+	elseif raw[1]=="function" then
+		obj:setUserData(loadstring(raw[3]))
+	elseif raw[1]=="boolean" then
+		if raw[2]=="false" then
+			obj:setUserData(false)
+		else
+			obj:setUserData(true)
+		end
+	elseif raw==nil then
+		obj:setUserData(nil)
+	else
+		obj:setUserData(tostring(raw[2]))
+	end
+end
+
 function helper.draw(world,colorStyle)
 	colorStyle=colorStyle or defaultStyle
 
@@ -259,6 +292,8 @@ function helper.createWorld(world,data,offx,offy)
 		local bx,by= obj.body:getPosition() ---set offside
 		obj.body:setPosition(bx+offx,by+offy)
 
+		setUserData(obj.body,v.body.userdata)
+
 		obj.fixtures={}
 		for i,param in ipairs(v.fixtures) do
 			local shell={}
@@ -287,6 +322,7 @@ function helper.createWorld(world,data,offx,offy)
 				end
 			end
 			
+			setUserData(shell.fixture,param.fixture.userdata)
 			table.insert(obj.fixtures, shell)
 		end
 		if #v.fixtures==1 then
@@ -296,8 +332,9 @@ function helper.createWorld(world,data,offx,offy)
 	end
 
 	for i,joint in ipairs(data.joint) do
+		local j
 		if joint.Type=="distance" then
-			local j = love.physics.newDistanceJoint(
+			j = love.physics.newDistanceJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body, 
 				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
@@ -306,7 +343,7 @@ function helper.createWorld(world,data,offx,offy)
 			j:setFrequency(joint.Frequency)
 		elseif joint.Type=="prismatic" then
 			local angle= getRot(joint.Anchors[1], joint.Anchors[2], joint.Anchors[3], joint.Anchors[4])
-			local j = love.physics.newPrismaticJoint(
+			j = love.physics.newPrismaticJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,
 				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3], joint.Anchors[4],
@@ -317,14 +354,14 @@ function helper.createWorld(world,data,offx,offy)
 			j:setMaxMotorForce(joint.MaxMotorForce)
 			j:setMotorSpeed(joint.MotorSpeed)
 		elseif joint.Type=="pulley" then
-			local j = love.physics.newPulleyJoint(
+			j = love.physics.newPulleyJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body, 
 				joint.GroundAnchors[1], joint.GroundAnchors[2], joint.GroundAnchors[3],joint.GroundAnchors[4],
 				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
 				joint.Ratio,joint.CollideConnected)
 		elseif joint.Type=="revolute" then
-			local j = love.physics.newRevoluteJoint(
+			j = love.physics.newRevoluteJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,  
 				joint.Anchors[1], joint.Anchors[2],
@@ -333,13 +370,13 @@ function helper.createWorld(world,data,offx,offy)
 			j:setMaxMotorTorque(joint.MaxMotorTorque)
 			j:setMotorSpeed(joint.MotorSpeed)
 		elseif joint.Type=="rope" then
-			local j = love.physics.newRopeJoint(
+			j = love.physics.newRopeJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,
 				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4], 
 				joint.MaxLength, joint.CollideConnected)
 		elseif joint.Type=="weld" then
-			local j = love.physics.newWeldJoint(
+			j = love.physics.newWeldJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body, 
 				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
@@ -352,7 +389,7 @@ function helper.createWorld(world,data,offx,offy)
 			group[joint.Bodies[1]].body:getX(), 
 			group[joint.Bodies[1]].body:getY()
 			 )
-			local j = love.physics.newWheelJoint(
+			j = love.physics.newWheelJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,
 				joint.Anchors[1], joint.Anchors[2],
@@ -364,41 +401,24 @@ function helper.createWorld(world,data,offx,offy)
 			j:setMaxMotorTorque(joint.MaxMotorTorque)
 			j:setMotorSpeed(joint.MotorSpeed)
 		end
+
+		j:setUserData(joint.userdata)
 	end
 	return group
 end
 
-local function getUserData(obj)
-	local raw=obj:getUserData()
-	if raw==nil then return end
-	if type(raw)=="table" then
-		return {type(raw),table.save(raw)}
-	elseif type(raw)=="function" then
-		return {type(raw),string.dump(raw)}
-	else
-		return {type(raw),tostring(raw)}
+
+
+local function getBodyIndex(list,body)
+	
+	for i,tbody in ipairs(list) do
+		if tbody==body then
+			return i
+		end
 	end
+	
 end
 
-local function setUserData(obj,raw)
-	if raw[1]=="table" then
-		obj:setUserData(loadstring(raw[2])())
-	elseif raw[1]=="number" then
-		obj:setUserData(tonumber(raw[2]))
-	elseif raw[1]=="function" then
-		obj:setUserData(loadstring(raw[3]))
-	elseif raw[1]=="boolean" then
-		if raw[2]=="false" then
-			obj:setUserData(false)
-		else
-			obj:setUserData(true)
-		end
-	elseif raw==nil then
-		obj:setUserData(nil)
-	else
-		obj:setUserData(tostring(raw[2]))
-	end
-end
 
 function helper.getWorldData(world,offx,offy)
 	offx =offx or 0
@@ -410,61 +430,44 @@ function helper.getWorldData(world,offx,offy)
 		bodyList=world
 	end
 	local group={}
-	local tab={}
-	local userdata={}
-	local index=0
-	userdata.body={}
+	group.obj={}
+
+
 	for i,body in ipairs(bodyList) do
 		local obj={}
 		local data={}
-		data.body=getUserData(body)
-		table.insert(tab, obj)
-		index=index+1
-		table.insert(userdata.body, data) --转存原有的userdata
-		body:setUserData(index) --存储标号
+		
+		table.insert(group.obj, obj)
 		local status=helper.getStatus(body,"body")
 		status.X=status.X-offx
 		status.Y=status.Y-offy
+		status.userdata=getUserData(body)
 		obj.body=status
 		obj.fixtures={}
 		data.fixtures={}
 		for i,fixture in ipairs(body:getFixtureList()) do
+			local fixtureData=helper.getStatus(fixture,"fixture")
+			fixtureData.userdata=getUserData(fixture)
 			table.insert(obj.fixtures, {
 			shape=helper.getStatus(fixture:getShape(),"shape"),
-			fixture=helper.getStatus(fixture,"fixture")})
-			table.insert(data.fixtures,getUserData(fixture))
+			fixture=fixtureData})
 		end
 		
 	end
-	group.obj=tab
-	userdata.joint={}
-	local tab={}
-	local index=0
-	for i,body in ipairs(bodyList) do	
-		for i,joint in ipairs(body:getJointList()) do
-			table.insert(userdata.joint, getUserData(joint))
-			joint:setUserData(nil)
-		end
-	end
+
+	group.joint={}
 
 	for i,body in ipairs(bodyList) do	
-		for i,joint in ipairs(body:getJointList()) do
-			local check = joint:getUserData()
-			if tab[check]==nil then 
-				index=index+1
+		for i,joint in ipairs(body:getJointList()) do	
+			if joint:getBodies()==body then --the first body==self body
 				local status=helper.getStatus(joint,"joint")
-				status.Bodies={status.Bodies[1]:getUserData(),status.Bodies[2]:getUserData()}
-				table.insert(tab, status)
-				joint:setUserData(index)
+				status.Bodies={getBodyIndex(bodyList,status.Bodies[1]),
+								getBodyIndex(bodyList,status.Bodies[2])}
+				table.insert(group.joint, status)
 			end
 		end
 	end
 	
-	group.joint=tab
-	group.userdata=userdata
-	for i,v in ipairs(userdata.body) do
-		v.body:setUserData(v.data)
-	end
 	return group
 
 end
@@ -522,7 +525,12 @@ function table.save(tab,name,ifCopyFunction)
 					output=output.."},\n"
 				end
 			elseif type(v)=="string" then
-				output=output.. name .."=\""..v.."\",\n"
+				if string.find(v,"\n") then
+					output=output.. name .."=[["..v.."]],\n"
+				else
+					output=output.. name .."=\""..v.."\",\n"
+				end
+				
 			elseif type(v)=="number" or type(v)=="boolean" then
 					output=output..name.."="..tostring(v)..",\n"
 			elseif type(v)=="function" and ifCopyFunction then

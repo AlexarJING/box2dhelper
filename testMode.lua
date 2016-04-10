@@ -9,13 +9,14 @@ test.pause=false
 function test:new()
 
 	if editor.state=="Test Mode" then
-		editor.state="Edit Mode"
-		editor.system:redo()
+		editor:cancel()
 		editor.log:push("stop testing")
 	else
 		editor.state="Test Mode"
 		editor.action="start testing"
+		editor:switchMode("test")
 	end
+
 end
 
 function test:update(dt)

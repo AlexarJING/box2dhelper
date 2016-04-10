@@ -651,7 +651,10 @@ end
 	- desc: removes the object
 --]]---------------------------------------------------------
 function newobject:Remove()
-	
+	if self.type=="textinput" then
+		loveframes.inputobject=false
+	end
+
 	local pinternals = self.parent.internals
 	local pchildren = self.parent.children
 	

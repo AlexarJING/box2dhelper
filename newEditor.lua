@@ -1,5 +1,6 @@
 local editor={}
 editor.world= love.physics.newWorld(0, 9.8*64, false)
+editor.log = require "log"(editor)
 editor.bg = require "bg"(editor)
 editor.cam = require "camera"(editor)
 editor.helper = require "b2helper"
@@ -10,9 +11,9 @@ editor.vertMode= require "vertMode"(editor)
 editor.testMode= require "testMode"(editor)
 editor.selector= require "selector"(editor)
 editor.system= require "system"(editor)
---editor.preview = require "preview"
+editor.units = require "units"(editor)
 editor.interface= require "interface"(editor)
-editor.log = require "log"
+
 love.physics.setMeter(64)
 function editor:init()
 	self.W = w()
@@ -69,16 +70,10 @@ end
 function editor:draw()
 	
 	self.bg:draw()
-	love.graphics.setColor(255,255,255,255)
-	love.graphics.printf(self.state, 0, 20, self.W/2, "center", 0, 2, 2)
-
-	self.LoveFrames.draw()
-
-
+	--love.graphics.setColor(255,255,255,255)
+	--love.graphics.printf(self.state, 0, 20, self.W/2, "center", 0, 2, 2)
 	--self:drawKeyBounds()
-	self.log:draw(300,600)
 
-	
 	self.cam:draw(function()
 		
 		self.helper.draw(self.world)
@@ -90,6 +85,10 @@ function editor:draw()
 
 		self.selector:draw()
 	end)
+
+	self.LoveFrames.draw()
+
+	self.units:draw()
 end
 
 
@@ -154,11 +153,25 @@ end
 
 
 function editor:cancel()
+	if self.state=="Test Mode" then
+		editor.system:redo()
+	end
 	self.createMode:cancel()
 	self.selector:clearSelection()
-
+	self.state="Edit Mode"
+	self:switchMode("edit")
 end
 
+function editor:switchMode(mode)
+	for k,v in pairs(self.interface.toggleMode) do
+		if k==mode then
+			v.toggle=true
+		else
+			v.toggle=false
+		end
+		
+	end
+end
 
 function editor:keyBound()
 	local bound={
@@ -180,8 +193,8 @@ function editor:keyBound()
 		cancel=function() self:cancel() end,
 		selectAll=function() self.selector:selectAll() end,
 		
-		alineHorizontal=function() self.editMode:aline(false) end,
-		alineVerticle=function() self.editMode:aline(true) end,
+		alineHorizontal=function() self.editMode:aline(true) end,
+		alineVerticle=function() self.editMode:aline(false) end,
 		
 		removeBody=function() self.editMode:removeBody() end,
 		removeJoint=function() self.editMode:removeJoint() end,
@@ -204,7 +217,8 @@ function editor:keyBound()
 		saveWorld=function() self.system:saveToFile() end,
 
 		togglePropFrameStyle=function() self.interface:nextTag() end,
-		
+		saveUnit=function() self.units:getSaveName() end,
+		quickSave=function() self.units:quickSave() end,
 	}
 
 	local keys ={}

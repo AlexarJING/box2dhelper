@@ -1,6 +1,5 @@
 local creator={}
 local editor
-local world
 
 local getDist = function(x1,y1,x2,y2) return math.sqrt((x1-x2)^2+(y1-y2)^2) end
 local getRot  = function (x1,y1,x2,y2) 
@@ -39,6 +38,7 @@ end
 function creator:new(cType)
 	editor:cancel()
 	editor.state="Create Mode"; 
+	editor:switchMode("create")
 	self.createTag=cType
 	if cType=="circle" or cType=="box" or cType=="line" then
 		self.needPoints=true
@@ -159,7 +159,7 @@ end
 
 function creator:circle()
 	editor.action="create circle"
-	local body = love.physics.newBody(world, self.createOX, self.createOY,"dynamic")
+	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
 	local shape = love.physics.newCircleShape(self.createR)
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
@@ -168,7 +168,7 @@ end
 
 function creator:box()
 	editor.action="create box"
-	local body = love.physics.newBody(self.world, (self.createOX+self.createTX)/2, 
+	local body = love.physics.newBody(editor.world, (self.createOX+self.createTX)/2, 
 		(self.createTY+self.createOY)/2,"dynamic")
 	local shape = love.physics.newRectangleShape(math.abs(self.createOX-self.createTX),math.abs(self.createTY-self.createOY))
 	local fixture = love.physics.newFixture(body, shape)
@@ -178,7 +178,7 @@ end
 
 function creator:line()
 	editor.action="create line"
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
+	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"static")
 	local shape = love.physics.newEdgeShape(0,0,self.createTX-self.createOX,self.createTY-self.createOY)
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
@@ -191,7 +191,7 @@ end
 function creator:edge()
 	if #self.createVerts<6 then return end
 	editor.action="create edge"
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
+	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"static")
 	local shape = love.physics.newChainShape(false, polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
@@ -204,7 +204,7 @@ end
 function creator:freeline()
 	if #self.createVerts<6 then return end
 	editor.action="create freeline"
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"static")
+	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"static")
 	local shape = love.physics.newChainShape(false, polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
@@ -226,12 +226,12 @@ function creator:polygon()
 		end
 	end
 	editor.action="create polygon"	
-	local body = love.physics.newBody(self.world, self.createOX, self.createOY,"dynamic")
+	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
 	local shape = love.physics.newPolygonShape(polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
 	local fixture = love.physics.newFixture(body, shape)
 	local x,y=body:getWorldPoint(fixture:getMassData( ))
 	body:destroy()
-	local body = love.physics.newBody(self.world, x, y,"dynamic")
+	local body = love.physics.newBody(editor.world, x, y,"dynamic")
 	local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,self.createVerts))
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
@@ -336,7 +336,6 @@ function creator:cancel()
 	self.needPoints=false
 	self.needVerts=false
 	self.createTag=nil
-	editor.state="Edit Mode"
 end
 
 
@@ -368,7 +367,5 @@ end
 
 return function(parent) 
 	editor=parent
-	world=parent.world
-	creator.world=world
 	return creator 
 end

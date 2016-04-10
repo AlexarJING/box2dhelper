@@ -4,68 +4,16 @@
 		"selected_items":
 		[
 			[
-				"propTa",
-				"propTag"
-			],
-			[
 				"for",
 				"fori	for i,v in ipairs()"
-			],
-			[
-				"shape",
-				"love.physics.newCircleShape"
-			],
-			[
-				"propTag",
-				"propTagIndex"
-			],
-			[
-				"proptag",
-				"propTagIndex"
-			],
-			[
-				"hover",
-				"hoverobject"
-			],
-			[
-				"brick",
-				"brickW"
-			],
-			[
-				"isdow",
-				"love.mouse.isDown"
-			],
-			[
-				"drag",
-				"dragTY"
-			],
-			[
-				"dragT",
-				"dragTX"
-			],
-			[
-				"changeR",
-				"changeNormal"
 			],
 			[
 				"tab",
 				"table.insert	(table, [pos,] value)"
 			],
 			[
-				"isdonw",
-				"love.keyboard.isDown"
-			],
-			[
-				"selectg",
-				"selectToggle"
-			],
-			[
-				"selectT",
-				"selectToggle"
-			],
-			[
-				"commad",
-				"commadName"
+				"fro",
+				"forp	for k,v in pairs()"
 			],
 			[
 				"swithPo",
@@ -90,6 +38,10 @@
 			[
 				"selectedV",
 				"selectedVerts"
+			],
+			[
+				"shape",
+				"love.physics.newPolygonShape"
 			],
 			[
 				"selected",
@@ -514,16 +466,104 @@
 			[
 				"search",
 				"searchForCreate"
+			],
+			[
+				"check",
+				"checkSkull"
+			],
+			[
+				"rad",
+				"love.math.setRandomSeed"
+			],
+			[
+				"we",
+				"while	while cond"
+			],
+			[
+				"setcl",
+				"love.graphics.setColor"
+			],
+			[
+				"gr",
+				"love.graphics.rectangle"
+			],
+			[
+				"drawf",
+				"drawFromOpDeck"
+			],
+			[
+				"selfk",
+				"selfkill10"
+			],
+			[
+				"onAtta",
+				"onAttack"
+			],
+			[
+				"attack",
+				"attackweak"
+			],
+			[
+				"alway",
+				"cardsAlways_update"
+			],
+			[
+				"cost_",
+				"cost_lvl0"
+			],
+			[
+				"inter",
+				"interceptTab"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
+			"file": "main.lua",
+			"settings":
+			{
+				"buffer_size": 614,
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "newEditor.lua",
 			"settings":
 			{
-				"buffer_size": 6596,
+				"buffer_size": 6971,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "b2helper.lua",
+			"settings":
+			{
+				"buffer_size": 16754,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "system.lua",
+			"settings":
+			{
+				"buffer_size": 1756,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "createMode.lua",
+			"settings":
+			{
+				"buffer_size": 11799,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "testMode.lua",
+			"settings":
+			{
+				"buffer_size": 3158,
 				"line_ending": "Windows"
 			}
 		},
@@ -532,96 +572,39 @@
 			"settings":
 			{
 				"buffer_size": 793,
-				"line_ending": "Windows"
+				"line_ending": "Windows",
+				"name": "keyconf.lua"
 			}
 		},
 		{
 			"file": "interface.lua",
 			"settings":
 			{
-				"buffer_size": 9988,
-				"line_ending": "Windows",
-				"name": "interface.lua"
-			}
-		},
-		{
-			"file": "b2helper.lua",
-			"settings":
-			{
-				"buffer_size": 16856,
+				"buffer_size": 16405,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "main.lua",
+			"file": "log.lua",
 			"settings":
 			{
-				"buffer_size": 721,
+				"buffer_size": 677,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "system.lua",
+			"file": "bg.lua",
 			"settings":
 			{
-				"buffer_size": 1400,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "preview.lua",
-			"settings":
-			{
-				"buffer_size": 1425,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "testMode.lua",
-			"settings":
-			{
-				"buffer_size": 3161,
+				"buffer_size": 1176,
 				"line_ending": "Windows"
 			}
 		}
 	],
 	"build_system": "",
-	"build_system_choices":
-	[
-		[
-			[
-				[
-					"Packages/Lua Love/LuaLove.sublime-build",
-					""
-				],
-				[
-					"Packages/Lua Love/LuaLove.sublime-build",
-					"Run"
-				],
-				[
-					"Packages/Lua Love/LuaLove.sublime-build",
-					"Love2D"
-				],
-				[
-					"Packages/Lua Love/LuaLove.sublime-build",
-					"ldoc: File"
-				],
-				[
-					"Packages/Lua Love/LuaLove.sublime-build",
-					"ldoc: Project"
-				]
-			],
-			[
-				"Packages/Lua Love/LuaLove.sublime-build",
-				"Love2D"
-			]
-		]
-	],
-	"build_varint": "",
 	"command_palette":
 	{
 		"height": 81.0,
-		"last_filter": "install",
 		"selected_items":
 		[
 			[
@@ -679,49 +662,49 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
-	"expanded_folders":
-	[
-		"/F/Love2D Project/box2d"
-	],
 	"file_history":
 	[
-		"/F/Love2D Project/box2d/ui.lua",
-		"/F/Love2D Project/box2d/b2helper.lua",
-		"/F/Love2D Project/box2d/libs/loveframes/objects/textinput.lua",
-		"/F/Love2D Project/box2d/newEditor.lua",
-		"/F/Love2D Project/box2d/editor.lua",
-		"/F/Love2D Project/box2d/editMode.lua",
-		"/F/Love2D Project/box2d/libs/loveframes/skins/Blue/skin.lua",
-		"/F/Love2D Project/box2d/libs/loveframes/libraries/util.lua",
-		"/F/Love2D Project/box2d/selector.lua",
-		"/F/Love2D Project/box2d/vertMode.lua",
-		"/F/Love2D Project/box2d/main.lua",
-		"/F/Love2D Project/box2d/preview.lua",
-		"/F/Love2D Project/box2d/system.lua",
-		"/F/Love2D Project/box2d/bg.lua",
-		"/F/Love2D Project/box2d/createMode.lua",
-		"/F/Love2D Project/box2d/log.lua",
-		"/F/Love2D Project/box2d/vertEditor.lua",
-		"/F/Love2D Project/box2d/camera.lua",
-		"/F/Love2D Project/box2d/keyconf.lua",
-		"/F/Love2D Project/box2d/testMode.lua",
-		"/F/Love2D Project/box2d/[string \"boot.lua\"]",
-		"/C/Program Files (x86)/Sublime Text 3/Data/Packages/Default/Default (Windows).sublime-keymap",
-		"/F/Love2D Project/box2d/libs/gamera.lua",
-		"/F/Love2D Project/box2d/conf.lua",
+		"/G/love2dporj/box2dhelper/system.lua",
+		"/C/Users/alex/AppData/Local/Temp/360zip$Temp/360$1/physicsDrivenParticles.cpp",
+		"/C/Users/alex/AppData/Local/Temp/360zip$Temp/360$2/iforce2d_physicsDrivenParticles.h",
+		"/G/love2dporj/box2dhelper/createMode.lua",
+		"/G/love2dporj/box2dhelper/testMode.lua",
+		"/G/love2dporj/box2dhelper/vertMode.lua",
+		"/G/love2dporj/box2dhelper/editMode.lua",
+		"/G/love2dporj/box2dhelper/units.lua",
+		"/G/love2dporj/box2dhelper/ui.lua",
+		"/G/love2dporj/box2dhelper/libs/loveframes/objects/base.lua",
+		"/G/love2dporj/box2dhelper/libs/loveframes/objects/button.lua",
+		"/C/Users/alex/AppData/Roaming/LOVE/box2dhelper/units/bcd.lua",
+		"/C/Users/alex/AppData/Roaming/LOVE/box2dhelper/units/abc.lua",
+		"/G/love2dporj/box2dhelper/editor.lua",
+		"/G/love2dporj/box2dhelper/b2helper.lua",
+		"/C/Users/alex/AppData/Roaming/LOVE/box2dhelper/save/test.lua",
+		"/C/Users/alex/AppData/Roaming/LOVE/box2dhelper/save/abc.lua",
+		"/G/love2dporj/box2dhelper/creator.lua",
+		"/G/love2dporj/box2dhelper/.gitignore",
 		"/C/Users/Alexar/AppData/Roaming/LOVE/box2d/abc",
+		"/F/Love2D Project/box2d/b2helper.lua",
 		"/F/Love2D Project/box2d/libs/loveframes/objects/checkbox.lua",
 		"/F/Love2D Project/box2d/libs/loveframes/objects/grid.lua",
+		"/F/Love2D Project/box2d/libs/gamera.lua",
+		"/F/Love2D Project/box2d/camera.lua",
+		"/F/Love2D Project/box2d/bg.lua",
 		"/F/Love2D Project/box2d/libs/util.lua",
 		"/F/Love2D Project/box2d/demo.lua",
+		"/C/Program Files (x86)/Sublime Text 3/Data/Packages/Default/Default (Windows).sublime-keymap",
+		"/F/Love2D Project/box2d/[string \"boot.lua\"]",
 		"/F/Love2D Project/box2d/create.lua",
 		"/F/Love2D Project/box2d/libs/camera.lua",
+		"/F/Love2D Project/box2d/main.lua",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk_unsafe.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk_private.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/chipmunk_ffi.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/include/chipmunk/cpBB.h",
 		"/C/Users/Alexar/Desktop/program/Chipmunk-7.0.1/src/chipmunk.c",
+		"/F/Love2D Project/box2d/ui.lua",
+		"/F/Love2D Project/box2d/conf.lua",
 		"/F/Love2D Project/box2d/libs/loveframes/init.lua",
 		"/C/Users/Alexar/AppData/Local/Temp/Rar$DIa0.286/rube.json",
 		"/C/Users/Alexar/AppData/Local/Temp/Rar$DIa0.294/snapshot.json",
@@ -808,15 +791,11 @@
 		"/F/Love2D Project/chinchilla/data.lua",
 		"/F/Love2D Project/chinchilla/objs/ground.lua",
 		"/F/Love2D Project/chinchilla/objs/ball.lua",
-		"/F/Love2D Project/chinchilla/libs/smooth.lua",
-		"/F/Love2D Project/chinchilla/slime.lua",
-		"/F/Love2D Project/slimemustdie/soft.lua",
-		"/F/Love2D Project/slimemustdie/ball.lua",
-		"/F/Love2D Project/slimemustdie/gameSetting.lua"
+		"/F/Love2D Project/chinchilla/libs/smooth.lua"
 	],
 	"find":
 	{
-		"height": 36.0
+		"height": 39.0
 	},
 	"find_in_files":
 	{
@@ -831,34 +810,27 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"print",
-			"self.propTagIndex",
+			"world",
+			"remove",
+			"verti",
+			"verticle",
 			"toggle",
-			"tag",
-			"self.action",
-			"preview",
-			"print",
-			"setpos",
+			"remove",
+			"inputobject",
 			"focus",
 			"hover",
-			"button",
-			"rest",
-			"mousetest",
+			"copied",
+			"select",
+			"onfocus",
+			"downcreate",
+			"toggleUI",
+			"needlines",
+			"getverts",
+			"getbodies",
+			"toggle",
+			"settogg",
 			"editor",
-			"polygon",
-			"polygonr",
-			"editor.objects",
-			"self.action",
-			"creator",
-			"mouseTest",
-			"self.action",
-			"editor",
-			"inrect",
-			"editor",
-			"mouseY",
-			"mouseX",
-			"love",
-			"editor",
+			"toggle",
 			"unpdatePopValue",
 			"print",
 			"remove",
@@ -958,7 +930,14 @@
 			"key",
 			"lapcheck",
 			"round",
-			"score"
+			"score",
+			"time",
+			"game.time",
+			"time",
+			"draw",
+			"print",
+			"set",
+			"newDown"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -966,19 +945,7 @@
 		"regex": false,
 		"replace_history":
 		[
-			"editor.action",
-			"units",
-			"test",
-			"system",
-			"editor.action",
-			"createMode",
-			"editor.action",
-			"edit",
-			"selector",
-			"editor.mouseY",
-			"editor.mouseX",
-			"editor",
-			"creator",
+			"self",
 			"Anchors",
 			"group[joint.Bodies[2]].body",
 			"group[joint.Bodies[1]].body",
@@ -1093,7 +1060,19 @@
 			"绿",
 			"\"green\"",
 			"green",
-			"upper"
+			"upper",
+			"绿",
+			"nil",
+			"",
+			"hero",
+			"hand",
+			"field",
+			"deck",
+			"bank",
+			"cards",
+			"upper.",
+			"deck",
+			"hero"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -1104,41 +1083,197 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "newEditor.lua",
+					"file": "main.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6596,
+						"buffer_size": 614,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1241,
-								1241
+								46,
+								46
 							]
 						],
 						"settings":
 						{
+							"encoding_helper_encoding": "cp936",
 							"origin_encoding": "ASCII",
 							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1500.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "newEditor.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6971,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5150,
+								5150
+							]
+						],
+						"settings":
+						{
+							"encoding_helper_encoding": "UTF-8",
+							"origin_encoding": "UTF-8",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3656.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
+					"buffer": 2,
+					"file": "b2helper.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16754,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13044,
+								13044
+							]
+						],
+						"settings":
+						{
+							"encoding_helper_encoding": "UTF-8",
+							"origin_encoding": "UTF-8",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 9147.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "system.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1756,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1296,
+								1296
+							]
+						],
+						"settings":
+						{
+							"encoding_helper_encoding": "UTF-8",
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1023.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "createMode.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11799,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11778,
+								11778
+							]
+						],
+						"settings":
+						{
+							"encoding_helper_encoding": "cp936",
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 8047.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "testMode.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3158,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3158,
+								3102
+							]
+						],
+						"settings":
+						{
+							"encoding_helper_encoding": "UTF-8",
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2676.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
 					"file": "keyconf.lua",
 					"semi_transient": false,
 					"settings":
@@ -1150,199 +1285,114 @@
 						"selection":
 						[
 							[
-								651,
-								671
+								762,
+								777
 							]
 						],
 						"settings":
 						{
-							"origin_encoding": "ASCII",
+							"auto_name": "keyconf.lua",
+							"encoding_helper_encoding": "cp936",
 							"syntax": "Packages/Lua Love/LuaLove.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 459.0,
+						"translation.y": 376.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "interface.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16405,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4411,
+								4411
+							]
+						],
+						"settings":
+						{
+							"encoding_helper_encoding": "UTF-8",
+							"origin_encoding": "ASCII",
+							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4144.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "interface.lua",
+					"buffer": 8,
+					"file": "log.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9988,
+						"buffer_size": 677,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4841,
-								4841
+								114,
+								114
 							]
 						],
 						"settings":
 						{
-							"auto_name": "interface.lua",
-							"origin_encoding": "ASCII",
-							"syntax": "Packages/Lua Love/LuaLove.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 3878.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "b2helper.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 16856,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								15960,
-								15960
-							]
-						],
-						"settings":
-						{
-							"origin_encoding": "ASCII",
-							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 10130.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "main.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 721,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								443,
-								443
-							]
-						],
-						"settings":
-						{
-							"origin_encoding": "ASCII",
-							"syntax": "Packages/Lua Love/LuaLove.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "system.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1400,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								281,
-								281
-							]
-						],
-						"settings":
-						{
+							"encoding_helper_encoding": "cp936",
 							"origin_encoding": "ASCII",
 							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "preview.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1425,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								680,
-								680
-							]
-						],
-						"settings":
-						{
-							"origin_encoding": "ASCII",
-							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 360.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
-					"file": "testMode.lua",
+					"buffer": 9,
+					"file": "bg.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3161,
+						"buffer_size": 1176,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								480,
-								480
+								1062,
+								1062
 							]
 						],
 						"settings":
 						{
+							"encoding_helper_encoding": "UTF-8",
 							"origin_encoding": "ASCII",
 							"syntax": "Packages/Lua Love/LuaLove.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 120.0,
+						"translation.y": 621.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -1381,23 +1431,21 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 130.0
+		"height": 273.0
 	},
 	"output.find_results":
 	{
 		"height": 0.0
 	},
-	"pinned_build_system": "Packages/Lua Love/LuaLove.sublime-build",
 	"project": "b2dhelper.sublime-project",
 	"replace":
 	{
-		"height": 66.0
+		"height": 72.0
 	},
 	"save_all_on_build": true,
 	"select_file":
 	{
 		"height": 0.0,
-		"last_filter": "",
 		"selected_items":
 		[
 		],
@@ -1406,7 +1454,6 @@
 	"select_project":
 	{
 		"height": 0.0,
-		"last_filter": "",
 		"selected_items":
 		[
 		],
@@ -1415,13 +1462,11 @@
 	"select_symbol":
 	{
 		"height": 0.0,
-		"last_filter": "",
 		"selected_items":
 		[
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
 	"settings":
 	{
 	},

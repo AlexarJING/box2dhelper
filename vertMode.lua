@@ -31,6 +31,7 @@ function vertex:new()
 	editor:cancel()
 	editor.state="Vertex Mode"
 	self:getVerts()
+	editor:switchMode("vert")
 end
 
 function vertex:getVerts()
@@ -210,7 +211,6 @@ function vertex:draw()
 					table.insert(drawVerts,drawVerts[1])
 					table.insert(drawVerts,drawVerts[2])
 					love.graphics.line(drawVerts)
-					--love.graphics.circle("line", 0,0, getDist(0,0,self.dragTX,self.dragTY))
 					love.graphics.line(self.dragTX,self.dragTY,cx,cy)
 				else
 					local cx,cy=body:getPosition()

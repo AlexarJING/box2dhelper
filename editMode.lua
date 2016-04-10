@@ -3,6 +3,13 @@ local editor
 local mouseX,mouseY
 local selection
 
+function edit:init()
+	editor:cancel()
+	
+end
+
+
+
 function edit:update()
 	selection=editor.selector.selection
 	mouseX,mouseY=editor.mouseX,editor.mouseY

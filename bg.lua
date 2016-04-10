@@ -26,6 +26,7 @@ function bg:init()
 	screenQuad=self.screenQuad
 
 	cam=self.editor.cam
+	self.visible=true
 	return self
 end
 
@@ -37,7 +38,8 @@ end
 
 
 
-function bg.draw()
+function bg:draw()
+	if not self.visible then return end
 	love.graphics.setColor(255, 255, 255, 155)
 	love.graphics.draw(gridCanvas,screenQuad,W*(1-cam.scale)/2,H*(1-cam.scale)/2,0,cam.scale,cam.scale)
 
@@ -46,6 +48,11 @@ function bg.draw()
 	love.graphics.line(-W/2,0,W/2,0)
 	love.graphics.line(0, -H/2, 0,H/2)
 	end)
+	editor.log:draw()
 end
-	
-return function(editor) bg.editor=editor; bg.cam=editor.cam ; return bg end
+return function(parent) 
+	editor=parent
+	bg.editor=editor
+	bg.cam=editor.cam
+	return bg
+end

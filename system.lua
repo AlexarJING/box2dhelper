@@ -3,16 +3,18 @@ local editor
 
 system.undoStack={}
 system.undoIndex=0
-
+system.maxUndo=20
 
 function system:saveToFile()
-	editor.interface:createLoadWorldFrame()
+	editor.interface:createSaveWorldFrame()
 end
 
 
 function system:loadFromFile()
-	editor.interface:createSaveWorldFrame()
+	editor.interface:createLoadWorldFrame()
 end
+
+
 
 
 
@@ -30,14 +32,14 @@ function system:pushUndo()
 	
 	self.undoIndex=self.undoIndex+1
 	self.undoStack[self.undoIndex]={event=editor.action,world=editor.helper.getWorldData(editor.world)}
-	if #self.undoStack>10 then
+	if #self.undoStack>self.maxUndo then
 		table.remove(self.undoStack, 1)
-		self.undoIndex=10
+		self.undoIndex=self.maxUndo
 	end
-	for i=self.undoIndex+1,10 do
+	for i=self.undoIndex+1,self.maxUndo  do
 		self.undoStack[i]=nil
 	end
-
+	editor.interface:updateHistoryFrame()
 end
 
 function system:undo()
@@ -46,7 +48,7 @@ function system:undo()
 	if self.undoIndex<1 then self.undoIndex=1 end
 	editor.world =love.physics.newWorld(0, 9.8*64, false)
 	editor.helper.createWorld(editor.world,self.undoStack[self.undoIndex].world)
-	editor.selector.selection=nil
+	editor:cancel()
 end
 
 function system:redo()
@@ -55,8 +57,19 @@ function system:redo()
 	if self.undoIndex>#self.undoStack then self.undoIndex=#self.undoStack end
 	editor.world = love.physics.newWorld(0, 9.8*64, false)
 	editor.helper.createWorld(editor.world,self.undoStack[self.undoIndex].world)
-	editor.selector.selection=nil
+	editor:cancel()
 end
+
+function system:returnTo(index)
+	if not self.undoStack[index] then return end
+	editor.log:push("return to histroy")
+	self.undoIndex=index
+	editor.world = love.physics.newWorld(0, 9.8*64, false)
+	editor.helper.createWorld(editor.world,self.undoStack[self.undoIndex].world)
+	editor:cancel()
+
+end
+
 
 return function(parent) 
 	editor=parent

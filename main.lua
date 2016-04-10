@@ -1,10 +1,7 @@
 require "libs.util"
 editor=require "newEditor"
-
 function love.load()
 	editor:init()
-	tab=loadstring(table.save({a=1,b=2,c={d=1,e=2},d=function() return 2 end},"abc",true))()
-	print(tab.d())
 end
 
 function love.update(dt)
