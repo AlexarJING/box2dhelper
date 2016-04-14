@@ -1,20 +1,30 @@
 local editor={}
 editor.world= love.physics.newWorld(0, 9.8*64, false)
-editor.log = require "log"(editor)
-editor.bg = require "bg"(editor)
-editor.cam = require "camera"(editor)
-editor.helper = require "b2helper"
-editor.LoveFrames= require "libs.loveframes"
-editor.createMode=require "createMode"(editor)
-editor.editMode= require "editMode"(editor)
-editor.vertMode= require "vertMode"(editor)
-editor.testMode= require "testMode"(editor)
-editor.selector= require "selector"(editor)
-editor.system= require "system"(editor)
-editor.units = require "units"(editor)
-editor.interface= require "interface"(editor)
-
 love.physics.setMeter(64)
+
+
+
+
+------------------------------------------------------
+editor.LoveFrames= require "libs.loveframes"
+editor.helper = require "editor/b2dhelper"
+--------------------------------------------------
+editor.log = require "editor/log"(editor)
+editor.bg = require "editor/bg"(editor)
+editor.cam = require "editor/camera"(editor)
+editor.selector= require "editor/selector"(editor)
+editor.system= require "editor/system"(editor)
+editor.units = require "editor/units"(editor)
+editor.interface= require "editor/interface"(editor)
+-------------------------------------------------------------
+editor.createMode=require "modes/createMode"(editor)
+editor.editMode= require "modes/editMode"(editor)
+editor.vertMode= require "modes/vertMode"(editor)
+editor.testMode= require "modes/testMode"(editor)
+editor.jointMode= require "modes/jointMode"(editor)
+
+--editor.world:update(1)
+
 function editor:init()
 	self.W = w()
 	self.H = h()
@@ -24,6 +34,35 @@ function editor:init()
 	self.interface:init()
 	self.action="system start"
 	editor.log:push("welcome to LoveBox2D editor !")
+	
+
+	local world=editor.world
+	local box  = love.physics.newBody(world, 500, 200, "static")
+	local shape = love.physics.newRectangleShape(50, 50)
+	local fixture = love.physics.newFixture(box, shape, 1)
+
+	local circle  = love.physics.newBody(world, 650, 200, "dynamic")
+	local shape = love.physics.newCircleShape( 0, 0, 50)
+	local fixture = love.physics.newFixture(circle, shape, 1)
+
+	local joint = love.physics.newRopeJoint(box, circle, 500,200,650,200,150)
+
+
+
+
+	local box  = love.physics.newBody(world, 600, 500, "static")
+	local shape = love.physics.newRectangleShape(50, 50)
+	local fixture = love.physics.newFixture(box, shape, 1)
+
+	local circle  = love.physics.newBody(world, 600, 500, "dynamic")
+	local shape = love.physics.newCircleShape( 0, 0, 50)
+	local fixture = love.physics.newFixture(circle, shape, 1)
+
+	local joint2 = love.physics.newRevoluteJoint(box,circle,600,500,false)
+
+	joint2:setMotorEnabled(true)
+	joint2:setMotorSpeed(10000)
+	joint2:setMaxMotorTorque(10000)
 
 end
 
@@ -32,7 +71,6 @@ function editor:update(dt)
 	self.bg:update()
 	self.cam:update()
 	self.interface:update(dt)
-
 	if not  self.interface:isHover() then --如果鼠标在ui上 而且是按下状态 则不更新系统
 
 		if self.state=="Create Mode" then
@@ -42,13 +80,13 @@ function editor:update(dt)
 			if not self.selector.selection then self.selector:update() end
 		elseif self.state=="Vertex Mode" then
 			self.vertMode:update()
+		elseif self.state=="Joint Mode" then
+			self.jointMode:update()
 		else
 			if not self.selector.dragSelecting then self.editMode:update() end
 			if not self.editMode.dragMoving then self.selector:update() end
 		end
 	end
-
-
 	if self.action then
 		editor.log:push(self.action)
 		editor.system:pushUndo()
@@ -81,6 +119,10 @@ function editor:draw()
 			self.createMode:draw()
 		elseif self.state=="Vertex Mode" then
 			self.vertMode:draw()
+		elseif self.state=="Test Mode" then
+			self.testMode:draw()
+		elseif self.state=="Joint Mode" then
+			self.jointMode:draw()
 		end	
 
 		self.selector:draw()
@@ -125,7 +167,7 @@ function editor:keypressed(key, isrepeat)
 				break
 			end
 		else
-			if not love.keyboard.isDown("lalt") and not love.keyboard.isDown("lctrl")  and key==v.key then
+			if  not love.keyboard.isDown("lctrl")  and key==v.key then
 				v.commad()
 				break
 			end
@@ -153,13 +195,14 @@ end
 
 
 function editor:cancel()
-	if self.state=="Test Mode" then
-		editor.system:redo()
-	end
+
+
 	self.createMode:cancel()
 	self.selector:clearSelection()
 	self.state="Edit Mode"
+
 	self:switchMode("edit")
+
 end
 
 function editor:switchMode(mode)
@@ -169,7 +212,6 @@ function editor:switchMode(mode)
 		else
 			v.toggle=false
 		end
-		
 	end
 end
 
@@ -192,7 +234,8 @@ function editor:keyBound()
 
 		cancel=function() self:cancel() end,
 		selectAll=function() self.selector:selectAll() end,
-		
+		selectNone=function() self.selector:clearSelection() end,
+
 		alineHorizontal=function() self.editMode:aline(true) end,
 		alineVerticle=function() self.editMode:aline(false) end,
 		
@@ -207,6 +250,8 @@ function editor:keyBound()
 		redo=function() self.system:redo() end,
 
 		vertexMode=function() self.vertMode:new() end,
+		jointMode=function() self.jointMode:new() end,
+
 
 		test=function() self.testMode:new() end,
 		pause=function() self.testMode:togglePause() end,
@@ -219,11 +264,38 @@ function editor:keyBound()
 		togglePropFrameStyle=function() self.interface:nextTag() end,
 		saveUnit=function() self.units:getSaveName() end,
 		quickSave=function() self.units:quickSave() end,
+
+		toggleSystem=function() self.interface.sysList:SetVisible(not self.interface.sysList:GetVisible()) end,
+		togglePropFrameStyle=function()self.editMode:toggleBodyType() end, 
+		toggleGrid=function() 
+						self.interface.uiVisible[1].toggle=not self.interface.uiVisible[1].toggle
+						editor.bg.visible=not editor.bg.visible
+						editor.log.visible= not editor.log.visible
+					end,
+		toggleCreate=function()
+						self.interface.uiVisible[2].toggle=not self.interface.uiVisible[2].toggle
+						self.interface.createFrame:SetVisible(not self.interface.createFrame:GetVisible())
+						self.interface.jointFrame:SetVisible(self.interface.createFrame:GetVisible())
+					end,
+		toggleProperty=function()
+						self.interface.uiVisible[3].toggle=not self.interface.uiVisible[3].toggle
+						if self.interface.propFrame then
+							self.interface.propFrame:SetVisible(not self.interface.propFrame:GetVisible())
+						end
+					end,
+		toggleUnit=function()
+						self.interface.uiVisible[4].toggle=not self.interface.uiVisible[4].toggle
+						self.interface.unitFrame:SetVisible(not self.interface.unitFrame:GetVisible())						
+					end,
+		toggleHistroy=function()
+						self.interface.uiVisible[5].toggle=not self.interface.uiVisible[5].toggle
+						self.interface.historyFrame:SetVisible(not self.interface.historyFrame:GetVisible())						
+					end,
 	}
 
 	local keys ={}
 
-	for commadName,key in pairs(require "keyconf") do
+	for commadName,key in pairs(require "editor/keyconf") do
 		table.insert(keys, {key=key,commad=bound[commadName],name=commadName})
 	end
 	self.commmadBounds=bound

@@ -4,13 +4,13 @@
 --]]------------------------------------------------
 
 -- get the current require path
-local ffi = require("ffi")
-ffi.cdef[[
+--[[local ffi = require("ffi")
+ffi.cdef
 long CreateCaret(long hwnd,long map,long width,long height);
 long GetForegroundWindow(void);
 long SetCaretPos(long x,long y);
 long SetFocus(long hwnd);
-]]
+
 local u32=ffi.load("User32")
 local gamehwnd=u32.GetForegroundWindow()
 u32.SetFocus(gamehwnd)
@@ -18,7 +18,7 @@ u32.CreateCaret(gamehwnd,0,4,20)
 local function setPos(x,y)
 	u32.SetCaretPos(x,y)
 end
-
+]]
 local path = string.sub(..., 1, string.len(...) - string.len(".objects.textinput"))
 local loveframes = require(path .. ".libraries.common")
 

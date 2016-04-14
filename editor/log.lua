@@ -24,7 +24,7 @@ function log:draw(x,y)
 	for i=log.currentLine,log.currentLine+log.showLine do
 		if log.lines[i] then
 			local pos=i-log.currentLine
-			love.graphics.print(log.lines[i], self.x, self.y-pos*15)
+			love.graphics.print(log.lines[i], self.x, self.y-pos*15-15)
 		end
 	end
 end

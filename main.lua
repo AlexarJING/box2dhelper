@@ -1,5 +1,6 @@
 require "libs.util"
-editor=require "newEditor"
+local editor=require "editor/editor"
+
 function love.load()
 	editor:init()
 end

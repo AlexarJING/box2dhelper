@@ -16,7 +16,8 @@ selector.colorStyle={
 		kinematic={100, 255, 0, 255},
 		sensor={0,0,-255,0},
 		joint={255, 100, 0, 150},
-		body={255, 0, 0, 255}
+		body={255, 0, 0, 255},
+		contact={0,255,255,255},
 	}
 
 function selector:update()
@@ -106,7 +107,7 @@ end
 
 function selector:click(key)
 	--if self.mouseBall.enable then return end
-	if editor.state=="Create Mode" or editor.state=="Vertex Mode" then return end
+	if editor.state=="Create Mode" or editor.state=="Vertex Mode" or editor.state=="Joint Mode" then return end
 
 	if editor.editMode.dragMoving then return end
 

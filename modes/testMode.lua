@@ -7,9 +7,8 @@ test.mouseBall={}
 test.pause=false
 
 function test:new()
-
 	if editor.state=="Test Mode" then
-		editor:cancel()
+		editor.system:undo()
 		editor.log:push("stop testing")
 	else
 		editor.state="Test Mode"
@@ -129,6 +128,7 @@ end
 
 
 function test:draw()
+	love.graphics.setColor(255, 255, 255, 255)
 	if self.dragForcing then
 		love.graphics.line(self.dragOX,self.dragOY,self.dragTX,self.dragTY)
 	end

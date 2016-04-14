@@ -15,8 +15,10 @@ local conf={
 	createPrismatic="m",
 	createWheel="i",
 	createPully="u",
+	createGear="g",
 
 	selectAll="ctrl+a",
+	selectNone="ctrl+d",
 
 	alineHorizontal="h",
 	alineVerticle="v",
@@ -28,11 +30,12 @@ local conf={
 	paste="ctrl+v",
 	combine="ctrl+b",
 	divide="ctrl+d",
-	toggleBodyType="ctrl+tab",
 	undo="ctrl+z",
 	redo="ctrl+y",
 
+
 	vertexMode="ctrl+t",
+	jointMode="ctrl+j",
 
 	test="f1",
 	pause="f3",
@@ -40,15 +43,18 @@ local conf={
 	reset="f4",
 
 	toggleSystem="lalt",
-	toggleUI="f9",
 	togglePropFrameStyle="tab", 
-	toggleLog="f11",
-	toggleInfo="f12",
+	toggleGrid="f8",
+	toggleCreate="f9",
+	toggleProperty="f10",
+	toggleUnit="f11",
+	toggleHistroy="f12",
+	
 
 	loadWorld="ctrl+l",
 	saveWorld="ctrl+s",
 
-	saveUnit="alt+s"
+	saveUnit="ctrl+`"
 }
 
 return conf

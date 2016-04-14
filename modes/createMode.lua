@@ -286,7 +286,6 @@ function creator:prismatic()
 	local x2,y2 = body2:getPosition()
 	local angle= getRot(x1,y1,x2,y2)
 	local joint = love.physics.newPrismaticJoint(body1, body2, x2, y2, math.sin(angle), -math.cos(angle), false)
-	--joint:setLimits(-90,50)
 end
 
 function creator:revolute()
@@ -307,13 +306,13 @@ function creator:pully()
 end
 
 function creator:wheel()
-	local body2,body1=self:getBodies()
+	local body1,body2=self:getBodies()
 	if not body1 then return end
 	editor.action="create wheel joint"
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
-	local angle= getRot(x1,y1,x2,y2)
-	local joint = love.physics.newWheelJoint(body2, body1, x1, y1, math.sin(angle), -math.cos(angle), false)
+	local angle= getRot(x2,y2,x1,y1)
+	local joint = love.physics.newWheelJoint(body1, body2, x2, y2, math.sin(angle), -math.cos(angle), false)
 end
 
 

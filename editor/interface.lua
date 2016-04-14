@@ -111,8 +111,8 @@ function interface:createSystemFrame()
 	local list = self.sysList
 	list:SetPos(0, 0)
 	list:SetSize(editor.W, 30)
-	list:SetSpacing(0)
-	list:SetPadding(0)
+	list:SetSpacing(5)
+	list:SetPadding(3)
 	list:SetDisplayType("horizontal")
 
 	self.sysButtons={}
@@ -120,6 +120,7 @@ function interface:createSystemFrame()
 	
 	local b= ui.Create("button")
 	b:SetText("save")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
 		editor.system:saveToFile()
@@ -128,6 +129,7 @@ function interface:createSystemFrame()
 
 	local b= ui.Create("button")
 	b:SetText("load")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
 		editor.system:loadFromFile()
@@ -135,6 +137,7 @@ function interface:createSystemFrame()
 
 	local b= ui.Create("button")
 	b:SetText("undo")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
 		editor.system:undo()
@@ -142,6 +145,7 @@ function interface:createSystemFrame()
 
 	local b= ui.Create("button")
 	b:SetText("redo")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
 		editor.system:redo()
@@ -149,6 +153,7 @@ function interface:createSystemFrame()
 
 	local b= ui.Create("button")
 	b:SetText("save unit")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
 		editor.units:getSaveName()
@@ -161,9 +166,11 @@ function interface:createSystemFrame()
 	local modes=self.toggleMode
 	
 	local b= ui.Create("button")
-	b:SetText("edit mode")
+	b:SetText("object mode")
+	b:SetSize(70,10)
 	b:SetToggleable(true)
 	b.toggle=true
+
 	list:AddItem(b)
 	b.OnToggle=function(obj)
 		editor:cancel()
@@ -171,7 +178,19 @@ function interface:createSystemFrame()
 	self.toggleMode.edit=b
 
 	local b= ui.Create("button")
+	b:SetText("joint mode")
+	b:SetToggleable(true)
+	b:SetSize(70,10)
+	b.toggle=false
+	list:AddItem(b)
+	b.OnToggle=function(obj)
+		editor.jointMode:new()
+	end
+	self.toggleMode.joint=b
+
+	local b= ui.Create("button")
 	b:SetText("vertex mode")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b:SetToggleable(true)
 	b.OnToggle=function(obj)
@@ -181,6 +200,7 @@ function interface:createSystemFrame()
 
 	local b= ui.Create("button")
 	b:SetText("test mode")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b:SetToggleable(true)
 	b.OnToggle=function(obj)
@@ -192,6 +212,7 @@ function interface:createSystemFrame()
 -----------------------------------------------
 	local b= ui.Create("button")
 	b:SetText("Hide All")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
 		self.createFrame:SetVisible(false)
@@ -208,8 +229,23 @@ function interface:createSystemFrame()
 
 
 	self.uiVisible={}
+
+
+	local b= ui.Create("button")
+	b:SetText("Grid")
+	b:SetSize(70,10)
+	b:SetToggleable(true)
+	b.toggle=true
+	list:AddItem(b)
+	b.OnClick=function()
+		editor.bg.visible=not editor.bg.visible
+		editor.log.visible= not editor.log.visible
+	end
+	table.insert(self.uiVisible,b)
+
 	local b= ui.Create("button")
 	b:SetText("create UI")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b:SetToggleable(true)
 	b.toggle=true
@@ -221,6 +257,7 @@ function interface:createSystemFrame()
 
 	local b= ui.Create("button")
 	b:SetText("property UI")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b:SetToggleable(true)
 	b.toggle=true
@@ -235,6 +272,7 @@ function interface:createSystemFrame()
 
 	local b= ui.Create("button")
 	b:SetText("unit UI")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b:SetToggleable(true)
 	b.toggle=true
@@ -243,19 +281,11 @@ function interface:createSystemFrame()
 	end
 	table.insert(self.uiVisible,b)
 
-	local b= ui.Create("button")
-	b:SetText("Grid")
-	b:SetToggleable(true)
-	b.toggle=true
-	list:AddItem(b)
-	b.OnClick=function()
-		editor.bg.visible=not editor.bg.visible
-		editor.log.visible= not editor.log.visible
-	end
-	table.insert(self.uiVisible,b)
+	
 
 	local b= ui.Create("button")
 	b:SetText("history")
+	b:SetSize(70,10)
 	b:SetToggleable(true)
 	b.toggle=true
 	list:AddItem(b)
@@ -267,18 +297,19 @@ function interface:createSystemFrame()
 	------------------------------
 	local b= ui.Create("button")
 	b:SetText("help")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
-		print("help")
+		self:createHelpFrame()
 	end
 
 	local b= ui.Create("button")
 	b:SetText("about")
+	b:SetSize(70,10)
 	list:AddItem(b)
 	b.OnClick=function()
-		print("about")
+		self:createAboutFrame()
 	end
-
 end
 
 function interface:updateUnitFrame()
@@ -707,8 +738,57 @@ function interface:createPropFrame(selectedBody,index,tag,visible)
 	list:update()
 end
 
+local font = love.graphics.newFont(15)
+
+local aboutText=[[
+
+			Box2D Editor for Love
+				
+				  version 0.0.1
+
+				program: Alexar
+
+			All Right Reserved. 2016
+]]
+
+function interface:createAboutFrame()
+	if self.aboutFrame then self.aboutFrame:Remove() end
+	local frame =ui.Create("frame")
+	self.aboutFrame=frame
+	frame:SetName("about")
+	frame:SetSize(300,200)
+	frame:CenterWithinArea(0,0,w(),h())
+	local text = ui.Create("text",frame)
+	text:SetPos(10,30)
+	text:SetFont(font)
+	text:SetText(aboutText)
+end
+
+local helpText= require "editor/helpText"
+
+function interface:createHelpFrame()
+	if self.helpFrame then self.helpFrame:Remove() end
+	local frame =ui.Create("frame")
+	self.helpFrame=frame
+	frame:SetName("help")
+	frame:SetSize(500,600)
+	frame:CenterWithinArea(0,0,w(),h())
+
+	local list = ui.Create("list", frame)
+	list:SetPos(5, 30)
+	list:SetSize(490, 565)
+	list:SetPadding(5)
+	list:SetSpacing(5)
 
 
+	
+	local text = ui.Create("text",frame)
+	text:SetPos(10,30)
+	text:SetFont(font)
+	text:SetText(helpText)
+
+	list:AddItem(text)
+end
 
 return function(parent) 
 	editor=parent
