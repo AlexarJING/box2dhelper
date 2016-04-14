@@ -111,8 +111,8 @@ function interface:createSystemFrame()
 	local list = self.sysList
 	list:SetPos(0, 0)
 	list:SetSize(editor.W, 30)
-	list:SetSpacing(5)
-	list:SetPadding(3)
+	list:SetSpacing(0)
+	list:SetPadding(0)
 	list:SetDisplayType("horizontal")
 
 	self.sysButtons={}
@@ -176,6 +176,18 @@ function interface:createSystemFrame()
 		editor:cancel()
 	end
 	self.toggleMode.edit=b
+
+	local b= ui.Create("button")
+	b:SetText("fixture mode")
+	b:SetSize(70,10)
+	b:SetToggleable(true)
+	b.toggle=false
+
+	list:AddItem(b)
+	b.OnToggle=function(obj)
+		editor.fixtureMode:new()
+	end
+	self.toggleMode.fixture=b
 
 	local b= ui.Create("button")
 	b:SetText("joint mode")

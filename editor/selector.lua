@@ -72,6 +72,7 @@ function selector:dragSelect()
 		self.dragTX,self.dragTY=mouseX,mouseY
 	elseif not love.mouse.isDown(1) and self.dragSelecting then
 		local selection={}
+		local fixtureIndex={}
 		for i,body in ipairs(editor.world:getBodyList()) do
 			for i,fix in ipairs(body:getFixtureList()) do
 				local shape=fix:getShape()
@@ -112,18 +113,28 @@ function selector:click(key)
 	if editor.editMode.dragMoving then return end
 
 	if self.dragOX~=self.dragTX or self.dragOY~=self.dragTY then return end
+	
+
 	if key=="l" then
 		local selectTest={}
+		local selectFixture={}
 		for i,body in ipairs(editor.world:getBodyList()) do
 			for i,fix in ipairs(body:getFixtureList()) do
 				if fix:testPoint( mouseX, mouseY ) then
 					if not table.getIndex(selectTest,body) then --避免重复加入同一个body
 						table.insert(selectTest, body)
 					end
+					table.insert(selectFixture, fixture)
 				end
 			end
 		end
 		
+		if editor.state=="Fixture Mode" then 
+			self.selectFixture=selectFixture 
+			self.selectFixtureIndex=1
+			return
+		end
+
 		if selectTest[1] then
 			if  love.keyboard.isDown("lctrl") then
 				
@@ -148,8 +159,18 @@ function selector:click(key)
 			end
 			self.selectToggle=selectTest
 		end
-		--if self.selection then print(#self.selection) end
+
 	elseif key=="r" then
+		
+		if editor.state=="Fixture Mode" then 
+			self.selectFixtureIndex=self.selectFixtureIndex+1
+			if not self.selectFixture[self.selectFixtureIndex] then
+				self.selectFixtureIndex=1
+			end
+			return
+		end
+
+
 		if not self.selectToggle then return end
 		self.selectIndex=self.selectIndex+1
 		if not self.selectToggle[self.selectIndex] then self.selectIndex=1 end

@@ -149,7 +149,8 @@ function helper.drawBody(body,colorStyle)
 	end
 end
 
-function helper.drawJoint(joint)
+function helper.drawJoint(joint,color)
+	love.graphics.setColor(color)
 	local jointType=joint:getType()
 	if jointType=="distance" then
 		local aX,aY,bX,bY=joint:getAnchors()
@@ -285,7 +286,8 @@ function helper.drawJoint(joint)
 	end
 end
 
-function helper.drawContact(contact,colorStyle)
+function helper.drawContact(contact,color)
+	love.graphics.setColor(color)
 	local x1, y1, x2, y2 = contact:getPositions( )
 	if x1 then love.graphics.circle("fill", x1, y1, 3) end
 	if x2 then love.graphics.circle("fill", x2, y2, 3) end
@@ -341,17 +343,15 @@ function helper.draw(world,colorStyle)
 		end
 	end
 
-	love.graphics.setColor(colorStyle.joint)	
 	if jointList then
 		for i,joint in ipairs(jointList) do
-			helper.drawJoint(joint,colorStyle)
+			helper.drawJoint(joint,colorStyle.joint)
 		end
 	end
 
-	love.graphics.setColor(colorStyle.contact)	
 	if contactList then
 		for i,contact in ipairs(contactList) do
-			helper.drawContact(contact)
+			helper.drawContact(contact,colorStyle.contact)
 		end
 	end	
 
