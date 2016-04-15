@@ -159,6 +159,21 @@ function interface:createSystemFrame()
 		editor.units:getSaveName()
 	end
 
+	local b= ui.Create("button")
+	b:SetText("copy")
+	b:SetSize(70,10)
+	list:AddItem(b)
+	b.OnClick=function()
+		editor.bodyMode:copy()
+	end
+
+	local b= ui.Create("button")
+	b:SetText("paste")
+	b:SetSize(70,10)
+	list:AddItem(b)
+	b.OnClick=function()
+		editor.bodyMode:paste(0,0)
+	end	
 ----------------------------------------------------
 	self.toggleMode={}
 	
@@ -166,57 +181,57 @@ function interface:createSystemFrame()
 	local modes=self.toggleMode
 	
 	local b= ui.Create("button")
-	b:SetText("object mode")
+	b:SetText("body")
 	b:SetSize(70,10)
 	b:SetToggleable(true)
 	b.toggle=true
 
 	list:AddItem(b)
 	b.OnToggle=function(obj)
-		editor:cancel()
+		editor:changeMode("body")
 	end
-	self.toggleMode.edit=b
+	self.toggleMode.body=b
 
 	local b= ui.Create("button")
-	b:SetText("fixture mode")
+	b:SetText("fixture")
 	b:SetSize(70,10)
 	b:SetToggleable(true)
 	b.toggle=false
 
 	list:AddItem(b)
 	b.OnToggle=function(obj)
-		editor.fixtureMode:new()
+		editor:changeMode("fixture")
 	end
 	self.toggleMode.fixture=b
 
 	local b= ui.Create("button")
-	b:SetText("joint mode")
+	b:SetText("shape")
+	b:SetSize(70,10)
+	list:AddItem(b)
+	b:SetToggleable(true)
+	b.OnToggle=function(obj)
+		editor:changeMode("shape")
+	end
+	self.toggleMode.shape=b
+
+	local b= ui.Create("button")
+	b:SetText("joint")
 	b:SetToggleable(true)
 	b:SetSize(70,10)
 	b.toggle=false
 	list:AddItem(b)
 	b.OnToggle=function(obj)
-		editor.jointMode:new()
+		editor:changeMode("joint")
 	end
 	self.toggleMode.joint=b
 
 	local b= ui.Create("button")
-	b:SetText("vertex mode")
+	b:SetText("test")
 	b:SetSize(70,10)
 	list:AddItem(b)
 	b:SetToggleable(true)
 	b.OnToggle=function(obj)
-		editor.vertMode:new()
-	end
-	self.toggleMode.vert=b
-
-	local b= ui.Create("button")
-	b:SetText("test mode")
-	b:SetSize(70,10)
-	list:AddItem(b)
-	b:SetToggleable(true)
-	b.OnToggle=function(obj)
-		editor.testMode:new()
+		editor:changeMode("test")
 	end
 	self.toggleMode.test=b
 
@@ -338,7 +353,7 @@ function interface:createUnitFrame()
 	self.unitFrame=frame
 	local count=#files
 	self.unitCount=count
-	local max=18
+	local max=9
 	frame:SetName("units")
 	frame:SetSize(100,30*max+28)
 	frame:SetPos(70,40)
@@ -433,7 +448,7 @@ function interface:createHistroyFrame()
 	local count=#stack
 
 	self.histroyCount=count
-	local max=18
+	local max=9
 	frame:SetName("history")
 	frame:SetSize(100,30*max+28)
 	frame:SetPos(180, 40)
@@ -483,7 +498,6 @@ function interface:createLoadWorldFrame()
 end
 
 
-local propTagList={"body","shape","fixture","joint","userdata"}
 
 local function setProp(target,prop,...)
 	local tag=interface.propTag
@@ -503,59 +517,51 @@ local function setProp(target,prop,...)
 
 end
 
-function interface:nextTag()
-	self.propTagIndex=self.propTagIndex+1
-	if not propTagList[self.propTagIndex] then self.propTagIndex=1 end
-end
 
 function interface:updatePropFrame()
-	local selection=editor.selector.selection
+	
+	local selection = editor.selector.selection
 	
 	if not selection then 
 		self:removePropFrame()
-		self.propTagIndex=1
-		self.propItemIndex=1
-		self.obody=nil
+		self.propTarget=nil
 		return 
 	end
 
-	local tag=propTagList[self.propTagIndex]
-	local index=self.propItemIndex
-	local selectedBody=selection[1]
-	if self.obody==selectedBody and self.oindex==index and self.otag==tag and self.propFrame then 
+	local target=selection[1]
+
+	if target==self.propTarget then
 		if not self:isHover() then 
+			if not self.uiVisible[3].toggle then return end
 			self:resetPropFrame()
 		end
 	else
-		local visible=true
-		if self.propFrame then visible=self.propFrame:GetVisible() end
 		self:removePropFrame()
-		if self.obody~=selectedBody then
-			self.propTagIndex=1
-			self.propItemIndex=1
-		end
-		self.obody=selectedBody
-		self.oindex=index
-		self.otag=tag
-		self:createPropFrame(selectedBody,index,tag,visible)
+		self:createPropFrame(target)
 	end
-
+	
 end
 
 function interface:resetPropFrame()
-	if not self.propFrame:GetVisible() then return end
-	if self.propTag=="userdata" then
-		self.propData=self.targetFixture:getUserData()
-	else
-		self.propData={}
-		local tmp=editor.helper.getStatus(self.propTarget,self.propTag)
-		for i,v in ipairs(editor.helper.properties[self.propTag]) do
-			if tmp[v]~=nil then table.insert(self.propData,{prop=v,value=tmp[v]}) end
-		end
+	local target=self.propTarget
+	local tag=self.targetType
+	local hasUserData
+	
+	if target.getUserData then hasUserData=true end
+	local prop={}
+	local data
+	if hasUserData then
+		data=target:getUserData()
+	end
+	local tmp=editor.helper.getStatus(target,tag)
+	for i,v in ipairs(editor.helper.properties[tag]) do
+		if tmp[v]~=nil then table.insert(prop,{prop=v,value=tmp[v]}) end
 	end
 
-	for i,v in ipairs(self.propData) do
+	self.targetProp=prop
+	self.targetData=data
 
+	for i,v in ipairs(self.targetProp) do
 		local value=self.propGrid[i][2]
 		if type(v.value)=="number" then
 			value:SetText(tostring(v.value))
@@ -569,185 +575,211 @@ function interface:resetPropFrame()
 			value:SetChecked(v.value)
 		elseif type(v.value)=="string" then
 			value:SetText(tostring(v.value))
-		end
-		
+		end	
 	end
 
-end
+	if not self.targetData then return end
 
-function interface:removePropFrame()
-	if self.propFrame then
-		self.propList:Remove()
-		self.propFrame:Remove() 
-	end
-end
-
-function interface:createPropFrame(selectedBody,index,tag,visible)
-	selectedBody=selectedBody or self.obody
-	inde= index or self.oindex
-	tag = tag or self.otag
-
-	local target
-	if tag=="body" then
-		self.propItems=nil
-		target=selectedBody
-	elseif tag=="shape" then
-		self.propItems=selectedBody:getFixtureList()
-		target=self.propItems[index] and self.propItems[index]:getShape() or self.propItems[1]:getShape()
-	elseif tag=="fixture" then
-		self.propItems=selectedBody:getFixtureList()
-		target=self.propItems[index] or self.propItems[1]
-	elseif tag=="joint" then
-		self.propItems=selectedBody:getJointList()
-		target=self.propItems[index] or self.propItems[1]
-	elseif tag=="userdata" then
-		self.propItems=selectedBody:getFixtureList()
-		local fixture=self.propItems[index] or self.propItems[1]
-
-		target=fixture:getUserData()
-		if not target then
-			target={
-			{prop="name",value="default"},
-		} end
-		
-		self.targetFixture=fixture
-		fixture:setUserData(target)
-	end	
-
-	if not target then
-		self:nextTag()
-		return
-	end
-	self.propTarget=target
-
-
-	------------------------------------------------
-	if tag=="userdata" then
-		self.propData=target
-	else
-		self.propData={}
-		local tmp=editor.helper.getStatus(target,tag)
-		for i,v in ipairs(editor.helper.properties[tag]) do
-			if tmp[v]~=nil then table.insert(self.propData,{prop=v,value=tmp[v]}) end
-		end
-	end
-
-
-
-	self.propTag=tag
-	self.propFrame= ui.Create("frame")
-	self.propFrame:SetVisible(visible)
-	local count=#self.propData
-	if tag=="userdata" then count=count+1 end
-
-	local frame = self.propFrame
-	frame:SetName(tag)
-	frame:SetSize(250, 35+count*30)
-	frame:SetPos(w()*0.8, 300)
-	frame:ShowCloseButton(false)
-	self.propList=ui.Create("grid", frame)
-	local list = self.propList
-	list:SetPos(5, 30)
-	list:SetSize(240, count*20)
-	list:SetCellWidth(110)
-	list:SetCellHeight(20)
-	list:SetRows(count)
-	list:SetColumns(2)
-	list:SetItemAutoSize(true)
-
-
-	self.propGrid={}
-	for i,v in ipairs(self.propData) do
-		local key = ui.Create("button")
-		key:SetText(v.prop)
-		local value
+	for i,v in ipairs(self.targetData) do
+		local value=self.propGrid[i][2]
 		if type(v.value)=="number" then
-			value = ui.Create("textinput")
 			value:SetText(tostring(v.value))
-			value.OnEnter=function(obj)
-				local text=value:GetText()
-				local num=tonumber(text)
-				if num then
-					setProp(target,v.prop,num)
-				end
-				obj.focus=false
-			end
-			
 		elseif type(v.value)=="table" then
-			value = ui.Create("textinput")
 			local str=""
 			for i,v in ipairs(v.value) do
 				str=str..tostring(v)..","
 			end
 			value:SetText(str)
-			value.OnEnter=function(obj)
-				local text=value:GetText()
-				local tab= string.split(text,",")
-				setProp(target,v.prop,unpack(tab))
-				obj.focus=false
-			end
-			
 		elseif type(v.value)=="boolean" then
-			value = ui.Create("checkbox")
 			value:SetChecked(v.value)
-			value.OnChanged=function()
-				setProp(target,v.prop,value:GetChecked())
-			end
-			
 		elseif type(v.value)=="string" then
-			value = ui.Create("textinput")
 			value:SetText(tostring(v.value))
-			value.OnEnter=function(obj)
-				local text=value:GetText()
-				setProp(target,v.prop,text)
-				obj.focus=false
+		end	
+	end
+end
+
+function interface:removePropFrame()
+	if self.propFrame then
+		self.propFrame:Remove() 
+	end
+end
+
+
+
+function interface:setListItems(target,v)
+	local key = ui.Create("button")
+	key:SetText(v.prop)
+	local value
+	if type(v.value)=="number" then
+		value = ui.Create("textinput")
+		value:SetText(tostring(v.value))
+		value.OnEnter=function(obj)
+			local text=value:GetText()
+			local num=tonumber(text)
+			if num then
+				setProp(target,v.prop,num)
 			end
-			
+			obj.focus=false
 		end
-		if tag~="userdata" and not target["set"..v.prop] then 
-			if value.SetEditable then
-				value:SetEditable(false)
-			else
-				value:SetEnabled(false)
+		
+	elseif type(v.value)=="table" then
+		value = ui.Create("textinput")
+		local str=""
+		for i,v in ipairs(v.value) do
+			str=str..tostring(v)..","
+		end
+		value:SetText(str)
+		value.OnEnter=function(obj)
+			local text=value:GetText()
+			local tab= string.split(text,",")
+			setProp(target,v.prop,unpack(tab))
+			obj.focus=false
+		end
+		
+	elseif type(v.value)=="boolean" then
+		value = ui.Create("checkbox")
+		value:SetChecked(v.value)
+		value.OnChanged=function()
+			setProp(target,v.prop,value:GetChecked())
+		end
+		
+	elseif type(v.value)=="string" then
+		value = ui.Create("textinput")
+		value:SetText(tostring(v.value))
+		value.OnEnter=function(obj)
+			local text=value:GetText()
+			setProp(target,v.prop,text)
+			obj.focus=false
+		end
+		
+	end
+	if tag~="userdata" and not target["set"..v.prop] then 
+		if value.SetEditable then
+			value:SetEditable(false)
+		else
+			value:SetEnabled(false)
+		end
+	end
+	return key,value
+end
+
+local function makeList(count)
+	local list = ui.Create("grid")
+	list:SetPos(0, 0)
+	list:SetCellWidth(100)
+	list:SetCellHeight(20)
+	list:SetRows(count)
+	list:SetColumns(2)
+	list:SetItemAutoSize(true)
+	return list
+end 
+
+
+
+function interface:createPropFrame(target)
+	local tType= string.lower(target:type()) 
+	if string.find(tType,"joint") then tType="joint" end
+	if string.find(tType,"shape") then tType="shape" end
+
+	self.propTarget=target
+	self.targetType=tType
+	local hasUserData
+	if target.getUserData then hasUserData=true end
+	local prop={}
+	local data={}
+	if hasUserData then
+		data=target:getUserData()
+		if not data then
+			if tType=="body" then
+				data={{prop="name",value="default"}}
+			elseif tType=="fixture" then
+				data={{prop="material",value="wood"}}
+			elseif tType=="joint" then
+				data={{prop="material",value="steel"}}
 			end
 		end
-		list:AddItem(key,i,1)
-		list:AddItem(value,i,2)
+	end
+	local tmp=editor.helper.getStatus(target,tType)
+	for i,v in ipairs(editor.helper.properties[tType]) do
+		if tmp[v]~=nil then table.insert(prop,{prop=v,value=tmp[v]}) end
+	end
+	self.targetProp=prop
+	self.targetData=data
+
+	self.propFrame= ui.Create("frame")
+	self.propFrame:SetVisible(self.uiVisible[3].toggle)
+
+	local count=#self.targetData+1>#self.targetProp and  #self.targetData+1 or #self.targetProp
+	
+	local frame = self.propFrame
+	frame:SetName(tType)
+	frame:SetSize(250, 70+count*30)
+	frame:SetPos(w()-250, h()-(70+count*30))
+	frame:ShowCloseButton(false)
+
+	local tabs= ui.Create("tabs",frame)
+	tabs:SetPos(5, 30)
+	tabs:SetSize(240, count*30+35)
+
+	self.propList=makeList(count)
+	tabs:AddTab("Property", self.propList)
+
+	self.propGrid={}
+	for i,v in ipairs(self.targetProp) do
+		local key,value= self:setListItems(target,v)
+		self.propList:AddItem(key,i,1)
+		self.propList:AddItem(value,i,2)
 		table.insert(self.propGrid, {key,value})
 	end
-	if tag=="userdata" then
-		local name = ui.Create("textinput")
-		local value = ui.Create("textinput")
-		name:SetText("*new")
-		name.OnFocusGained=function()
-			name:SetText("")
-		end
-		
-		name.OnEnter=function(obj)
-			local k=name:GetText()
-			local v=value:GetText()
-			table.insert(target, {prop=k,value=v})
-			self:removePropFrame()
-			self:createPropFrame()
-			obj.focus=false
-		end
-		value:SetText("none")
-		value.OnFocusGained=function()
-			value:SetText("")
-		end
-		
-		value.OnEnter=function(obj)
-			local k=name:GetText()
-			local v=value:GetText()
-			table.insert(target, {prop=k,value=v})
-			self:removePropFrame()
-			self:createPropFrame()
-			obj.focus=false
-		end
-		list:AddItem(name,count,1)
-		list:AddItem(value,count,2)
+
+
+	self.dataList=makeList(count)
+	tabs:AddTab("UserData", self.dataList)
+	self.propList:update()
+
+	if not hasUserData then return end
+	self.dataGrid={}
+	for i,v in ipairs(self.targetData) do
+		local key,value= self:setListItems(target,v)
+		self.dataList:AddItem(key,i,1)
+		self.dataList:AddItem(value,i,2)
+		table.insert(self.dataGrid, {key,value})
 	end
-	list:update()
+	
+	
+	local name = ui.Create("textinput")
+	local value = ui.Create("textinput")
+	name:SetText("*new")
+	name.OnFocusGained=function()
+		name:SetText("")
+	end
+	
+	name.OnEnter=function(obj)
+		local k=name:GetText()
+		local v=value:GetText()
+		table.insert(target, {prop=k,value=v})
+		self:removePropFrame()
+		self:createPropFrame()
+		obj.focus=false
+	end
+	value:SetText("none")
+	value.OnFocusGained=function()
+		value:SetText("")
+	end
+	
+	value.OnEnter=function(obj)
+		local k=name:GetText()
+		local v=value:GetText()
+		table.insert(target, {prop=k,value=v})
+		self:removePropFrame()
+		self:createPropFrame()
+		obj.focus=false
+	end
+	self.dataList:AddItem(name,#self.targetData+1,1)
+	self.dataList:AddItem(value,#self.targetData+1,2)
+	
+	
+	self.dataList:update()
 end
 
 local font = love.graphics.newFont(15)

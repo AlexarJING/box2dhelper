@@ -100,14 +100,10 @@ function helper.drawBody(body,colorStyle)
 	local bodyY=body:getY()
 	love.graphics.setColor(colorStyle.body)
 	love.graphics.circle("fill", bodyX, bodyY, 4)
-	local bodyAngle=body:getAngle()
 	local bodyType= body:getType()	
 	-------------------------------------for shapes-----------------------
 	for i,fixture in ipairs(body:getFixtureList()) do
-		local shape=fixture:getShape()
-		local shapeType = shape:type()
-		local shapeR=shape:getRadius()
-		local isSensor = fixture:isSensor()
+		local color
 		if  bodyType=="dynamic" then
 			color=colorStyle.dynamic
 		elseif bodyType=="static" then
@@ -116,38 +112,51 @@ function helper.drawBody(body,colorStyle)
 			color=colorStyle.kinematic
 		end
 
-
-		if isSensor then		
+		if  fixture:isSensor() then		
 			for i=1,4 do
 				color[i]=color[i]-colorStyle.sensor[i]
 			end
 		end
-
-
-		if shapeType=="CircleShape" then
-			color[4]=255
-			local offx,offy= shape:getPoint()
-			love.graphics.setColor(color)
-			love.graphics.circle("line", bodyX+offx, bodyY+offy, shapeR)
-			love.graphics.line(bodyX+offx,bodyY+offy,
-				bodyX+math.cos(bodyAngle)*shapeR+offx,bodyY+math.sin(bodyAngle)*shapeR+offy)
-			color[4]=50
-			love.graphics.setColor(color)
-			love.graphics.circle("fill", bodyX+offx, bodyY+offy, shapeR)
-		elseif shapeType=="ChainShape" or shapeType=="EdgeShape" then
-			color[4]=255
-			love.graphics.setColor(color)
-			love.graphics.line(body:getWorldPoints(shape:getPoints()))
-		else
-			color[4]=255
-			love.graphics.setColor(color)
-			love.graphics.polygon("line", body:getWorldPoints(shape:getPoints()))
-			color[4]=50
-			love.graphics.setColor(color)
-			love.graphics.polygon("fill", body:getWorldPoints(shape:getPoints()))
-		end
+	
+		helper.drawFixture(fixture,color)
 	end
 end
+
+function helper.drawFixture(fixture,color)
+	local body = fixture:getBody()
+	local bodyX=body:getX()
+	local bodyY=body:getY()
+	local bodyAngle=body:getAngle()
+	local shape=fixture:getShape()
+	local shapeType = shape:type()
+	local shapeR=shape:getRadius()
+	
+	if shapeType=="CircleShape" then
+		color[4]=255
+		local fx,fy=shape:getPoint()
+		local offx,offy= axisRot(fx,fy,bodyAngle)
+		love.graphics.setColor(color)
+		love.graphics.circle("line", bodyX+offx, bodyY+offy, shapeR)
+		love.graphics.line(bodyX+offx,bodyY+offy,
+			bodyX+math.cos(bodyAngle)*shapeR+offx,bodyY+math.sin(bodyAngle)*shapeR+offy)
+		color[4]=50
+		love.graphics.setColor(color)
+		love.graphics.circle("fill", bodyX+offx, bodyY+offy, shapeR)
+	elseif shapeType=="ChainShape" or shapeType=="EdgeShape" then
+		color[4]=255
+		love.graphics.setColor(color)
+		love.graphics.line(body:getWorldPoints(shape:getPoints()))
+	else
+		color[4]=255
+		love.graphics.setColor(color)
+		love.graphics.polygon("line", body:getWorldPoints(shape:getPoints()))
+		color[4]=50
+		love.graphics.setColor(color)
+		love.graphics.polygon("fill", body:getWorldPoints(shape:getPoints()))
+	end
+
+end
+
 
 function helper.drawJoint(joint,color)
 	love.graphics.setColor(color)

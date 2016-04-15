@@ -33,7 +33,7 @@ end
 
 
 function bg:update()
-	screenQuad:setViewport(cam.x, cam.y+5, W, H )
+	screenQuad:setViewport(cam.x+5, cam.y+35, W, H )
 end
 
 

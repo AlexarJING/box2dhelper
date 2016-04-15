@@ -16,7 +16,10 @@ end
 
 
 
-
+function system:clear()
+	editor.world =love.physics.newWorld(0, 9.8*64, false)
+	editor:changeMode("body")
+end
 
 function system:toggleUI()
 	self.showUI=not self.showUI

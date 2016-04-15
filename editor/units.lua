@@ -52,7 +52,7 @@ function units:load(text)
 	local tab=loadstring(file:read())()
 	file:close()
 	if not tab then return end
-	editor.editMode.copied=tab
+	editor.bodyMode.copied=tab
 end
 
 return function(parent) 

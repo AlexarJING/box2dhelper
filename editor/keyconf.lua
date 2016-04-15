@@ -32,10 +32,13 @@ local conf={
 	divide="ctrl+d",
 	undo="ctrl+z",
 	redo="ctrl+y",
+	toggleBodyType="`",
 
-
-	vertexMode="ctrl+t",
-	jointMode="ctrl+j",
+	toggleMode="tab",
+	bodyMode="ctrl+1",
+	fixtureMode="ctrl+2",
+	shapeMode="ctrl+3",
+	jointMode="ctrl+4",
 
 	test="f1",
 	pause="f3",
@@ -43,7 +46,6 @@ local conf={
 	reset="f4",
 
 	toggleSystem="lalt",
-	togglePropFrameStyle="tab", 
 	toggleGrid="f8",
 	toggleCreate="f9",
 	toggleProperty="f10",

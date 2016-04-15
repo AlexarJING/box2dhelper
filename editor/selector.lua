@@ -86,8 +86,8 @@ function selector:dragSelect()
 				elseif shape:type()~="ChainShape" then
 					local points={shape:getPoints()}
 					local check=true
-					for i=1,#points/2,2 do
-						if not self:inRect(shape:getPoints()) then
+					for i=1,#points/2-1,2 do
+						if not self:inRect(points[i]+body:getX(),points[i+1]+body:getY()) then
 							check=false
 							break
 						end
@@ -106,35 +106,26 @@ function selector:dragSelect()
 	end
 end
 
+
 function selector:click(key)
 	--if self.mouseBall.enable then return end
-	if editor.state=="Create Mode" or editor.state=="Vertex Mode" or editor.state=="Joint Mode" then return end
+	if editor.state=="fixture" then editor.fixtureMode:click(key) end
+	if editor.state~="body" and editor.state~="test" then return end
 
-	if editor.editMode.dragMoving then return end
+	if editor.bodyMode.dragMoving then return end
 
-	if self.dragOX~=self.dragTX or self.dragOY~=self.dragTY then return end
-	
 
 	if key=="l" then
 		local selectTest={}
-		local selectFixture={}
 		for i,body in ipairs(editor.world:getBodyList()) do
 			for i,fix in ipairs(body:getFixtureList()) do
-				if fix:testPoint( mouseX, mouseY ) then
+				if fix:testPoint( editor.mouseX, editor.mouseY ) then
 					if not table.getIndex(selectTest,body) then --避免重复加入同一个body
 						table.insert(selectTest, body)
 					end
-					table.insert(selectFixture, fixture)
 				end
 			end
 		end
-		
-		if editor.state=="Fixture Mode" then 
-			self.selectFixture=selectFixture 
-			self.selectFixtureIndex=1
-			return
-		end
-
 		if selectTest[1] then
 			if  love.keyboard.isDown("lctrl") then
 				
@@ -158,19 +149,12 @@ function selector:click(key)
 				self.selectIndex=1
 			end
 			self.selectToggle=selectTest
+		else
+			--self.selection=nil
 		end
 
 	elseif key=="r" then
 		
-		if editor.state=="Fixture Mode" then 
-			self.selectFixtureIndex=self.selectFixtureIndex+1
-			if not self.selectFixture[self.selectFixtureIndex] then
-				self.selectFixtureIndex=1
-			end
-			return
-		end
-
-
 		if not self.selectToggle then return end
 		self.selectIndex=self.selectIndex+1
 		if not self.selectToggle[self.selectIndex] then self.selectIndex=1 end

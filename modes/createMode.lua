@@ -1,4 +1,4 @@
-local creator={}
+local creator={} --to create objects joints
 local editor
 
 local getDist = function(x1,y1,x2,y2) return math.sqrt((x1-x2)^2+(y1-y2)^2) end
@@ -37,8 +37,8 @@ end
 
 function creator:new(cType)
 	editor:cancel()
-	editor.state="Create Mode"; 
-	editor:switchMode("create")
+	if not editor.state then return end
+	editor.state="create"
 	self.createTag=cType
 	if cType=="circle" or cType=="box" or cType=="line" then
 		self.needPoints=true
@@ -361,7 +361,7 @@ function creator:create()
 	self.needPoints=false
 	self.needVerts=false
 	self.createTag=nil
-	editor.state="Edit Mode"
+	editor.state="body"
 end
 
 return function(parent) 

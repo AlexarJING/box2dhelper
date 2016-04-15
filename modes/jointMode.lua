@@ -28,10 +28,7 @@ local polygonTrans= function(x,y,rot,size,v)
 end
 
 function jMode:new()
-	editor:cancel()
-	editor.state="Joint Mode"
 	self:getAnchors()
-	editor:switchMode("joint")
 end
 
 local function testExist(anchors,joint)
@@ -56,7 +53,7 @@ function jMode:getAnchors()
 				table.insert(self.anchors,{joint=joint,x=gx1,y=gy1,index=4})
 			else
 				table.insert(self.anchors,{joint=joint,x=x1,y=y1,index=1})
-				if x1~=x2 and y1~=y2 then
+				if x1~=x2 or y1~=y2 then
 					table.insert(self.anchors,{joint=joint,x=x2,y=y2,index=2})
 				end
 			end
@@ -119,6 +116,7 @@ function jMode:moveAnchor()
 	local jType=joint:getType()
 	local tx,ty=self.dragTX,self.dragTY
 	local toChange = self.selectedAnchor.index
+	if getDist(jx[toChange],jy[toChange],tx,ty)<5 then return end
 	jx[toChange]=tx;jy[toChange]=ty
 	local jointData=editor.helper.getStatus(joint,"joint")
 	local j
@@ -134,20 +132,20 @@ function jMode:moveAnchor()
 		j = love.physics.newPrismaticJoint(body1,body2,jx[1],jy[1],math.sin(angle), -math.cos(angle),
 			joint:getCollideConnected())
 		
-	elseif joint.Type=="pulley" then
+	elseif jType=="pulley" then
 		local gx1,gy1,gx2,gy2 = joint:getGroundAnchors()
 		j = love.physics.newPulleyJoint(body1, body2, jx[1], jy[1], jx[2], jy[2],gx1,gy1,gx2,gy2,
 			joint:getRatio(),joint:CollideConnected())
-	elseif joint.Type=="revolute" then
+	elseif jType=="revolute" then
 		j = love.physics.newRevoluteJoint(body1, body2, jx[1], jy[1], joint:getCollideConnected())
 		
-	elseif joint.Type=="weld" then
+	elseif jType=="weld" then
 		j = love.physics.newWeldJoint(body1, body2, jx[1], jy[1], joint:getCollideConnected())
 		
-	elseif joint.Type=="wheel" then	
+	elseif jType=="wheel" then	
 		local angle= getRot(x1, y1,jx[1], jy[1])
 		j = love.physics.newWheelJoint(body1, body2, jx[1], jy[1],math.sin(angle), -math.cos(angle), joint:getCollideConnected())
-	elseif joint.Type=="prismatic" then
+	elseif jType=="prismatic" then
 		local angle= getRot(x1, y1,jx[1], jy[1])
 		j = love.physics.newWheelJoint(body1, body2, jx[1], jy[1],math.sin(angle), -math.cos(angle), joint:getCollideConnected())
 	else
@@ -155,6 +153,8 @@ function jMode:moveAnchor()
 	end
 	local jointData=editor.helper.getStatus(joint,"joint")
 	editor.helper.setStatus(j,"joint",jointData)
+	self.selection=j
+	editor.selector.selection={j}
 	joint:destroy()
 end
 
@@ -185,14 +185,22 @@ local function CreateGear(segments)
 	return love.graphics.newMesh(vertices, "fan")
 end
 
+function jMode:click()
+	if not self.selectedAnchor then 
+		editor.selector.selection=nil
+		return 
+	end
+	self.selection=self.selectedAnchor.joint
+	editor.selector.selection={self.selection}
+end
+
+
 
 local gearShape = CreateGear(20)
 
 
-function jMode:draw()
 
-	
-	
+function jMode:draw()
 
 	for i,anchor in ipairs(self.anchors) do
 		love.graphics.setColor(255, 255, 0, 255)

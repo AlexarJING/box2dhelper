@@ -1,10 +1,9 @@
-local edit={}
+local edit={} --to edit positions change name to body mode
 local editor
 local mouseX,mouseY
 local selection
 
-function edit:init()
-	editor:cancel()
+function edit:new()
 	
 end
 
@@ -59,8 +58,10 @@ function edit:copy()
 end
 
 
-function edit:paste()
+function edit:paste(x,y)
 	if not self.copied then return end
+	x=x or mouseX
+	y=y or mouseY
 	editor.action="paste " .. #self.copied.obj .." body(s)"
 	local add=editor.helper.createWorld(editor.world,self.copied,mouseX,mouseY)
 	editor.selector.selection={}

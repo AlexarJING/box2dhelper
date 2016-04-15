@@ -28,10 +28,7 @@ local polygonTrans= function(x,y,rot,size,v)
 end
 
 function vertex:new()
-	editor:cancel()
-	editor.state="Vertex Mode"
 	self:getVerts()
-	editor:switchMode("vert")
 end
 
 function vertex:getVerts()
@@ -85,6 +82,10 @@ function vertex:update()
 	elseif down and self.selectedVert then
 		self.dragTX,self.dragTY=editor.mouseX,editor.mouseY
 	elseif not down and self.selectedVert then
+		if getDist(self.selectedVert.x,self.selectedVert.y,self.dragTX,self.dragTY)<5 then
+		 	self.selectedVert=nil
+			return 
+		end
 		local vType=self.selectedVert.type
 		if vType=="radius" then
 			self:changeR()
@@ -93,6 +94,8 @@ function vertex:update()
 		elseif vType=="normal" then
 			self:changeNormal()
 		end
+		self.selectedVert=nil
+		self:getVerts()
 	end
 	return true
 end
@@ -105,8 +108,6 @@ function vertex:changeR()
 	local newShape = love.physics.newCircleShape(cx,cy,r)
 	local newFixture= love.physics.newFixture(self.selectedVert.body,newShape)
 	self.selectedVert.fixture:destroy()
-	self.selectedVert=nil
-	self:getVerts()
 	self.action="change radius"
 end
 
@@ -130,8 +131,6 @@ function vertex:changeNormal()
 	end
 	local newFixture=love.physics.newFixture(body,newShape)
 	self.selectedVert.fixture:destroy()
-	self.selectedVert=nil
-	self:getVerts()
 	self.action="translate vertex"
 end
 
@@ -153,11 +152,16 @@ function vertex:rotate()
 		body:setAngle(angle+rotation-bodyR)
 		body:setPosition(axisRot(x,y,rotation-bodyR))
 	end
+	
+end
 
-	self.selectedVert=nil
-	self:getVerts()
-	
-	
+function vertex:click()
+	if not self.selectedVert then 
+		editor.selector.selection=nil
+		return 
+	end
+	self.selection=self.selectedVert.fixture:getShape()
+	editor.selector.selection={self.selection}
 end
 
 

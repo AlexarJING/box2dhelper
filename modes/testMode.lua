@@ -7,16 +7,14 @@ test.mouseBall={}
 test.pause=false
 
 function test:new()
-	if editor.state=="Test Mode" then
-		editor.system:undo()
-		editor.log:push("stop testing")
-	else
-		editor.state="Test Mode"
-		editor.action="start testing"
-		editor:switchMode("test")
-	end
-
+	editor.action="start testing"
 end
+
+function test:release()
+	editor.system:undo()
+	editor.log:push("stop testing")
+end
+
 
 function test:update(dt)
 	if self.mouseMode=="power" then
@@ -55,18 +53,18 @@ end
 
 function test:downForce()
 	if love.keyboard.isDown("w") then
-		self:applyForce(0,-1000)
+		self:applyForce(0,-5000)
 	end
 	if love.keyboard.isDown("s") then
-		self:applyForce(0,1000)
+		self:applyForce(0,5000)
 	end
 
 	if love.keyboard.isDown("a") then
-		self:applyForce(-1000,0)
+		self:applyForce(-5000,0)
 	end	
 
 	if love.keyboard.isDown("d") then
-		self:applyForce(1000,0)
+		self:applyForce(5000,0)
 	end
 
 	if love.keyboard.isDown("q") then
