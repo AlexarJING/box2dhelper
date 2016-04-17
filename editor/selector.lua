@@ -159,13 +159,11 @@ function selector:click(key)
 		self.selectIndex=self.selectIndex+1
 		if not self.selectToggle[self.selectIndex] then self.selectIndex=1 end
 		local target=self.selectToggle[self.selectIndex]
-		local index=table.getIndex(self.selection,target) 
-		if index then
-			table.remove(self.selection, index)
-		else
-			table.remove(self.selection, #self.selection)
-			table.insert(self.selection, target)
-		end	
+		
+		
+		table.remove(self.selection,1)
+		table.insert(self.selection,1,target)
+		
 
 	end
 end

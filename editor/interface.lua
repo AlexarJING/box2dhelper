@@ -809,6 +809,7 @@ function interface:createAboutFrame()
 end
 
 local helpText= require "editor/helpText"
+local font = love.graphics.newFont("font/cn.ttf", 20)
 
 function interface:createHelpFrame()
 	if self.helpFrame then self.helpFrame:Remove() end

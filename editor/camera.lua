@@ -6,6 +6,12 @@ function cam:update()
 	self:shakeProcess()
 	--self:edgeMove()
 	self :holdMove()
+	if editor.state=="test" then
+		self.state="test"
+		self:followSelection()
+	elseif editor.state~="test" and self.state=="test" then
+		cam:setPosition(0,0)
+	end
 	editor.mouseX,editor.mouseY = cam.x+ (love.mouse.getX()-w()/2)/cam.scale,cam.y+(love.mouse.getY()-h()/2)/cam.scale
 end
 
@@ -54,6 +60,15 @@ function cam:holdMove()
 		end
 	else
 		self.holdOX=nil
+	end
+end
+
+function cam:followSelection()
+	self.target=editor.selector.selection and editor.selector.selection[1] or nil
+	if self.target then
+		cam:setPosition(self.target:getPosition())
+	else
+		cam:setPosition(0,0)
 	end
 end
 

@@ -7,6 +7,12 @@ local conf={
 	createEdge="e",
 	createPolygon="p",
 	createFreeline="f",
+	createSoftRope="shift+l",
+	createSoftCircle="shift+c",
+	createSoftPolygon="shift+p",
+	createSoftBox="shift+b",
+	createWater="e",
+	createBoom="q",
 
 	createDistance="d",
 	createRope="r",
@@ -35,10 +41,10 @@ local conf={
 	toggleBodyType="`",
 
 	toggleMode="tab",
-	bodyMode="ctrl+1",
-	fixtureMode="ctrl+2",
-	shapeMode="ctrl+3",
-	jointMode="ctrl+4",
+	bodyMode="1",
+	fixtureMode="2",
+	shapeMode="3",
+	jointMode="4",
 
 	test="f1",
 	pause="f3",

@@ -135,16 +135,25 @@ function vertex:changeNormal()
 end
 
 function vertex:rotate()
-	
+	local ifCopy
+	if love.keyboard.isDown("lctrl") then ifCopy=true end
 
 	local body=self.selectedVert.body
 	local x,y =self.selectedVert.x,self.selectedVert.y
 	
 	if self.downType==1 then
+		if ifCopy then
+			local obj=editor.helper.getWorldData({body})
+			editor.helper.createWorld(editor.world,obj)
+		end
 		local rotation=getRot(x,y,self.dragTX,self.dragTY)
 		local angle=rotation-Pi/2
 		body:setAngle(angle)
 	else
+		if ifCopy then
+			local obj=editor.helper.getWorldData({body})
+			editor.helper.createWorld(editor.world,obj)
+		end
 		local rotation=getRot(0,0,self.dragTX,self.dragTY)
 		local bodyR= getRot(0,0,x,y)
 		local rotation=getRot(0,0,self.dragTX,self.dragTY)

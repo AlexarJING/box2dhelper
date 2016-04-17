@@ -100,6 +100,7 @@ function editor:draw()
 		elseif self.state=="fixture" then
 			self.fixtureMode:draw()
 		elseif self.state=="body" then
+			self.bodyMode:draw()
 			self.selector:draw()
 		end	
 	end)
@@ -135,10 +136,9 @@ function editor:mousereleased(x, y, button)
 end
 
 function editor:keypressed(key, isrepeat)
-	if isrepeat then return end
 	self.LoveFrames.keypressed(key, isrepeat)
+	if isrepeat then return end
 	if self.interface:isHover() then return end
-	
 
 	for i,v in ipairs(self.keys) do
 		if string.sub(v.key,1,5)=="ctrl+" then
@@ -153,15 +153,26 @@ function editor:keypressed(key, isrepeat)
 				v.commad()
 				break
 			end
+		elseif string.sub(v.key,1,6)=="shift+" then
+			local tkey=string.sub(v.key,7,-1)
+			if love.keyboard.isDown("lshift") and key==tkey then
+				v.commad()
+				break
+			end
 		else
-			if  not love.keyboard.isDown("lctrl")  and key==v.key then
-				if self.state=="test" then
-					if key=="q" or key=="w" or key=="e" or key=="a" or key=="s" or key=="d" then
-						return
+			local down=love.keyboard.isDown("lctrl") or love.keyboard.isDown("lshift") or love.keyboard.isDown("lalt")
+			if not down then
+				if  key==v.key then
+					if self.state=="test" then
+						if key=="q" or key=="w" or key=="e" or key=="a" or key=="s" or key=="d" then
+							return
+						else
+							v.commad()
+						end
+					else
+						v.commad()
+						break
 					end
-				else
-					v.commad()
-					break
 				end
 			end
 		end
@@ -232,6 +243,15 @@ function editor:keyBound()
 		createEdge=function() self.createMode:new("edge") end,
 		createPolygon=function()  self.createMode:new("polygon") end,
 		createFreeline=function()  self.createMode:new("freeline") end,
+		
+
+		createSoftRope=function()  self.createMode:new("softrope") end,
+		createSoftCircle=function() self.createMode:new("softcircle") end,
+		createSoftPolygon=function() self.createMode:new("softpolygon") end,
+		createSoftBox=function() self.createMode:new("softbox") end,
+
+		createWater=function() self.createMode:new("water") end,
+		createBoom=function() self.createMode:new("explosion") end,
 
 		createDistance=function() self.createMode:distance() end,
 		createRope=function() self.createMode:rope() end,

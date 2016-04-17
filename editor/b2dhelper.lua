@@ -302,7 +302,10 @@ function helper.drawContact(contact,color)
 	if x2 then love.graphics.circle("fill", x2, y2, 3) end
 end
 
-function helper.draw(world,colorStyle)
+function helper.draw(world,colorStyle,offx,offy)
+	if offx then
+		love.graphics.translate(offx, offy)
+	end
 	updatePreserve()
 	colorStyle=colorStyle or defaultStyle
 	local bodyList
@@ -364,6 +367,9 @@ function helper.draw(world,colorStyle)
 		end
 	end	
 
+	if offx then
+		love.graphics.translate(-offx, -offy)
+	end
 end
 
 
@@ -427,11 +433,13 @@ function helper.createWorld(world,data,offx,offy)
 	local joints={}
 	for i,joint in ipairs(data.joint) do
 		local j
+		local a1,a2=joint.Anchors[1]+offx, joint.Anchors[2]+offy
+		local a3,a4=joint.Anchors[3]+offx,joint.Anchors[4]+offy
 		if joint.Type=="distance" then
 			j = love.physics.newDistanceJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body, 
-				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
+				a1, a2, a3,a4,
 				joint.CollideConnected)
 			
 		elseif joint.Type=="prismatic" then
@@ -441,7 +449,7 @@ function helper.createWorld(world,data,offx,offy)
 			j = love.physics.newPrismaticJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,
-				joint.Anchors[1], joint.Anchors[2],
+				a1, a2,
 				math.sin(angle), 
 				-math.cos(angle),
 				joint.CollideConnected)
@@ -450,41 +458,42 @@ function helper.createWorld(world,data,offx,offy)
 			j = love.physics.newPulleyJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body, 
-				joint.GroundAnchors[1], joint.GroundAnchors[2], joint.GroundAnchors[3],joint.GroundAnchors[4],
-				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
+				joint.GroundAnchors[1]+offx, joint.GroundAnchors[2]+offy, 
+				joint.GroundAnchors[3]+offx,joint.GroundAnchors[4]+offy,
+				a1, a2, a3,a4,
 				joint.Ratio,joint.CollideConnected)
 		elseif joint.Type=="revolute" then
 			j = love.physics.newRevoluteJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,  
-				joint.Anchors[1], joint.Anchors[2],
+				a1, a2,
 				joint.CollideConnected)
 			
 		elseif joint.Type=="rope" then
 			j = love.physics.newRopeJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,
-				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4], 
+				a1, a2, a3,a4, 
 				joint.MaxLength, joint.CollideConnected)
 		elseif joint.Type=="weld" then
 			j = love.physics.newWeldJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body, 
-				joint.Anchors[1], joint.Anchors[2], joint.Anchors[3],joint.Anchors[4],
+				a1, a2, a3,a4,
 				joint.CollideConnected)
 			
 		elseif joint.Type=="wheel" then
 			local angle= getRot(
-				joint.Anchors[1], joint.Anchors[2],
-			group[joint.Bodies[1]].body:getX(), 
-			group[joint.Bodies[1]].body:getY()
+				a1, a2,
+			group[joint.Bodies[2]].body:getX(), 
+			group[joint.Bodies[2]].body:getY()
 			 )
 			j = love.physics.newWheelJoint(
 				group[joint.Bodies[1]].body, 
 				group[joint.Bodies[2]].body,
-				joint.Anchors[1], joint.Anchors[2],
+				a1, a2,
 				math.sin(angle), 
-				math.cos(angle),
+				-math.cos(angle),
 				joint.CollideConnected)
 		
 		elseif joint.Type=="gear" then

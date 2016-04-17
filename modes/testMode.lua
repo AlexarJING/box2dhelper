@@ -68,11 +68,11 @@ function test:downForce()
 	end
 
 	if love.keyboard.isDown("q") then
-		self:applyTorque(-10000)
+		self:applyTorque(-50000)
 	end
 
 	if love.keyboard.isDown("e") then
-		self:applyTorque(10000)
+		self:applyTorque(50000)
 	end
 end
 

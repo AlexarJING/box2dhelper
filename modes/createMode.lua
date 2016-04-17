@@ -28,22 +28,31 @@ local clamp= function (a,low,high)
 	end
 end
 
+local Softbody=require "editor/softbody"
 
 function creator:update()
+	self:getPoint()
 	self:getPoints()
 	self:getVerts()
 	self:freeDraw()
 end
 
 function creator:new(cType)
+	self.oState=editor.state
 	editor:cancel()
 	if not editor.state then return end
 	editor.state="create"
 	self.createTag=cType
-	if cType=="circle" or cType=="box" or cType=="line" then
+	if cType=="circle" or cType=="box" 
+		or cType=="line" or cType=="softrope" 
+		or cType=="softcircle" or ctype=="softbox"
+		or cType=="explosion"
+		then
 		self.needPoints=true
 	elseif cType=="freeline" then
 		self.needLines=true
+	elseif cType=="water" then
+		self.needPoint=true
 	else
 		self.needVerts=true
 	end
@@ -57,16 +66,16 @@ function creator:draw()
 	end
 
 	if self.createOX then
-		if self.createTag=="circle" then
+		if self.createTag=="circle" or self.createTag=="softcircle" or self.createTag=="explosion"then
 			love.graphics.circle("line", self.createOX, self.createOY, self.createR)
 			love.graphics.line(self.createOX,self.createOY,self.createTX,self.createTY)
-		elseif self.createTag=="box" then
+		elseif self.createTag=="box" or self.createTag=="softbox" then
 			love.graphics.polygon("line",
 				self.createOX,self.createOY,
 				self.createOX,self.createTY,
 				self.createTX,self.createTY,
 				self.createTX,self.createOY)
-		elseif self.createTag=="line" then
+		elseif self.createTag=="line" or self.createTag=="softrope" then
 			love.graphics.line(self.createOX,self.createOY,self.createTX,self.createTY)
 		elseif self.createTag=="edge" or self.createTag=="freeline" then
 			if not self.createVerts then return end
@@ -75,7 +84,7 @@ function creator:draw()
 			end
 			love.graphics.line(self.createVerts[#self.createVerts-1],self.createVerts[#self.createVerts],self.createTX,self.createTY)
 
-		elseif self.createTag=="polygon" then
+		elseif self.createTag=="polygon" or self.createTag=="softpolygon" then
 			if not self.createVerts then return end
 			local count=#self.createVerts
 			if count==0 then
@@ -98,7 +107,32 @@ function creator:draw()
 
 end
 
+createTimer=0
+createCD=20
 
+function creator:getPoint()
+	if not self.needPoint then return end
+	if not self.createOX and love.mouse.isDown(1) then
+		self.createOX,self.createOY= editor.mouseX,editor.mouseY	
+		self.createTX,self.createTY=self.createOX,self.createOY
+	elseif self.createOX and love.mouse.isDown(1) then
+		self.createTX,self.createTY=editor.mouseX,editor.mouseY
+		createTimer=createTimer-1
+		if createTimer<0 then
+			self:water()
+		end
+	elseif self.createOX and not love.mouse.isDown(1) then
+		self:create()
+		editor.action="create water"
+	end
+end
+
+function creator:water()
+	local body = love.physics.newBody(editor.world, self.createTX, self.createTY,"dynamic")
+	local shape = love.physics.newCircleShape(5)
+	local fixture = love.physics.newFixture(body, shape,1)
+	self:setMaterial(fixture,"water")
+end
 
 
 function creator:getPoints()
@@ -156,6 +190,93 @@ function creator:freeDraw()
 
 end
 
+function creator:softrope()
+	local angle=getRot(self.createOX, self.createOY,self.createTX, self.createTY)
+	local stepX=math.sin(angle)
+	local stepY=-math.cos(angle)
+	local len=50
+	local rest=self.createR%30
+	self.createTX,self.createTY=self.createTX-rest*stepX,self.createTY-rest*stepY
+
+	editor.action="create softrope"
+	local body1 = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
+	local shape = love.physics.newCircleShape(5)
+	local fixture = love.physics.newFixture(body1, shape)
+	fixture:setSensor(true)
+	self:setMaterial(fixture,"wood")
+
+	local body2 = love.physics.newBody(editor.world, self.createTX, self.createTY,"dynamic")
+	local shape = love.physics.newCircleShape(5)
+	local fixture = love.physics.newFixture(body2, shape)
+	fixture:setSensor(true)
+	self:setMaterial(fixture,"wood")
+
+	
+	local chain={}
+	
+	for i=len/2,self.createR-len/2,len do
+		local body = love.physics.newBody(editor.world, 
+			self.createOX+i*stepX, self.createOY+i*stepY,"dynamic")
+		body:setAngle(angle+math.pi/2)
+		local shape = love.physics.newRectangleShape(len,1)
+		local fixture = love.physics.newFixture(body, shape,1000)
+		fixture:setGroupIndex(-1)
+		table.insert(chain, body)
+	end
+	love.physics.newRevoluteJoint(body1, chain[1], body1:getX(),body1:getY(), false)
+	love.physics.newDistanceJoint(body1, chain[1], 
+		body1:getX(), body1:getY(),chain[1]:getX(), chain[1]:getY(),
+		false)
+	love.physics.newRevoluteJoint(body2, chain[#chain], body2:getX(),body2:getY(), false)
+	love.physics.newDistanceJoint(body2, chain[#chain], 
+		body2:getX(), body2:getY(),chain[#chain]:getX(), chain[#chain]:getY(),
+		false)
+
+	for i=2,#chain do
+		love.physics.newRevoluteJoint(chain[i], chain[i-1], 
+		chain[i]:getX()-len*stepX/2, chain[i]:getY()-len*stepY/2, false)
+		love.physics.newDistanceJoint(chain[i], chain[i-1], 
+			chain[i]:getX(), chain[i]:getY(),chain[i-1]:getX(), chain[i-1]:getY(),
+			false)
+	end
+
+	return {body=body}
+end
+
+function creator:softcircle()
+	editor.action="create softcircle"
+	Softbody(editor.world, "ball",{x=self.createOX,y=self.createOY,r=self.createR})
+end
+
+function creator:softbox()
+	editor.action="create softbox"
+	Softbody(editor.world, "rect",{
+		x=(self.createOX+self.createTX)/2,
+		y=(self.createTY+self.createOY)/2,
+		w=math.abs(self.createOX-self.createTX),
+		h=math.abs(self.createTY-self.createOY)}
+		)
+end
+
+function creator:softpolygon()
+	editor.action="create softpolygon"
+	Softbody(editor.world, "polygon",{x=self.createOX,y=self.createOY,
+		vert=polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts)})
+end
+
+function creator:explosion()
+	editor.action="create softpolygon"
+	local boomV=10000
+	for i=1,self.createR do
+		local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
+		local shape = love.physics.newCircleShape(5)
+		local fixture = love.physics.newFixture(body, shape,10)
+		self:setMaterial(fixture,"boom")
+		local angle= love.math.random()*math.pi*2
+		body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
+		fixture:setGroupIndex(-2)
+	end
+end
 
 function creator:circle()
 	editor.action="create circle"
@@ -316,13 +437,21 @@ function creator:wheel()
 end
 
 
+
 function creator:setMaterial(fixture,m_type)
 	--editor.action="set material"..m_type
 	if m_type=="wood" then
-		fixture:setDensity(1)
+		fixture:setDensity(0.8)
 		fixture:setFriction(1)
 		fixture:setRestitution(0.2)
-	elseif m_type=="rock" then
+	elseif m_type=="water" then
+		fixture:setDensity(1)
+		fixture:setFriction(0)
+		fixture:setRestitution(0.1)
+	elseif m_type=="boom" then
+		fixture:setDensity(100)
+		fixture:setFriction(99)
+		fixture:setRestitution(0.5)
 	end
 end
 
@@ -334,6 +463,7 @@ function creator:cancel()
 	self.needLines=false
 	self.needPoints=false
 	self.needVerts=false
+	self.needPoint=false
 	self.createTag=nil
 end
 
@@ -360,8 +490,9 @@ function creator:create()
 	self.needLines=false
 	self.needPoints=false
 	self.needVerts=false
+	self.needPoint=false
 	self.createTag=nil
-	editor.state="body"
+	editor.state=self.oState
 end
 
 return function(parent) 

@@ -49,7 +49,7 @@ end
 
 function edit:copy()
 	local selection=editor.selector.selection
-	if not selection then 
+	if not selection or selection[1]:type()~="Body" then 
 		editor.log:push("error:need at least 1 body")
 		return 
 	end
@@ -158,12 +158,26 @@ function edit:dragMove()
 		self.dragMoving=true	
 		self.dragOX,self.dragOY=mouseX,mouseY
 		self.dragTX,self.dragTY=mouseX,mouseY
+		if love.keyboard.isDown("lctrl") then 
+			self.dragCopy=true 
+			self.dragCopyObj=editor.helper.getWorldData(selection)
+		else
+			self.dragCopy=false 
+			self.dragCopyObj=nil
+		end
 	elseif love.mouse.isDown(1) and self.dragMoving then
 		local dx,dy=mouseX-self.dragTX,mouseY-self.dragTY
 		self:move(dx,dy)
 		self.dragTX,self.dragTY=mouseX,mouseY
 	elseif not love.mouse.isDown(1) and self.dragMoving then
 		local dx,dy=mouseX-self.dragTX,mouseY-self.dragTY
+		
+		if self.dragCopy then
+			editor.helper.createWorld(editor.world,self.dragCopyObj)
+			self.dragCopy=false 
+			self.dragCopyObj=nil
+		end
+
 		self:move(dx,dy,true)
 		self.dragMoving=false
 		editor.action="move"
@@ -172,8 +186,16 @@ function edit:dragMove()
 	return self.dragMoving
 end
 
+function edit:draw()
+	if self.dragCopy then
+		editor.helper.draw(editor.selector.selection,_,self.dragOX-self.dragTX,self.dragOY-self.dragTY)
+	end
+end
+
+
 function edit:move(dx,dy,throw)
 	local selection=editor.selector.selection
+
 	for i,body in ipairs(selection) do
 		
 		local x,y = body:getPosition()
@@ -243,6 +265,7 @@ function edit:clear()
 	editor.world =love.physics.newWorld(0, 9.8*64, false)
 	editor.action = "clear the world"
 end
+
 
 
 return function(parent) 
