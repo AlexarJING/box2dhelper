@@ -65,7 +65,10 @@ function editor:update(dt)
 		self.action=nil
 	end
 
-	if self.state=="test" and not self.testMode.pause then self.world:update(dt) end
+	if self.state=="test" and not self.testMode.pause then 
+		self.world:update(dt) 
+		self.system:updateTodo()
+	end
 
 end
 

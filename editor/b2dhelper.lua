@@ -64,34 +64,14 @@ local defaultStyle= {
 local function getUserData(obj)
 	local raw=obj:getUserData()
 	if raw==nil then return end
-	if type(raw)=="table" then
-		return {type(raw),table.save(raw)}
-	elseif type(raw)=="function" then
-		return {type(raw),string.dump(raw)}
-	else
-		return {type(raw),tostring(raw)}
+	if type(raw)=="table" then 
+		return table.save(raw,_,true)
 	end
 end
 
 local function setUserData(obj,raw)
 	if raw==nil then return end
-	if raw[1]=="table" then
-		obj:setUserData(loadstring(raw[2])())
-	elseif raw[1]=="number" then
-		obj:setUserData(tonumber(raw[2]))
-	elseif raw[1]=="function" then
-		obj:setUserData(loadstring(raw[3]))
-	elseif raw[1]=="boolean" then
-		if raw[2]=="false" then
-			obj:setUserData(false)
-		else
-			obj:setUserData(true)
-		end
-	elseif raw==nil then
-		obj:setUserData(nil)
-	else
-		obj:setUserData(tostring(raw[2]))
-	end
+	obj:setUserData(loadstring(raw)())
 end
 
 function helper.drawBody(body,colorStyle)
@@ -315,16 +295,7 @@ function helper.draw(world,colorStyle,offx,offy)
 		bodyList=world:getBodyList()
 		jointList=world:getJointList()
 		contactList=world:getContactList()
-		for i,v in ipairs(bodyList) do
-			addPreserve(v)
-		end
-		for i,v in ipairs(jointList) do
-			addPreserve(v)
-		end
-		for i,v in ipairs(contactList) do
-			addPreserve(v)
-		end
-
+		
 	else
 		bodyList=world
 	end
@@ -357,12 +328,14 @@ function helper.draw(world,colorStyle,offx,offy)
 
 	if jointList then
 		for i,joint in ipairs(jointList) do
+			addPreserve(joint)
 			helper.drawJoint(joint,colorStyle.joint)
 		end
 	end
 
 	if contactList then
 		for i,contact in ipairs(contactList) do
+			addPreserve(contact)
 			helper.drawContact(contact,colorStyle.contact)
 		end
 	end	
@@ -390,9 +363,42 @@ function helper.load(world,data,asTable)
 	return helper.createWorld(world,data)
 end
 
+local function begin(a,b,coll)
+	local data=a:getUserData()
+	if data then
+		for i,v in ipairs(data) do
+			if v.prop=="beginContact" and v.value then
+				v.value(a,b,coll)
+			end
+		end
+	end
+	local data=b:getUserData()
+	if data then
+		for i,v in ipairs(data) do
+			if v.prop=="beginContact" and v.value then
+				v.value(b,a,coll)
+			end
+		end
+	end
+end
+
+
+local function setCallbacks(world)
+	world:setCallbacks(begin)
+end
+
+
 function helper.createWorld(world,data,offx,offy)
 	offx=offx or 0
 	offy=offy or 0
+	
+
+	local beginContact, endContact, preSolve, postSolve = world:getCallbacks()
+	if not beginContact then
+		setCallbacks(world)
+	end
+
+
 	local group={}
 	for i,v in ipairs(data.obj) do
 		local obj={}
@@ -535,12 +541,24 @@ local function getJointIndex(list,joint)
 	
 end
 
+
+
+
+
+
+
+
+
 function helper.getWorldData(world,offx,offy)
 	offx =offx or 0
 	offy =offy or 0
 	local bodyList --如果不是world 那么就是body list
 	if type(world)=="userdata" then
 		bodyList=world:getBodyList()
+		local beginContact, endContact, preSolve, postSolve = world:getCallbacks()
+		if not beginContact then
+			setCallbacks(world)
+		end
 	else
 		bodyList=world
 	end

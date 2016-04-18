@@ -264,19 +264,45 @@ function creator:softpolygon()
 		vert=polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts)})
 end
 
-function creator:explosion()
-	editor.action="create softpolygon"
-	local boomV=10000
-	for i=1,self.createR do
-		local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
-		local shape = love.physics.newCircleShape(5)
-		local fixture = love.physics.newFixture(body, shape,10)
-		self:setMaterial(fixture,"boom")
-		local angle= love.math.random()*math.pi*2
-		body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
-		fixture:setGroupIndex(-2)
+function creator.boom(a,b,coll)	
+	--coll:setEnabled(false)
+	local func=function(a,b,coll)
+		if a:isDestroyed() then return end
+		local x,y=a:getBody():getPosition()
+		local r = a:getShape():getRadius()
+		local boomV=10000
+		for i=1,r do
+			local body = love.physics.newBody(editor.world, x, y,"dynamic")
+			local shape = love.physics.newCircleShape(5)
+			local fixture = love.physics.newFixture(body, shape,10)
+			creator:setMaterial(fixture,"boom")
+			local angle= love.math.random()*math.pi*2
+			body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
+			fixture:setGroupIndex(-2)
+		end
+		a:getBody():destroy()
 	end
+	table.insert(editor.system.todo,{func,a,b,coll})
+	
 end
+
+
+function creator:explosion()
+	editor.action="create explosion"
+	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
+	local shape = love.physics.newCircleShape(self.createR)
+	local fixture = love.physics.newFixture(body, shape)
+	self:setMaterial(fixture,"wood")
+	local userData={prop="beginContact",value=creator.boom}
+	local data = fixture:getUserData()
+	if not data then data={} end
+	table.insert(data, userData)
+	fixture:setUserData(data)
+	return {body=body}
+end
+
+
+
 
 function creator:circle()
 	editor.action="create circle"
