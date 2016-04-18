@@ -1,6 +1,5 @@
 local creator={} --to create objects joints
 local editor
-
 local getDist = function(x1,y1,x2,y2) return math.sqrt((x1-x2)^2+(y1-y2)^2) end
 local getRot  = function (x1,y1,x2,y2) 
 	if x1==x2 and y1==y2 then return 0 end 
@@ -264,27 +263,7 @@ function creator:softpolygon()
 		vert=polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts)})
 end
 
-function creator.boom(a,b,coll)	
-	--coll:setEnabled(false)
-	local func=function(a,b,coll)
-		if a:isDestroyed() then return end
-		local x,y=a:getBody():getPosition()
-		local r = a:getShape():getRadius()
-		local boomV=10000
-		for i=1,r do
-			local body = love.physics.newBody(editor.world, x, y,"dynamic")
-			local shape = love.physics.newCircleShape(5)
-			local fixture = love.physics.newFixture(body, shape,10)
-			creator:setMaterial(fixture,"boom")
-			local angle= love.math.random()*math.pi*2
-			body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
-			fixture:setGroupIndex(-2)
-		end
-		a:getBody():destroy()
-	end
-	table.insert(editor.system.todo,{func,a,b,coll})
-	
-end
+
 
 
 function creator:explosion()
@@ -293,7 +272,7 @@ function creator:explosion()
 	local shape = love.physics.newCircleShape(self.createR)
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
-	local userData={prop="beginContact",value=creator.boom}
+	local userData={prop="beginContact",value="explosion"}
 	local data = fixture:getUserData()
 	if not data then data={} end
 	table.insert(data, userData)
@@ -470,6 +449,14 @@ function creator:setMaterial(fixture,m_type)
 		fixture:setDensity(0.8)
 		fixture:setFriction(1)
 		fixture:setRestitution(0.2)
+		if not fixture:getUserData() then
+			local data={
+			{prop="material",value="wood"},
+			{prop="hardness",value=5},
+			{prop="beginContact",value="spark"}
+		}
+		fixture:setUserData(data)
+		end
 	elseif m_type=="water" then
 		fixture:setDensity(1)
 		fixture:setFriction(0)

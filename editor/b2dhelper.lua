@@ -1,7 +1,36 @@
 local helper={}
 local gearAngle={}
 local preserve={}
+helper.todo={}
+helper.delay={}
+helper.world=nil
 
+local function addDelay(func,delay,...)
+	table.insert(helper.delay, {func,os.time()+delay,...})
+end
+
+local function updateDelay()
+	for i=#helper.delay,1,-1 do
+		local tab=helper.delay[i]
+		local func=tab[1]
+		local expect=tab[2]
+		if os.time()>=expect then
+			table.remove(tab, 1)
+			table.remove(tab, 1)
+			func(unpack(tab))
+			table.remove(helper.delay, i)
+		end
+	end
+end
+
+local function updateTodo()
+	for i,v in ipairs(helper.todo) do
+		local func=v[1]
+		table.remove(v,1)
+		func(unpack(v))
+	end
+	helper.todo={}
+end
 local function addPreserve(obj)
 	if not preserve[obj] then  preserve[obj]=obj end --reg data
 end
@@ -64,7 +93,7 @@ local defaultStyle= {
 local function getUserData(obj)
 	local raw=obj:getUserData()
 	if raw==nil then return end
-	if type(raw)=="table" then 
+	if type(raw)=="table" then
 		return table.save(raw,_,true)
 	end
 end
@@ -283,6 +312,10 @@ function helper.drawContact(contact,color)
 end
 
 function helper.draw(world,colorStyle,offx,offy)
+	if world==helper.world then
+		updateTodo()
+		updateDelay()
+	end
 	if offx then
 		love.graphics.translate(offx, offy)
 	end
@@ -295,7 +328,6 @@ function helper.draw(world,colorStyle,offx,offy)
 		bodyList=world:getBodyList()
 		jointList=world:getJointList()
 		contactList=world:getContactList()
-		
 	else
 		bodyList=world
 	end
@@ -363,20 +395,107 @@ function helper.load(world,data,asTable)
 	return helper.createWorld(world,data)
 end
 
-local function begin(a,b,coll)
+helper.collisionFunc={
+	explosion=function(a,b,coll)	
+		coll:setEnabled(false)
+		local frags={}
+		local func=function(a,b,coll)
+			if a:isDestroyed() then return end
+			local x,y=a:getBody():getPosition()
+			local r = a:getShape():getRadius()
+			local boomV=10000
+			for i=1,r do
+				local body = love.physics.newBody(helper.world, x, y,"dynamic")
+				local shape = love.physics.newCircleShape(3)
+				local fixture = love.physics.newFixture(body, shape,10)
+				fixture:setDensity(99)
+				fixture:setFriction(99)
+				fixture:setRestitution(1)
+				local angle= love.math.random()*math.pi*2
+				body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
+				fixture:setGroupIndex(-2)
+				table.insert(frags, body)
+			end
+			a:getBody():destroy()
+		end
+		table.insert(helper.todo,{func,a,b,coll})
+		local func=function()
+			for i,v in ipairs(frags) do
+				if not v:isDestroyed() then
+					v:destroy()
+				end
+			end
+		end
+		addDelay(func,4)
+	end,
+	spark=function(a,b,coll)
+		local func=function(a,b,coll)
+			if a:isDestroyed() or b:isDestroyed() or coll:isDestroyed() then return end
+			local bodyA,bodyB=a:getBody(),b:getBody()
+			local matA,hardA,matB,hardB
+			local tab=a:getUserData()
+			if not tab then return end
+			for i,v in ipairs(tab) do
+				if v.prop=="material" then matA=v.value end
+				if v.prop=="hardness" then hardA=v.value end
+			end
+			tab=b:getUserData()
+			if not tab then return end
+			for i,v in ipairs(tab) do
+				if v.prop=="material" then matB=v.value end
+				if v.prop=="hardness" then hardB=v.value end
+			end
+
+			if hardA<=hardB then
+				local vxA,vyA=bodyA:getLinearVelocity()
+				local vxB,vyB=bodyB:getLinearVelocity()
+				local relativeX,relativeY=vxB-vxA,vyB-vyA
+				local relativeAB = getDist(0,0,relativeX,relativeY)
+				local fAB = a:getFriction()*b:getFriction()
+				local intensity =fAB*relativeAB
+				local threshold =500
+				local x, y = coll:getPositions( )
+				
+				if intensity<threshold then return end
+				
+				for i=1,relativeAB/500 do
+					local body = love.physics.newBody(helper.world, x, y,"dynamic")
+					local shape = love.physics.newCircleShape(2)
+					local fixture = love.physics.newFixture(body, shape)
+					fixture:setDensity(0.01)
+					fixture:setFriction(5)
+					fixture:setRestitution(0.2)
+					body:setLinearVelocity(relativeX*(0.8+0.4*love.math.random()),
+						relativeY*(0.8+0.4*love.math.random()))
+					fixture:setGroupIndex(-2)
+					local func2=function()
+						if not body:isDestroyed() then
+							body:destroy()
+						end
+					end
+					addDelay(func2,love.math.random(1,2))
+				end
+			end
+		end
+		table.insert(helper.todo,{func,a,b,coll})
+	end,
+}
+
+
+local function beginC(a,b,coll)
 	local data=a:getUserData()
 	if data then
 		for i,v in ipairs(data) do
-			if v.prop=="beginContact" and v.value then
-				v.value(a,b,coll)
+			if v.prop=="beginContact" and helper.collisionFunc[v.value] then
+				helper.collisionFunc[v.value](a,b,coll)
 			end
 		end
 	end
 	local data=b:getUserData()
 	if data then
 		for i,v in ipairs(data) do
-			if v.prop=="beginContact" and v.value then
-				v.value(b,a,coll)
+			if v.prop=="beginContact" and helper.collisionFunc[v.value] then
+				helper.collisionFunc[v.value](b,a,coll)
 			end
 		end
 	end
@@ -384,7 +503,7 @@ end
 
 
 local function setCallbacks(world)
-	world:setCallbacks(begin)
+	world:setCallbacks(beginC,endC,preC,postC)
 end
 
 
@@ -392,13 +511,6 @@ function helper.createWorld(world,data,offx,offy)
 	offx=offx or 0
 	offy=offy or 0
 	
-
-	local beginContact, endContact, preSolve, postSolve = world:getCallbacks()
-	if not beginContact then
-		setCallbacks(world)
-	end
-
-
 	local group={}
 	for i,v in ipairs(data.obj) do
 		local obj={}
@@ -512,6 +624,11 @@ function helper.createWorld(world,data,offx,offy)
 		j:setUserData(joint.userdata)
 		table.insert(joints, j)
 	end
+
+	if world~=helper.world then
+		setCallbacks(world)
+	end
+
 	return group
 end
 
@@ -554,6 +671,11 @@ function helper.getWorldData(world,offx,offy)
 	offy =offy or 0
 	local bodyList --如果不是world 那么就是body list
 	if type(world)=="userdata" then
+		if world~=helper.world then
+			helper.todo={}
+			helper.delay={}
+		end
+		helper.world=world
 		bodyList=world:getBodyList()
 		local beginContact, endContact, preSolve, postSolve = world:getCallbacks()
 		if not beginContact then

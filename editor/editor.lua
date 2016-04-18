@@ -3,8 +3,6 @@ editor.world= love.physics.newWorld(0, 9.8*64, false)
 love.physics.setMeter(64)
 
 
-
-
 ------------------------------------------------------
 editor.LoveFrames= require "libs.loveframes"
 editor.helper = require "editor/b2dhelper"
@@ -67,7 +65,6 @@ function editor:update(dt)
 
 	if self.state=="test" and not self.testMode.pause then 
 		self.world:update(dt) 
-		self.system:updateTodo()
 	end
 
 end

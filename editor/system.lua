@@ -4,16 +4,7 @@ local editor
 system.undoStack={}
 system.undoIndex=0
 system.maxUndo=20
-system.todo={}
 
-function system:updateTodo()
-	for i,v in ipairs(self.todo) do
-		local func=v[1]
-		table.remove(v,1)
-		func(unpack(v))
-	end
-	self.todo={}
-end
 
 function system:saveToFile()
 	editor.interface:createSaveWorldFrame()

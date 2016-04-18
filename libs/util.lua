@@ -603,7 +603,7 @@ end
 
 function table.save(tab,name,ifCopyFunction)
 	name=name or "test"
-	tableList=tablelist or {{name="root",tab=tab}} --to protect loop
+	local tableList= {{name="root",tab=tab}} --to protect loop
 	local output="local "..name.."=\n"
 	local function ergodic(target,time)
 		time=time+1
@@ -642,11 +642,14 @@ function table.save(tab,name,ifCopyFunction)
 			elseif type(v)=="number" or type(v)=="boolean" then
 					output=output..name.."="..tostring(v)..",\n"
 			elseif type(v)=="function" and ifCopyFunction then
-				output=output .. name .."=".."loadstring(\""..string.dump(v).."\")"..",\n"			
+				print(v)
+				print(string.dump(v))
+				output=output .. name .."= loadstring(\""..string.dump(v).."\")(),\n"			
 			end
 		end
 	end
 	ergodic(tab,0)
 	output=output.."}\nreturn "..name
+	--print(output)
 	return output 
 end
