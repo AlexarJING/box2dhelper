@@ -445,7 +445,6 @@ helper.collisionFunc={
 				if v.prop=="material" then matB=v.value end
 				if v.prop=="hardness" then hardB=v.value end
 			end
-
 			if hardA<=hardB then
 				local vxA,vyA=bodyA:getLinearVelocity()
 				local vxB,vyB=bodyB:getLinearVelocity()
@@ -453,54 +452,108 @@ helper.collisionFunc={
 				local relativeAB = getDist(0,0,relativeX,relativeY)
 				local fAB = a:getFriction()*b:getFriction()
 				local intensity =fAB*relativeAB
-				local threshold =500
+				local threshold =300
 				local x, y = coll:getPositions( )
 				
 				if intensity<threshold then return end
 				
-				for i=1,relativeAB/500 do
+				for i=1,relativeAB/300 do
 					local body = love.physics.newBody(helper.world, x, y,"dynamic")
-					local shape = love.physics.newCircleShape(2)
+					body:setGravityScale(0)
+					local shape = love.physics.newCircleShape(8)
 					local fixture = love.physics.newFixture(body, shape)
 					fixture:setDensity(0.01)
 					fixture:setFriction(5)
-					fixture:setRestitution(0.2)
-					body:setLinearVelocity(relativeX*(0.8+0.4*love.math.random()),
-						relativeY*(0.8+0.4*love.math.random()))
-					fixture:setGroupIndex(-2)
+					fixture:setRestitution(0)
+					body:setLinearVelocity(-relativeX+1.2*relativeX*love.math.random(),
+						-relativeY+1.2*relativeY*love.math.random())
+					fixture:setMask(2)
 					local func2=function()
 						if not body:isDestroyed() then
 							body:destroy()
 						end
 					end
-					addDelay(func2,love.math.random(1,2))
+					addDelay(func2,3)
 				end
 			end
 		end
 		table.insert(helper.todo,{func,a,b,coll})
 	end,
+	reverse=function(a,b,coll)
+		local func=function(a,b,coll)
+			if a:isDestroyed() then return end
+			local body=a:getBody()
+			local jointList=body:getJointList()
+			for i,joint in ipairs(jointList) do
+				if joint:getType()=="revolute" or joint:getType()=="prismatic" then
+					joint:setMotorSpeed(-joint:getMotorSpeed())
+				end
+			end
+		end
+		table.insert(helper.todo,{func,a,b,coll})
+	end,
+	crash=function(a,b,coll)
+
+	end
 }
+
+helper.collisionType={
+	begin={
+		makeFrag=helper.collisionFunc.spark,
+		reverse=helper.collisionFunc.reverse,
+		explosion=helper.collisionFunc.reverse},
+	over={
+
+	},
+	pre={
+		crashable=helper.collisionFunc.crash
+	},
+	post={
+
+	}	
+}
+
+
 
 
 local function beginC(a,b,coll)
 	local data=a:getUserData()
 	if data then
 		for i,v in ipairs(data) do
-			if v.prop=="beginContact" and helper.collisionFunc[v.value] then
-				helper.collisionFunc[v.value](a,b,coll)
+			if helper.collisionType.begin[v.prop]  then
+				helper.collisionType.begin[v.prop](a,b,coll,v.value)
 			end
 		end
 	end
 	local data=b:getUserData()
 	if data then
 		for i,v in ipairs(data) do
-			if v.prop=="beginContact" and helper.collisionFunc[v.value] then
-				helper.collisionFunc[v.value](b,a,coll)
+			if helper.collisionType.begin[v.prop]  then
+				helper.collisionType.begin[v.prop](b,a,coll,v.value)
 			end
 		end
 	end
 end
 
+
+local function preC(a,b,coll)
+	local data=a:getUserData()
+	if data then
+		for i,v in ipairs(data) do
+			if helper.collisionType.pre[v.prop]  then
+				helper.collisionType.pre[v.prop](a,b,coll,v.value)
+			end
+		end
+	end
+	local data=b:getUserData()
+	if data then
+		for i,v in ipairs(data) do
+			if helper.collisionType.begin[v.prop]  then
+				helper.collisionType.pre[v.prop](b,a,coll,v.value)
+			end
+		end
+	end
+end
 
 local function setCallbacks(world)
 	world:setCallbacks(beginC,endC,preC,postC)

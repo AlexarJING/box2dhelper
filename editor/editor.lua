@@ -24,6 +24,28 @@ editor.fixtureMode= require "modes/fixtureMode"(editor)
 
 
 function editor:init()
+	local box  = love.physics.newBody(self.world, 0, 0, "static")
+	local shape = love.physics.newRectangleShape(50, 50)
+	local fixture = love.physics.newFixture(box, shape, 1)
+
+	local circle  = love.physics.newBody(self.world, 0, 0, "dynamic")
+	local shape = love.physics.newCircleShape( 0, 0, 50)
+	local fixture = love.physics.newFixture(circle, shape, 0.1)
+
+	local fixture = love.physics.newFixture(box, shape, 1)
+	local shape = love.physics.newRectangleShape(100,0,100, 50)
+	local fixture = love.physics.newFixture(circle, shape, 0.1)
+	local joint = love.physics.newRevoluteJoint(box,circle,0,0,false)
+	joint:setMotorEnabled(true)
+	joint:setMotorSpeed(100000)
+	joint:setMaxMotorTorque(100000)
+	fixture:setUserData({
+		{prop="spark",value="true"},
+		{prop="material",value="rock"},
+		{prop="hardness",value=9},
+		{prop="reverse",value=true}
+		 })
+
 	self.W = w()
 	self.H = h()
 	self.bg:init()

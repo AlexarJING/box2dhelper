@@ -288,7 +288,7 @@ function creator:circle()
 	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
 	local shape = love.physics.newCircleShape(self.createR)
 	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
+	self:setMaterial(fixture,"steel")
 	return {body=body}
 end
 
@@ -453,9 +453,23 @@ function creator:setMaterial(fixture,m_type)
 			local data={
 			{prop="material",value="wood"},
 			{prop="hardness",value=5},
-			{prop="beginContact",value="spark"}
+			{prop="spark",value=true}
 		}
-		fixture:setUserData(data)
+			fixture:setUserData(data)
+			fixture:setCategory(1)
+		end
+	elseif m_type=="steel" then
+		fixture:setDensity(4)
+		fixture:setFriction(1)
+		fixture:setRestitution(0.2)
+		if not fixture:getUserData() then
+			local data={
+			{prop="material",value="steel"},
+			{prop="hardness",value=10},
+			{prop="spark",value=true}
+		}
+			fixture:setUserData(data)
+			fixture:setCategory(2)
 		end
 	elseif m_type=="water" then
 		fixture:setDensity(1)
