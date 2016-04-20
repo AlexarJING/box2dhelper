@@ -272,7 +272,7 @@ function creator:explosion()
 	local shape = love.physics.newCircleShape(self.createR)
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
-	local userData={prop="beginContact",value="explosion"}
+	local userData={prop="explosion",value=true}
 	local data = fixture:getUserData()
 	if not data then data={} end
 	table.insert(data, userData)
