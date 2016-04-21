@@ -1,6 +1,12 @@
 if arg[#arg] == "-debug" then require("mobdebug").start() end 
 require "libs.util"
 
+
+local verts = math.polygonClip({0,0,100,0,100,100,0,100},{50,50,150,50,150,150,50,150})
+for i,v in ipairs(verts) do
+	print(v)
+end
+print(math.getPolygonArea(verts)) 
 local editor=require "editor/editor"
 
 function love.load()

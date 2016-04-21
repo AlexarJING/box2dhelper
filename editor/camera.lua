@@ -8,7 +8,7 @@ function cam:update()
 	self :holdMove()
 	if editor.state=="test" then
 		self.state="test"
-		self:followSelection()
+		if not editor.testMode.dragForcing then self:followSelection() end
 	elseif editor.state~="test" and self.state=="test" then
 		cam:setPosition(0,0)
 	end

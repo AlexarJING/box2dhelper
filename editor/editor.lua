@@ -30,7 +30,7 @@ function editor:init()
 	local fixture = love.physics.newFixture(circle, shape, 0.1)
 
 	fixture:setUserData({
-		{prop="crashable",value=true},
+		{prop="oneWay",value=true},
 		{prop="material",value="rock"},
 		{prop="hardness",value=3},
 		 })
@@ -39,10 +39,9 @@ function editor:init()
 	local fixture = love.physics.newFixture(circle, shape, 0.1)
 
 	fixture:setUserData({
-		{prop="crashable",value=true},
+		{prop="embed",value=100},
 		{prop="material",value="rock"},
 		{prop="hardness",value=3},
-		{prop="reverse",value=true}
 		 })
 	self.W = w()
 	self.H = h()

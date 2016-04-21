@@ -653,3 +653,216 @@ function table.save(tab,name,ifCopyFunction)
 	--print(output)
 	return output 
 end
+
+
+local sqrt, cos, sin, atan2 = math.sqrt, math.cos, math.sin, math.atan2
+
+local function str(x,y)
+	return "("..tonumber(x)..","..tonumber(y)..")"
+end
+
+local function mul(s, x,y)
+	return s*x, s*y
+end
+
+local function div(s, x,y)
+	return x/s, y/s
+end
+
+local function add(x1,y1, x2,y2)
+	return x1+x2, y1+y2
+end
+
+local function sub(x1,y1, x2,y2)
+	return x1-x2, y1-y2
+end
+
+local function permul(x1,y1, x2,y2)
+	return x1*x2, y1*y2
+end
+
+local function dot(x1,y1, x2,y2)
+	return x1*x2 + y1*y2
+end
+
+local function det(x1,y1, x2,y2)
+	return x1*y2 - y1*x2
+end
+
+local function eq(x1,y1, x2,y2)
+	return x1 == x2 and y1 == y2
+end
+
+local function lt(x1,y1, x2,y2)
+	return x1 < x2 or (x1 == x2 and y1 < y2)
+end
+
+local function le(x1,y1, x2,y2)
+	return x1 <= x2 and y1 <= y2
+end
+
+local function len2(x,y)
+	return x*x + y*y
+end
+
+local function len(x,y)
+	return sqrt(x*x + y*y)
+end
+
+local function dist2(x1,y1, x2,y2)
+	return len2(x1-x2, y1-y2)
+end
+
+local function dist(x1,y1, x2,y2)
+	return len(x1-x2, y1-y2)
+end
+
+local function normalize(x,y)
+	local l = len(x,y)
+	if l > 0 then
+		return x/l, y/l
+	end
+	return x,y
+end
+
+local function rotate(phi, x,y)
+	local c, s = cos(phi), sin(phi)
+	return c*x - s*y, s*x + c*y
+end
+
+local function perpendicular(x,y)
+	return -y, x
+end
+
+local function project(x,y, u,v)
+	local s = (x*u + y*v) / (u*u + v*v)
+	return s*u, s*v
+end
+
+local function mirror(x,y, u,v)
+	local s = 2 * (x*u + y*v) / (u*u + v*v)
+	return s*u - x, s*v - y
+end
+
+-- ref.: http://blog.signalsondisplay.com/?p=336
+local function trim(maxLen, x, y)
+	local s = maxLen * maxLen / len2(x, y)
+	s = s > 1 and 1 or math.sqrt(s)
+	return x * s, y * s
+end
+
+local function angleTo(x,y, u,v)
+	if u and v then
+		return atan2(y, x) - atan2(v, u)
+	end
+	return atan2(y, x)
+end
+
+-- the module
+math.vec2={
+	str = str,
+	mul    = mul,
+	div    = div,
+	add    = add,
+	sub    = sub,
+	permul = permul,
+	dot    = dot,
+	det    = det,
+	cross  = det,
+	eq = eq,
+	lt = lt,
+	le = le,
+	len2          = len2,
+	len           = len,
+	dist2         = dist2,
+	dist          = dist,
+	normalize     = normalize,
+	rotate        = rotate,
+	perpendicular = perpendicular,
+	project       = project,
+	mirror        = mirror,
+	trim          = trim,
+	angleTo       = angleTo,
+}
+
+
+local inv3=1/3
+
+--return center,area verts[1],verts[2] = x ,y
+function math.getPolygonArea(verts) 
+	local count=#verts/2
+	local cx,cy=0,0
+	local area = 0
+
+	local refx,refy=0,0
+	for i=1,#verts-3,2 do
+		local p1x,p1y=refx,refy
+		local p2x,p2y=verts[i],verts[i+1]
+		local p3x = i+2>#verts and verts[1] or verts[i+2]
+		local p3y = i+2>#verts and verts[2] or verts[i+3]
+
+		local e1x= p2x-p1x
+		local e1y= p2y-p1y
+		local e2x= p3x-p1x
+		local e2y= p3y-p1y
+
+		local d=math.vec2.cross(e1x,e1y,e2x,e2y)
+		local triAngleArea=0.5*d
+		area=area+triAngleArea
+		cx = cx + triAngleArea*(p1x+p2x+p3x)/3
+		cy = cy + triAngleArea*(p1y+p2y+p3y)/3
+	end
+
+	if area~=0 then
+		cx= cx/area
+		cy= cy/area
+		return cx,cy,math.abs(area)
+	end
+	
+end
+
+local function inside(px,py, cp1x,cp1y,cp2x, cp2y)
+    return (cp2x-cp1x)*(py-cp1y) > (cp2y-cp1y)*(px-cp1x)
+end
+ 
+local function intersection(cp1x,cp1y,cp2x, cp2y, sx,sy, ex,ey)
+  local dcx, dcy = cp1x-cp2x, cp1y-cp2y
+  local dpx, dpy = sx-ex, sy-ey
+  local n1 = cp1x*cp2y - cp1y*cp2x
+  local n2 = sx*ey - sy*ex
+  local n3 = 1 / (dcx*dpy - dcy*dpx)
+  local x = (n1*dpx - n2*dcx) * n3
+  local y = (n1*dpy - n2*dcy) * n3
+  return x,y
+end
+ 
+function math.polygonClip(subjectPolygon, clipPolygon)
+  local outputList = subjectPolygon
+  local cp1x = clipPolygon[#clipPolygon-1]
+  local cp1y = clipPolygon[#clipPolygon]
+  for i=1,#clipPolygon-1,2 do
+    local cp2x,cp2y = clipPolygon[i],clipPolygon[i+1]
+    local inputList = outputList
+    outputList={}
+    local sx,sy = inputList[#inputList-1],inputList[#inputList]
+    for i=1,#inputList-1,2 do
+      local ex,ey=inputList[i],inputList[i+1]
+      if inside(ex,ey, cp1x,cp1y,cp2x, cp2y) then
+        if not inside(sx,sy, cp1x,cp1y,cp2x, cp2y ) then
+          local x,y=intersection(cp1x,cp1y,cp2x, cp2y, sx,sy, ex,ey)
+          table.insert(outputList, x)
+          table.insert(outputList, y)
+        end
+        table.insert(outputList, ex)
+        table.insert(outputList, ey)
+      elseif inside(sx,sy, cp1x,cp1y,cp2x, cp2y ) then
+        local x,y=intersection(cp1x,cp1y,cp2x, cp2y, sx,sy, ex,ey)
+        table.insert(outputList, x)
+        table.insert(outputList, y)
+      end
+      sx=ex;sy=ey
+    end
+    cp1x=cp2x;cp1y=cp2y
+  end
+  return outputList
+end
