@@ -151,7 +151,7 @@ func.crash=function(threshold,a,b,coll,np,tp)
 			local verts={}
 			for i=1,8 do
 				table.insert(verts, x+r*math.sin(i*math.pi/4))
-				table.insert(verts, x+r*math.cos(i*math.pi/4))
+				table.insert(verts, y+r*math.cos(i*math.pi/4))
 			end
 			local shape = love.physics.newPolygonShape(verts)
 			local body=a:getBody()
@@ -276,8 +276,143 @@ function func.oneWayEnd(enabled,a,b,coll)
 	end
 end
 
+function func.buoyancy(density,a,b,coll)  --in pre
+	local bodyA,bodyB=a:getBody(),b:getBody()
+	coll:setEnabled(false)
+	if bodyB:getType()~="dynamic" then return end
+	local bVerts
+	local shapeA,shapeB=a:getShape(),b:getShape()
+	if shapeB:getType()=="circle" then
+		local x,y=shapeB:getPoint()
+		local r = shapeB:getRadius()
+		local count= r/3 > 8 and r/3 or 8
+		bVerts={}
+		for i=1,count do
+			table.insert(bVerts, x+r*math.sin(i*math.pi*2/count))
+			table.insert(bVerts, y+r*math.cos(i*math.pi*2/count))
+		end
+	else
+		bVerts={bodyB:getWorldPoints(shapeB:getPoints())}
+	end
+
+	local aVerts={bodyA:getWorldPoints(shapeA:getPoints())}
+	local intersection = math.polygonClip(bVerts,aVerts)
+	if not intersection then return end
+	local cx,cy,area = math.getPolygonArea(intersection)
+	if not area then return end
+
+	local displacedMass = area*density/love.physics.getMeter( )
+	bodyB:applyForce(0,-displacedMass*9.8,cx,cy)
+	local vx,vy= bodyB:getLinearVelocity()
+	bodyB:applyForce(-vx/10,-vy/10)
+	local vr = bodyB:getAngularVelocity()
+	bodyB:applyTorque(-vr*5000)
+
+	local dragMod = 0.25
+    local liftMod = 0.25
+    local maxDrag = 20
+    local maxLift = 5
+
+    for i=1, #intersection-1,2 do
+    	local p1x,p1y=intersection[i],intersection[i+1]
+    	local ii = i+2>#intersection and 1 or i+2
+    	local p2x,p2y=intersection[ii],intersection[ii+1]
+    	local pmx,pmy = (p1x+p2x)/2,(p1y+p2y)/2
+
+ 		local vax,vay=bodyA:getLinearVelocityFromWorldPoint(pmx,pmy)
+ 		local vbx,vby=bodyB:getLinearVelocityFromWorldPoint(pmx,pmy)
+
+ 		local vrx,vry=vbx-vax,vby-vay
+ 		local vr=math.vec2.normalize(vrx,vry)
+
+ 		local ex,ey=p2x-p1x,p2y-p1y
+ 		local elen=math.vec2.normalize(ex,ey)
+ 		local enx,eny=math.vec2.cross(-1,0,ex,ey),0
+ 		local dragDot=math.vec2.dot(enx,eny,vrx,vry)
+
+ 		if dragDot>=0 then
+ 			local dragMag=dragDot * dragMod * elen * density * vr * vr/ love.physics.getMeter()^3;
+ 			if dragMag>0 then
+ 				dragMag = math.min( dragMag, maxDrag )
+ 			elseif dragMag<0 then
+ 				dragMag = math.max( dragMag, -maxDrag )
+ 			end
+ 			local dragForceX,dragForceY=-dragMag*vrx,-dragMag*vry
 
 
+ 			local liftDot=math.vec2.dot(ex,ey,vrx,vry)
+ 			local liftMag =dragDot *liftDot* liftMod * elen * density * vr * vr/ love.physics.getMeter()^3
+ 			liftMag = math.min(liftMag,maxLift)
+ 			if liftMag>0 then
+ 				liftMag = math.min( liftMag, maxLift )
+ 			elseif liftMag<0 then
+ 				liftMag = math.max( liftMag, -maxLift )
+ 			end
+ 			local lx,ly= math.vec2.cross(1,0,vrx,vry),0
+ 			local liftForceX,liftForceY=-liftMag*lx,-liftMag*ly
+			bodyB:applyForce(liftForceX,liftForceY,pmx,pmy)
+
+ 		end
+    end
+end
+
+--[[
+	magnetfixture:
+	1. createfieldfixture
+	2. magnet.north=fixture
+	3. magnet.south=fixture
+	4. magnet.power=999
+	north/south
+	1. power= +- 999
+	2. pole = north/south
+	3. parent = main fixutre
+	4. opposite = south/north
+
+]]
+
+
+
+function func.magnet(power,a,b,coll)
+	coll:setEnabled(false)
+	local tab=b:getUserData()
+	local magB --B的磁场
+	if not tab then return end
+	for i,v in ipairs(tab) do
+		if v.prop=="material" then matB=v.value end
+		if v.prop=="magnetField" then magB=v.value end
+	end
+	local parent = a:getBody():getFixtureList()[#a:getBody():getFixtureList()]
+
+	if (not matB=="steel") and (matB=="magnet") then return end
+	local bodyA,bodyB=a:getBody(),b:getBody()
+	local shapeA,shapeB=a:getShape(),b:getShape()
+	local xA,yA= bodyA:getWorldPoint(shapeA:getPoint())
+	local xB,yB
+	--local r = shapeA:getRadius()
+	if matB=="steel" and magB==nil then
+		xB,yB= bodyB:getPosition()
+		local distance = math.getDistance(xA,yA,xB,yB)
+		local distX,distY=xA-xB,yA-yB
+		local power=math.abs(power)/(1+distance)
+		local angle=math.getRot(xB,yB,xA,yA)
+
+		bodyA:applyForce(-power*math.sin(angle), power*math.cos(angle))
+		bodyB:applyForce(power*math.sin(angle), -power*math.cos(angle))
+	end
+	if magB then
+		xB,yB= bodyB:getWorldPoint(shapeB:getPoint())
+		local distance = math.getDistance(xA,yA,xB,yB)
+		local distX,distY=xA-xB,yA-yB
+		if math.sign(magB)~=math.sign(power) then
+			power=math.abs(power)/(1+distance)
+		else
+			power=-math.abs(power)/(1+distance)
+		end
+		local angle=math.getRot(xB,yB,xA,yA)
+		bodyA:applyForce(-power*math.sin(angle), power*math.cos(angle),xA,yA)
+		bodyB:applyForce(power*math.sin(angle), -power*math.cos(angle),xB,yB)
+	end
+end
 
 
 return function(parent) 

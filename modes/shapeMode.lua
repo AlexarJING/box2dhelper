@@ -39,10 +39,11 @@ function vertex:getVerts()
 		
 			local shape=fix:getShape()
 			if shape:type()=="CircleShape" then
-				x,y=body:getWorldPoint(shape:getRadius(),0)
+				local sx,sy=shape:getPoint()
+				x,y=body:getWorldPoint(shape:getRadius()+sx,sy)
 				table.insert(self.verts, {type="radius",body=body,fixture=fix,x=x,y=y})
-				x,y=body:getWorldPoint(shape:getPoint())
-				table.insert(self.verts, {type="center",body=body,fixture=fix,x=x,y=y})
+				x,y=body:getWorldPoint(sx,sy)
+      				table.insert(self.verts, {type="center",body=body,fixture=fix,x=x,y=y})
 			else
 				local verts= {body:getWorldPoints(shape:getPoints())}
 				for i= 1,#verts-1,2 do
@@ -138,30 +139,60 @@ function vertex:rotate()
 	local ifCopy
 	if love.keyboard.isDown("lctrl") then ifCopy=true end
 
+	local fixture=self.selectedVert.fixture
 	local body=self.selectedVert.body
 	local x,y =self.selectedVert.x,self.selectedVert.y
 	
-	if self.downType==1 then
-		if ifCopy then
-			local obj=editor.helper.getWorldData({body})
-			editor.helper.createWorld(editor.world,obj)
+	if fixture==body:getFixtureList()[#body:getFixtureList()] then --it's the main 旋转body
+		if self.downType==1 then
+			if ifCopy then
+				local obj=editor.helper.getWorldData({body})
+				editor.helper.createWorld(editor.world,obj)
+			end
+			local rotation=getRot(x,y,self.dragTX,self.dragTY)
+			local angle=rotation-Pi/2
+			body:setAngle(angle)
+		else
+			if ifCopy then
+				local obj=editor.helper.getWorldData({body})
+				editor.helper.createWorld(editor.world,obj)
+			end
+			local rotation=getRot(0,0,self.dragTX,self.dragTY)
+			local bodyR= getRot(0,0,x,y)
+			local rotation=getRot(0,0,self.dragTX,self.dragTY)
+			local angle=body:getAngle()
+			body:setAngle(angle+rotation-bodyR)
+			body:setPosition(axisRot(x,y,rotation-bodyR))
 		end
-		local rotation=getRot(x,y,self.dragTX,self.dragTY)
-		local angle=rotation-Pi/2
-		body:setAngle(angle)
-	else
-		if ifCopy then
-			local obj=editor.helper.getWorldData({body})
-			editor.helper.createWorld(editor.world,obj)
+	else --旋转fixture的顶点
+		if self.downType==1 then
+			if ifCopy then
+				local obj=editor.helper.getWorldData({body})
+				editor.helper.createWorld(editor.world,obj)
+			end
+			local rotation=getRot(x,y,self.dragTX,self.dragTY)
+			local verts
+			if fixture:getShape():getType()=="polygon" then
+				verts=fixture:getShape():getPoints()
+				local newshape = love.physics.newPolygonShape(polygonTrans(0,0,rotation,1,verts))
+				local newfixture = love.physics.newFixture(body, newshape)
+			end
+		else
+			if ifCopy then
+				local obj=editor.helper.getWorldData({body})
+				editor.helper.createWorld(editor.world,obj)
+			end
+			local rotation=getRot(0,0,self.dragTX,self.dragTY)
+			local bodyR= getRot(0,0,x,y)
+			local rotation=getRot(0,0,self.dragTX,self.dragTY)
+			local angle=body:getAngle()
+			body:setAngle(angle+rotation-bodyR)
+			body:setPosition(axisRot(x,y,rotation-bodyR))
 		end
-		local rotation=getRot(0,0,self.dragTX,self.dragTY)
-		local bodyR= getRot(0,0,x,y)
-		local rotation=getRot(0,0,self.dragTX,self.dragTY)
-		local angle=body:getAngle()
-		body:setAngle(angle+rotation-bodyR)
-		body:setPosition(axisRot(x,y,rotation-bodyR))
 	end
+
 	
+	self.action="rotate fixture"
 end
 
 function vertex:click()

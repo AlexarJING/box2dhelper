@@ -108,9 +108,6 @@ end
 
 
 function selector:click(key)
-	--if self.mouseBall.enable then return end
-	if editor.state=="fixture" then editor.fixtureMode:click(key) end
-	if editor.state~="body" and editor.state~="test" then return end
 
 	if editor.bodyMode.dragMoving then return end
 

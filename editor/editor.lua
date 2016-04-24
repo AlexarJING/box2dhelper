@@ -1,5 +1,5 @@
 local editor={}
-editor.world= love.physics.newWorld(0, 9.8*64, false)
+editor.world= love.physics.newWorld(0, 0, false)
 love.physics.setMeter(64)
 
 
@@ -25,24 +25,49 @@ editor.fixtureMode= require "modes/fixtureMode"(editor)
 
 function editor:init()
 	
-	local circle  = love.physics.newBody(self.world, 0, 0, "static")
-	local shape  = love.physics.newRectangleShape(100,100)
-	local fixture = love.physics.newFixture(circle, shape, 0.1)
-
+	local body  = love.physics.newBody(self.world, 0, 0, "static")
+	body:setLinearDamping(3)
+	local shape   = love.physics.newRectangleShape(100,300)
+	local fixture = love.physics.newFixture(body, shape, 1)
+	fixture:setRestitution(0)
+	fixture:setFriction(99)
 	fixture:setUserData({
-		{prop="oneWay",value=true},
 		{prop="material",value="rock"},
 		{prop="hardness",value=3},
+		{prop="magnet",value=1},
 		 })
-	local circle  = love.physics.newBody(self.world, 150, 0, "dynamic")
-	local shape   = love.physics.newCircleShape( 0, 0, 50)
-	local fixture = love.physics.newFixture(circle, shape, 0.1)
+	editor.createMode:magnetField(fixture)
 
+
+	local body  = love.physics.newBody(self.world, 100, -200, "dynamic")
+	body:setLinearDamping(3)
+	body:getAngularDamping(3)
+	local shape   = love.physics.newRectangleShape(30,100)
+	local fixture = love.physics.newFixture(body, shape, 2)
+	fixture:setRestitution(0)
+	fixture:setFriction(99)
 	fixture:setUserData({
-		{prop="embed",value=100},
 		{prop="material",value="rock"},
 		{prop="hardness",value=3},
+		{prop="magnet",value=-1},
 		 })
+	editor.createMode:magnetField(fixture)
+
+
+	local body  = love.physics.newBody(self.world, -100, 200, "dynamic")
+	body:setLinearDamping(3)
+	body:getAngularDamping(3)
+	local shape   = love.physics.newRectangleShape(30,100)
+	local fixture = love.physics.newFixture(body, shape, 2)
+	fixture:setRestitution(0)
+	fixture:setFriction(99)
+	fixture:setUserData({
+		{prop="material",value="rock"},
+		{prop="hardness",value=3},
+		{prop="magnet",value=1},
+		 })
+	editor.createMode:magnetField(fixture)
+
 	self.W = w()
 	self.H = h()
 	self.bg:init()
@@ -122,11 +147,13 @@ function editor:draw()
 			self.bodyMode:draw()
 			self.selector:draw()
 		end	
-		if TestVerts then
-			for i,v in ipairs(TestVerts) do
-				--love.graphics.circle("fill", v.x, v.y, 3)
-				--love.graphics.line(v.x,v.y,TestX,TestY)
-			end
+		love.graphics.setColor(255, 0, 0, 255)
+		if test1 and #test1>2 then
+			love.graphics.polygon("line", test1)
+		end
+
+		if test2 then 
+			love.graphics.polygon("line", test2)
 		end
 	end)
 
@@ -147,17 +174,20 @@ end
 function editor:mousereleased(x, y, button)
 	if button==1 then button="l"
 	elseif button==2 then button="r" end
-	if self.state=="body" or self.state=="test" then
-		editor.selector:click(button)
-	elseif self.state=="fixture" then
-		editor.fixtureMode:click(button)
-	elseif self.state=="joint" then
-		editor.jointMode:click(button)
-	elseif self.state=="shape" then
-		editor.shapeMode:click(button)
+	
+	if self.interface:isHover() then
+		self.LoveFrames.mousereleased(x, y, button)
+	else
+		if self.state=="body" or self.state=="test" then
+			editor.selector:click(button)
+		elseif self.state=="fixture" then
+			editor.fixtureMode:click(button)
+		elseif self.state=="joint" then
+			editor.jointMode:click(button)
+		elseif self.state=="shape" then
+			editor.shapeMode:click(button)
+		end
 	end
-
-	self.LoveFrames.mousereleased(x, y, button)
 end
 
 function editor:keypressed(key, isrepeat)

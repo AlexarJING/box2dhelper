@@ -408,10 +408,13 @@ helper.collisionType={
 	},
 	pre={
 		oneWay=helper.collisionFunc.oneWayPre,
+		buoyancy=helper.collisionFunc.buoyancy,
+		magnetField=helper.collisionFunc.magnet,
 	},
 	post={
 		crashable=helper.collisionFunc.crash,
-		embed=helper.collisionFunc.embed
+		embed=helper.collisionFunc.embed,
+
 	}	
 }
 
@@ -607,12 +610,6 @@ local function getJointIndex(list,joint)
 	end
 	
 end
-
-
-
-
-
-
 
 
 

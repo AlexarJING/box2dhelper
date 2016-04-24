@@ -651,15 +651,12 @@ function interface:setListItems(target,v)
 			setProp(target,v.prop,text)
 			obj.focus=false
 		end
-		
+	elseif type(v.value)=="userdata" then 
+		value = ui.Create("textinput")
+		value:SetText(tostring(v.value))
+		value:SetEditable(false)
 	end
-	if tag~="userdata" and not target["set"..v.prop] then 
-		if value.SetEditable then
-			value:SetEditable(false)
-		else
-			value:SetEnabled(false)
-		end
-	end
+
 	return key,value
 end
 

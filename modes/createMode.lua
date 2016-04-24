@@ -346,22 +346,25 @@ end
 function creator:polygon()
 	if not self.createVerts then return end
 	if #self.createVerts<6 then return end
-	if #self.createVerts>16 then
-		for i=16,#self.createVerts do
-			self.createVerts[i]=nil
+	editor.action="create polygon"
+	if #self.createVerts>16 or not love.math.isConvex(self.createVerts) then
+		local x,y=math.getPolygonArea(self.createVerts)
+		local body = love.physics.newBody(editor.world, x, y,"dynamic")
+		local triangles = love.math.triangulate( self.createVerts )
+		for i,triangle in ipairs(triangles) do
+			local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,triangle))
+			local fixture = love.physics.newFixture(body, shape)
+			self:setMaterial(fixture,"wood")
 		end
+
+	else
+		local x,y=math.getPolygonArea(self.createVerts)
+		local body = love.physics.newBody(editor.world, x, y,"dynamic")
+		local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,self.createVerts))
+		local fixture = love.physics.newFixture(body, shape)
+		self:setMaterial(fixture,"wood")
 	end
-	editor.action="create polygon"	
-	local body = love.physics.newBody(editor.world, self.createOX, self.createOY,"dynamic")
-	local shape = love.physics.newPolygonShape(polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts))
-	local fixture = love.physics.newFixture(body, shape)
-	local x,y=body:getWorldPoint(fixture:getMassData( ))
-	body:destroy()
-	local body = love.physics.newBody(editor.world, x, y,"dynamic")
-	local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,self.createVerts))
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	return {body=body,shape=shape,fixture=fixture}
+
 end
 
 function creator:getBodies()
@@ -441,6 +444,47 @@ function creator:wheel()
 	local joint = love.physics.newWheelJoint(body1, body2, x2, y2, math.sin(angle), -math.cos(angle), false)
 end
 
+--mainbody
+--magnet = +999 or -999 
+
+
+function creator:magnetField(fixture)
+	local body=fixture:getBody()
+	local shape=fixture:getShape()
+	local power
+	for i,v in ipairs(fixture:getUserData()) do
+		if v.prop=="magnet" then power=v.value end
+	end
+	local _, _, mass = fixture:getMassData( )
+	if shape:getType()=="circle" then
+		local x,y= shape:getPoint()
+		local fieldShape = love.physics.newCircleShape(x, y, math.sqrt(mass)*100)
+		local fieldfixture = love.physics.newFixture(body, fieldShape, 0.00001)
+		fieldfixture:setUserData {
+			{prop="magnetField",value=power*math.sqrt(mass)*49999},
+		}
+	elseif shape:getType()=="polygon" then
+		local verts={shape:getPoints()}
+		if #verts~=8 then print("only rect");return end
+
+		local x,y=(verts[1]+verts[3]) /2,(verts[2]+verts[4]) /2
+
+		local fieldShape = love.physics.newCircleShape(x, y, math.sqrt(mass)*60)
+		local fieldfixture = love.physics.newFixture(body, fieldShape, 0.00001)
+		fieldfixture:setUserData {
+			{prop="magnetField",value=power*math.sqrt(mass)*49999},
+		}
+		local x,y=(verts[5]+verts[7]) /2,(verts[6]+verts[8]) /2
+		local fieldShape = love.physics.newCircleShape(x,y,math.sqrt(mass)*60)
+		local fieldfixture = love.physics.newFixture(body, fieldShape, 0.00001)
+		fieldfixture:setUserData {
+			{prop="magnetField",value=-power*math.sqrt(mass)*49999},
+		}
+	else
+		print("can not solve")
+	end
+
+end
 
 
 function creator:setMaterial(fixture,m_type)

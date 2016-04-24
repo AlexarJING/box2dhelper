@@ -795,7 +795,7 @@ function math.getPolygonArea(verts)
 	local area = 0
 
 	local refx,refy=0,0
-	for i=1,#verts-3,2 do
+	for i=1,#verts-1,2 do
 		local p1x,p1y=refx,refy
 		local p2x,p2y=verts[i],verts[i+1]
 		local p3x = i+2>#verts and verts[1] or verts[i+2]
@@ -818,7 +818,6 @@ function math.getPolygonArea(verts)
 		cy= cy/area
 		return cx,cy,math.abs(area)
 	end
-	
 end
 
 local function inside(px,py, cp1x,cp1y,cp2x, cp2y)
