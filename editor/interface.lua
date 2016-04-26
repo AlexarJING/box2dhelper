@@ -499,23 +499,7 @@ end
 
 
 
-local function setProp(target,prop,...)
-	local tag=interface.propTag
-	if tag=="userdata" then
-		for i,v in ipairs(target) do
-			if v.prop==prop then
-				v.value=...
-				break
-			end
-		end
-		--interface.targetFixture:setUserData(target)
-	else
-		target["set"..prop](target,...)
-	end
-	
-	editor.action="change property"
 
-end
 
 
 function interface:updatePropFrame()
@@ -561,6 +545,7 @@ function interface:resetPropFrame()
 	self.targetProp=prop
 	self.targetData=data
 
+
 	for i,v in ipairs(self.targetProp) do
 		local value=self.propGrid[i][2]
 		if type(v.value)=="number" then
@@ -581,7 +566,7 @@ function interface:resetPropFrame()
 	if not self.targetData then return end
 
 	for i,v in ipairs(self.targetData) do
-		local value=self.propGrid[i][2]
+		local value=self.dataGrid[i][2]
 		if type(v.value)=="number" then
 			value:SetText(tostring(v.value))
 		elseif type(v.value)=="table" then
@@ -605,6 +590,29 @@ function interface:removePropFrame()
 end
 
 
+local function setProp(target,prop,...)
+	
+	if target["get"..prop] or target["is"..prop] or target["has"..prop] then
+		if target["set"..prop] then target["set"..prop](target,...) end
+	elseif target.update then --tt's a world
+		if prop=="meter" then
+			love.physics.setMeter(...)
+		else
+			editor[prop]=...
+		end
+	else
+		for i,v in ipairs(target:getUserData()) do
+			if v.prop==prop then
+				v.value=...
+				break
+			end
+		end
+	end
+	
+	
+	editor.action="change property"
+
+end
 
 function interface:setListItems(target,v)
 	local key = ui.Create("button")
@@ -687,17 +695,11 @@ function interface:createPropFrame(target)
 	if hasUserData then
 		data=target:getUserData()
 		if not data then
-			if tType=="body" then
-				data={{prop="name",value="default"}}
-			elseif tType=="fixture" then
-				data={{prop="material",value="wood"}}
-			elseif tType=="joint" then
-				data={{prop="material",value="steel"}}
-			end
+			error("no user data")
 		end
 	end
 	local tmp=editor.helper.getStatus(target,tType)
-	for i,v in ipairs(editor.helper.properties[tType]) do
+	for i,v in ipairs(editor.helper.properties[tType]) do --为了排序
 		if tmp[v]~=nil then table.insert(prop,{prop=v,value=tmp[v]}) end
 	end
 	self.targetProp=prop
@@ -728,13 +730,12 @@ function interface:createPropFrame(target)
 		self.propList:AddItem(value,i,2)
 		table.insert(self.propGrid, {key,value})
 	end
-
-
-	self.dataList=makeList(count)
-	tabs:AddTab("UserData", self.dataList)
 	self.propList:update()
 
 	if not hasUserData then return end
+
+	self.dataList=makeList(count)
+	tabs:AddTab("UserData", self.dataList)
 	self.dataGrid={}
 	for i,v in ipairs(self.targetData) do
 		local key,value= self:setListItems(target,v)
@@ -754,7 +755,7 @@ function interface:createPropFrame(target)
 	name.OnEnter=function(obj)
 		local k=name:GetText()
 		local v=value:GetText()
-		table.insert(target, {prop=k,value=v})
+		table.insert(target:getUserData(), {prop=k,value=v})
 		self:removePropFrame()
 		self:createPropFrame()
 		obj.focus=false
@@ -767,7 +768,7 @@ function interface:createPropFrame(target)
 	value.OnEnter=function(obj)
 		local k=name:GetText()
 		local v=value:GetText()
-		table.insert(target, {prop=k,value=v})
+		table.insert(target:getUserData(), {prop=k,value=v})
 		self:removePropFrame()
 		self:createPropFrame()
 		obj.focus=false
@@ -775,8 +776,28 @@ function interface:createPropFrame(target)
 	self.dataList:AddItem(name,#self.targetData+1,1)
 	self.dataList:AddItem(value,#self.targetData+1,2)
 	
-	
 	self.dataList:update()
+
+	if tType~="body" then return end
+	
+	self.worldList=makeList(count)
+	tabs:AddTab("  world  ", self.worldList)
+	self.worldGrid={}
+	self.worldData={
+		{prop="meter",value= love.physics.getMeter()},
+		{prop="Gravity",value={editor.world:getGravity()}},
+		{prop="linearDamping",value=editor.linearDamping},
+		{prop="angularDamping",value=editor.angularDamping},
+		{prop="SleepingAllowed",value=editor.world:isSleepingAllowed()}
+
+	}
+	for i,v in ipairs(self.worldData) do
+		local key,value= self:setListItems(editor.world,v)
+		self.worldList:AddItem(key,i,1)
+		self.worldList:AddItem(value,i,2)
+		table.insert(self.worldGrid, {key,value})
+	end
+
 end
 
 local font = love.graphics.newFont(15)

@@ -486,43 +486,64 @@ function creator:magnetField(fixture)
 
 end
 
+function creator:setData(target,data)
+	local tab=target:getUserData()
+	if not tab then
+		tab={data}
+		target:setUserData(tab)
+	else
+		local found=false
+		for i,v in ipairs(target:getUserData()) do
+			if v.prop==data.prop then
+				v.value=data.value
+				found=true
+				break
+			end
+		end
+		if not found then
+			table.insert(tab, data)
+		end
+	end
+	
+end
 
-function creator:setMaterial(fixture,m_type)
-	--editor.action="set material"..m_type
+
+function creator:setMaterial(fixture,m_type,arg)
+	editor.action="set material"..m_type
+	local body=fixture:getBody()
+	body:setLinearDamping(editor.linearDamping)
+	body:setAngularDamping(editor.angularDamping)
+	self:setData(body)
+	self:setData(fixture,{prop="material",value=m_type})
 	if m_type=="wood" then
 		fixture:setDensity(0.8)
 		fixture:setFriction(1)
 		fixture:setRestitution(0.2)
-		if not fixture:getUserData() then
-			local data={
-			{prop="material",value="wood"},
-			{prop="hardness",value=5},
-			{prop="spark",value=true}
-		}
-			fixture:setUserData(data)
-			fixture:setCategory(1)
-		end
+		fixture:setCategory(1)
+		self:setData(fixture,{prop="hardness",value=5})
+		self:setData(fixture,{prop="spark",value=5})
+		
 	elseif m_type=="steel" then
 		fixture:setDensity(4)
 		fixture:setFriction(1)
 		fixture:setRestitution(0.2)
-		if not fixture:getUserData() then
-			local data={
-			{prop="material",value="steel"},
-			{prop="hardness",value=10},
-			{prop="spark",value=true}
-		}
-			fixture:setUserData(data)
-			fixture:setCategory(2)
-		end
+		fixture:setCategory(2)
+		self:setData(fixture,{prop="hardness",value=10})
+		self:setData(fixture,{prop="spark",value=10})
 	elseif m_type=="water" then
 		fixture:setDensity(1)
-		fixture:setFriction(0)
+		fixture:setFriction(0.1)
 		fixture:setRestitution(0.1)
 	elseif m_type=="boom" then
 		fixture:setDensity(100)
 		fixture:setFriction(99)
 		fixture:setRestitution(0.5)
+	elseif m_type=="magnet" then
+		fixture:setRestitution(0)
+		fixture:setFriction(99)
+		self:setData(fixture,{prop="hardness",value=10})
+		self:setData(fixture,{prop="magnet",value=arg.magnet})
+		self:magnetField(fixture)
 	end
 end
 

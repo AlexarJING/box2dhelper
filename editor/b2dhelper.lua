@@ -4,6 +4,12 @@ local preserve={}
 helper.todo={}
 helper.delay={}
 helper.world=nil
+helper.visible={
+	body=true,
+	fixture=true,
+	contact=false,
+	joint=true
+}
 
 local function addDelay(func,delay,...)
 	table.insert(helper.delay, {func,os.time()+delay,...})
@@ -311,13 +317,15 @@ function helper.drawContact(contact,color)
 	if x2 then love.graphics.circle("fill", x2, y2, 3) end
 end
 
-function helper.draw(world,colorStyle,offx,offy)
+function helper.draw(world,colorStyle,offx,offy,offr)
 	if world==helper.world then
 		updateTodo()
 		updateDelay()
 	end
+	love.graphics.push( )
 	if offx then
 		love.graphics.translate(offx, offy)
+		love.graphics.rotate(offr or 0)
 	end
 	updatePreserve()
 	colorStyle=colorStyle or defaultStyle
@@ -335,7 +343,7 @@ function helper.draw(world,colorStyle,offx,offy)
 	love.graphics.setLineJoin( "none")
 	for i,body in ipairs(bodyList) do
 		addPreserve(body)
-		helper.drawBody(body,colorStyle)
+		if helper.visible.body then helper.drawBody(body,colorStyle) end
 		
 		if not jointList then
 			jointList={}
@@ -361,20 +369,18 @@ function helper.draw(world,colorStyle,offx,offy)
 	if jointList then
 		for i,joint in ipairs(jointList) do
 			addPreserve(joint)
-			helper.drawJoint(joint,colorStyle.joint)
+			if helper.visible.joint then helper.drawJoint(joint,colorStyle.joint) end
 		end
 	end
 
 	if contactList then
 		for i,contact in ipairs(contactList) do
 			addPreserve(contact)
-			helper.drawContact(contact,colorStyle.contact)
+			if helper.visible.contact then helper.drawContact(contact,colorStyle.contact) end
 		end
 	end	
 
-	if offx then
-		love.graphics.translate(-offx, -offy)
-	end
+	love.graphics.pop( )
 end
 
 
@@ -464,6 +470,10 @@ function helper.createWorld(world,data,offx,offy)
 	offx=offx or 0
 	offy=offy or 0
 	
+	if data.world then
+		helper.setStatus(world,"world",data.world)
+	end
+
 	local group={}
 	for i,v in ipairs(data.obj) do
 		local obj={}
@@ -613,9 +623,11 @@ end
 
 
 
-function helper.getWorldData(world,offx,offy)
+function helper.getWorldData(world,offx,offy,arg)
 	offx =offx or 0
 	offy =offy or 0
+	local group={} --contains all the data
+
 	local bodyList --如果不是world 那么就是body list
 	if type(world)=="userdata" then
 		if world~=helper.world then
@@ -628,10 +640,15 @@ function helper.getWorldData(world,offx,offy)
 		if not beginContact then
 			setCallbacks(world)
 		end
+		local status=helper.getStatus(world,"world")
+		status.meter=arg.meter
+		status.linearDamping=arg.linearDamping
+		status.angularDamping=arg.angularDamping
+		group.world=status
 	else
 		bodyList=world
 	end
-	local group={}
+	
 	group.obj={}
 
 
@@ -722,6 +739,10 @@ end
 
 
 helper.properties={
+		world={
+		"Gravity",
+		"SleepingAllowed"
+	},
 		body={
 	"X","Y","Angle",
 	"AngularDamping",

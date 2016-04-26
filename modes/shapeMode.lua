@@ -38,22 +38,24 @@ function vertex:getVerts()
 		for i,fix in ipairs(body:getFixtureList()) do
 		
 			local shape=fix:getShape()
-			if shape:type()=="CircleShape" then
+			if shape:type()=="CircleShape"  then
 				local sx,sy=shape:getPoint()
 				x,y=body:getWorldPoint(shape:getRadius()+sx,sy)
 				table.insert(self.verts, {type="radius",body=body,fixture=fix,x=x,y=y})
-				x,y=body:getWorldPoint(sx,sy)
+				if i==#body:getFixtureList() then
+					x,y=body:getWorldPoint(sx,sy)
       				table.insert(self.verts, {type="center",body=body,fixture=fix,x=x,y=y})
+      			end
 			else
 				local verts= {body:getWorldPoints(shape:getPoints())}
 				for i= 1,#verts-1,2 do
 					x,y = verts[i],verts[i+1]
 					table.insert(self.verts, {type="normal",body=body,fixture=fix,x=x,y=y,index=i,verts=verts})
 				end
-				table.insert(self.verts, {type="center",body=body,fixture=fix,x=body:getX(),y=body:getY(),verts=verts})
 			end
 			
 		end
+		table.insert(self.verts, {type="center",body=body,fixture=nil,x=body:getX(),y=body:getY(),verts=nil})
 	end
 
 end
@@ -137,13 +139,17 @@ end
 
 function vertex:rotate()
 	local ifCopy
-	if love.keyboard.isDown("lctrl") then ifCopy=true end
+	if love.keyboard.isDown("lctrl") then 
+		ifCopy=true 
+	else
+		ifCopy=false
+	end
 
 	local fixture=self.selectedVert.fixture
 	local body=self.selectedVert.body
 	local x,y =self.selectedVert.x,self.selectedVert.y
 	
-	if fixture==body:getFixtureList()[#body:getFixtureList()] then --it's the main 旋转body
+	
 		if self.downType==1 then
 			if ifCopy then
 				local obj=editor.helper.getWorldData({body})
@@ -164,32 +170,7 @@ function vertex:rotate()
 			body:setAngle(angle+rotation-bodyR)
 			body:setPosition(axisRot(x,y,rotation-bodyR))
 		end
-	else --旋转fixture的顶点
-		if self.downType==1 then
-			if ifCopy then
-				local obj=editor.helper.getWorldData({body})
-				editor.helper.createWorld(editor.world,obj)
-			end
-			local rotation=getRot(x,y,self.dragTX,self.dragTY)
-			local verts
-			if fixture:getShape():getType()=="polygon" then
-				verts=fixture:getShape():getPoints()
-				local newshape = love.physics.newPolygonShape(polygonTrans(0,0,rotation,1,verts))
-				local newfixture = love.physics.newFixture(body, newshape)
-			end
-		else
-			if ifCopy then
-				local obj=editor.helper.getWorldData({body})
-				editor.helper.createWorld(editor.world,obj)
-			end
-			local rotation=getRot(0,0,self.dragTX,self.dragTY)
-			local bodyR= getRot(0,0,x,y)
-			local rotation=getRot(0,0,self.dragTX,self.dragTY)
-			local angle=body:getAngle()
-			body:setAngle(angle+rotation-bodyR)
-			body:setPosition(axisRot(x,y,rotation-bodyR))
-		end
-	end
+	
 
 	
 	self.action="rotate fixture"
@@ -200,7 +181,9 @@ function vertex:click()
 		editor.selector.selection=nil
 		return 
 	end
-	self.selection=self.selectedVert.fixture:getShape()
+	self.selection=self.selectedVert.fixture and 
+		self.selectedVert.fixture:getShape() or 
+		self.selectedVert.body:getFixtureList()[1]:getShape()
 	editor.selector.selection={self.selection}
 end
 
@@ -225,14 +208,31 @@ function vertex:draw()
 			love.graphics.setColor(255, 0, 0, 255)
 		end
 
-		local shape = vert.fixture:getShape()
+		
 		local bx,by = vert.body:getPosition()
 		local body = vert.body
 		if vert.type=="radius" then
 			local cx,cy = shape:getPoint()
 			love.graphics.line(self.dragTX,self.dragTY,bx+cx,by+cy)
+			love.graphics.circle("line", bx+cx, by+cy, math.getDistance(self.dragTX,self.dragTY,bx+cx,by+cy))
 		elseif vert.type=="center" then
-			
+			local cx,cy=body:getPosition()
+			local rotation
+			if love.mouse.isDown(1) then
+				rotation=getRot(cx,cy,self.dragTX,self.dragTY)-Pi/2
+				love.graphics.line(self.dragTX,self.dragTY,cx,cy)
+				love.graphics.push()
+				love.graphics.translate(cx, cy)
+				love.graphics.rotate(rotation)
+				editor.helper.draw({body},nil,-cx,-cy,0)
+				love.graphics.pop()
+			else
+				rotation=getRot(0,0,self.dragTX,self.dragTY)
+				bodyR= getRot(0,0,cx,cy)
+				editor.helper.draw({body},nil,0,0,rotation-bodyR)
+			end
+
+			--[[
 			if shape:type()=="CircleShape" then
 				if love.mouse.isDown(1) then
 					local cx,cy = shape:getPoint()
@@ -268,7 +268,7 @@ function vertex:draw()
 					love.graphics.circle("line", 0,0, getDist(0,0,cx,cy))
 					love.graphics.line(self.dragTX,self.dragTY,0,0)
 				end
-			end
+			end]]
 		else
 			local shapeVerts=vert.verts
 			local i = vert.index

@@ -18,7 +18,7 @@ end
 
 
 function system:clear()
-	editor.world =love.physics.newWorld(0, 9.8*64, false)
+	editor.world =love.physics.newWorld()
 	editor:changeMode("body")
 end
 
@@ -35,7 +35,7 @@ end
 function system:pushUndo()
 	
 	self.undoIndex=self.undoIndex+1
-	self.undoStack[self.undoIndex]={event=editor.action,world=editor.helper.getWorldData(editor.world)}
+	self.undoStack[self.undoIndex]={event=editor.action,world=editor.helper.getWorldData(editor.world,0,0,editor)}
 	if #self.undoStack>self.maxUndo then
 		table.remove(self.undoStack, 1)
 		self.undoIndex=self.maxUndo
@@ -46,12 +46,20 @@ function system:pushUndo()
 	editor.interface:updateHistoryFrame()
 end
 
+function system:setWorld(arg)
+	love.physics.setMeter(arg.meter)
+	editor.meter=arg.meter
+	editor.linearDamping=arg.linearDamping
+	editor.angularDamping=arg.angularDamping
+end
+
 function system:undo()
 	editor.log:push("undo")
 	self.undoIndex=self.undoIndex-1
 	if self.undoIndex<1 then self.undoIndex=1 end
-	editor.world =love.physics.newWorld(0, 9.8*64, false)
+	editor.world =love.physics.newWorld()
 	editor.helper.createWorld(editor.world,self.undoStack[self.undoIndex].world)
+	self:setWorld(self.undoStack[self.undoIndex].world.world)
 	editor:cancel()
 end
 
@@ -59,8 +67,9 @@ function system:redo()
 	editor.log:push("redo")
 	self.undoIndex=self.undoIndex+1
 	if self.undoIndex>#self.undoStack then self.undoIndex=#self.undoStack end
-	editor.world = love.physics.newWorld(0, 9.8*64, false)
+	editor.world = love.physics.newWorld()
 	editor.helper.createWorld(editor.world,self.undoStack[self.undoIndex].world)
+	self:setWorld(self.undoStack[self.undoIndex].world.world)
 	editor:cancel()
 end
 
@@ -68,8 +77,9 @@ function system:returnTo(index)
 	if not self.undoStack[index] then return end
 	editor.log:push("return to histroy")
 	self.undoIndex=index
-	editor.world = love.physics.newWorld(0, 9.8*64, false)
+	editor.world = love.physics.newWorld()
 	editor.helper.createWorld(editor.world,self.undoStack[self.undoIndex].world)
+	self:setWorld(self.undoStack[self.undoIndex].world.world)
 	editor:cancel()
 
 end

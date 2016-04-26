@@ -35,7 +35,7 @@ end
 local fixColor={255, 0, 255, 255}
 
 function fMode:draw()
-	if not self.selectedFixture then return end
+	if not self.selectedFixture or self.selectedFixture:isDestroyed() then return end
 	editor.helper.drawFixture(self.selectedFixture,fixColor)
 end
 
