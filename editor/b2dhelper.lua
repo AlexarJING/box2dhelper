@@ -40,6 +40,7 @@ end
 local function addPreserve(obj)
 	if not preserve[obj] then  preserve[obj]=obj end --reg data
 end
+
 local function updatePreserve()
 	for k,v in pairs(preserve) do
 		if v:isDestroyed() then
@@ -47,6 +48,20 @@ local function updatePreserve()
 		end
 	end
 end
+
+local function addKeyBound()
+
+
+
+end
+
+
+local function updateKeyRun()
+
+
+end
+
+
 
 local function CreateGear(segments)
 	segments = segments or 40

@@ -212,7 +212,7 @@ function vertex:draw()
 		local bx,by = vert.body:getPosition()
 		local body = vert.body
 		if vert.type=="radius" then
-			local cx,cy = shape:getPoint()
+			local cx,cy = vert.fixture:getShape():getPoint()
 			love.graphics.line(self.dragTX,self.dragTY,bx+cx,by+cy)
 			love.graphics.circle("line", bx+cx, by+cy, math.getDistance(self.dragTX,self.dragTY,bx+cx,by+cy))
 		elseif vert.type=="center" then
@@ -231,44 +231,6 @@ function vertex:draw()
 				bodyR= getRot(0,0,cx,cy)
 				editor.helper.draw({body},nil,0,0,rotation-bodyR)
 			end
-
-			--[[
-			if shape:type()=="CircleShape" then
-				if love.mouse.isDown(1) then
-					local cx,cy = shape:getPoint()
-					love.graphics.circle("line", bx+cx,by+cy, shape:getRadius())
-					love.graphics.line(self.dragTX,self.dragTY,bx+cx,by+cy)
-				else
-					local cx,cy = shape:getPoint()
-					love.graphics.circle("line", 0,0, getDist(0,0,cx+bx,cy+by))
-					love.graphics.line(self.dragTX,self.dragTY,0,0)
-					local rotation=getRot(0,0,self.dragTX,self.dragTY)
-					local bodyR= getRot(0,0,cx+bx,cy+by)
-					local x,y = axisRot(cx+bx,cy+by,rotation-bodyR)
-					love.graphics.circle("line", x, y, shape:getRadius())
-				end
-			else
-				if love.mouse.isDown(1) then
-					local cx,cy=body:getPosition()
-					local rotation=getRot(cx,cy,self.dragTX,self.dragTY)-Pi/2
-					local drawVerts=polygonTrans(cx,cy,rotation,1,{shape:getPoints()})
-					table.insert(drawVerts,drawVerts[1])
-					table.insert(drawVerts,drawVerts[2])
-					love.graphics.line(drawVerts)
-					love.graphics.line(self.dragTX,self.dragTY,cx,cy)
-				else
-					local cx,cy=body:getPosition()
-					local rotation=getRot(0,0,self.dragTX,self.dragTY)
-					local bodyR= getRot(0,0,cx+bx,cy+by)
-					local drawVerts=polygonTrans(0,0,rotation-bodyR,1,vert.verts)
-					table.insert(drawVerts,drawVerts[1])
-					table.insert(drawVerts,drawVerts[2])
-					love.graphics.line(drawVerts)
-
-					love.graphics.circle("line", 0,0, getDist(0,0,cx,cy))
-					love.graphics.line(self.dragTX,self.dragTY,0,0)
-				end
-			end]]
 		else
 			local shapeVerts=vert.verts
 			local i = vert.index

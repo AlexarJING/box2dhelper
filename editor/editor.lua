@@ -1,5 +1,5 @@
 local editor={}
-editor.world= love.physics.newWorld()
+editor.world= love.physics.newWorld(0,9.8*64)
 editor.linearDamping=1
 editor.angularDamping=3
 editor.meter=64
@@ -25,7 +25,7 @@ editor.fixtureMode= require "modes/fixtureMode"(editor)
 
 
 function editor:init()
-	
+	--[[
 	local body  = love.physics.newBody(self.world, 0, 0, "static")
 	local shape   = love.physics.newRectangleShape(100,300)
 	local fixture = love.physics.newFixture(body, shape)
@@ -46,7 +46,7 @@ function editor:init()
 	local shape   = love.physics.newRectangleShape(30,100)
 	local fixture = love.physics.newFixture(body, shape)
 	self.createMode:setMaterial(fixture,"magnet",{magnet=1})
-
+]]
 	self.W = w()
 	self.H = h()
 	self.bg:init()

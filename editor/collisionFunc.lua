@@ -356,20 +356,6 @@ function func.buoyancy(density,a,b,coll)  --in pre
     end
 end
 
---[[
-	magnetfixture:
-	1. createfieldfixture
-	2. magnet.north=fixture
-	3. magnet.south=fixture
-	4. magnet.power=999
-	north/south
-	1. power= +- 999
-	2. pole = north/south
-	3. parent = main fixutre
-	4. opposite = south/north
-
-]]
-
 
 
 function func.magnet(power,a,b,coll)
