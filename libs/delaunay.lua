@@ -58,9 +58,9 @@ end
 -- @type Edge
 local Edge = class()
 Edge.__eq = function(a, b) return (a.p1 == b.p1 and a.p2 == b.p2) end
-Edge.__tostring = function(e)
-  return (('Edge :\n  %s\n  %s'):format(tostring(e.p1), tostring(e.p2)))
-end
+--Edge.__tostring = function(e)
+ -- return (('Edge :\n  %s\n  %s'):format(tostring(e.p1), tostring(e.p2)))
+--end
 
 --- Creates a new `Edge`
 -- @name Edge:new
@@ -120,9 +120,9 @@ end
 -- @type Point
 local Point = class()
 Point.__eq = function(a,b)  return (a.x == b.x and a.y == b.y) end
-Point.__tostring = function(p)
-  return ('Point (%s) x: %.2f y: %.2f'):format(p.id, p.x, p.y)
-end
+--Point.__tostring = function(p)
+--  return ('Point (%s) x: %.2f y: %.2f'):format(p.id, p.x, p.y)
+--end
 
 --- Creates a new `Point`
 -- @name Point:new
@@ -182,10 +182,10 @@ end
 -- @type Triangle
 
 local Triangle = class()
-Triangle.__tostring = function(t)
-  return (('Triangle: \n  %s\n  %s\n  %s')
-    :format(tostring(t.p1), tostring(t.p2), tostring(t.p3)))
-end
+--Triangle.__tostring = function(t)
+--  return (('Triangle: \n  %s\n  %s\n  %s')
+ --   :format(tostring(t.p1), tostring(t.p2), tostring(t.p3)))
+--end
 
 --- Creates a new `Triangle`
 -- @name Triangle:new
