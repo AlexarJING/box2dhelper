@@ -517,6 +517,15 @@ function helper.createWorld(world,data,offx,offy)
 
 		setUserData(obj.body,v.body.userdata)
 
+
+		for i,v in ipairs(obj.body:getUserData()) do
+			if v.prop=="texturePath" then 
+				local image = love.graphics.newImage(v.value)
+				table.insert(obj.body:getUserData(), {prop="texture",value=image})
+				break
+			end
+		end
+
 		obj.fixtures={}
 		for i,param in ipairs(v.fixtures) do
 			local shell={}
@@ -728,7 +737,6 @@ function helper.getWorldData(world,offx,offy,arg)
 			end
 		end
 	end
-
 	return group
 end
 

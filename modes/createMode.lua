@@ -128,6 +128,14 @@ end
 
 
 function creator:importFromImage(file)
+	
+	local name=string.stripfilename(file:getFilename())
+	love.filesystem.createDirectory("texture")
+	local file2 = love.filesystem.newFile("texture/"..name)
+	file2:open("w")
+	file2:write(file:read())
+	file2:close()
+
 	local Point    = editor.Delaunay.Point
 	local points = {}
 	local test,imageData = pcall(love.image.newImageData,file)
@@ -225,6 +233,7 @@ function creator:importFromImage(file)
 	local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
 	body:setUserData({})
 	table.insert(body:getUserData(), {prop="texture",value=image})
+	table.insert(body:getUserData(), {prop="texturePath",value="texture/"..name})
 	for i,v in ipairs(target) do
 		local test,triangles = pcall(love.math.triangulate,v)
 		if test then
@@ -233,6 +242,7 @@ function creator:importFromImage(file)
 					math.polygonTrans(-imageW/2,-imageH/2,0,1,v))
 				if rt then
 					local fixture = love.physics.newFixture(body, shape)
+					self:setMaterial(fixture,"wood")
 				else
 					
 				end
@@ -607,7 +617,7 @@ function creator:setData(target,data)
 	if not tab then
 		tab={data}
 		target:setUserData(tab)
-	else
+	elseif data then
 		local found=false
 		for i,v in ipairs(target:getUserData()) do
 			if v.prop==data.prop then

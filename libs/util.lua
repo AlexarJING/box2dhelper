@@ -643,13 +643,7 @@ function table.save(tab,name,ifCopyFunction)
 					output=output..name.."="..tostring(v)..",\n"
 			elseif type(v)=="function" and ifCopyFunction then
 				output=output .. name .."= loadstring(\""..string.dump(v).."\")(),\n"			
-			elseif type(v)=="userdata" then
-				if v.type and v:type()=="Image" then
-					local str=v:getData():encode("png"):getString()
-					str="abc"
-					output=output .. name .."= love.graphics.newImage(love.image.newImageData( love.filesystem.newFileData([["..str.."]],\"\")))"..",\n"
-					print(output)
-				end
+			
 			end
 		end
 	end

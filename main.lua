@@ -1,16 +1,12 @@
 if arg[#arg] == "-debug" then require("mobdebug").start() end 
 require "libs.util"
-local image = love.graphics.newImage("chicken.png")
-local str = image:getData():encode("png"):getString()
-
-local data = love.filesystem.newFileData(str,"png")
-local image2= love.graphics.newImage(love.image.newImageData( data ))
 
 local editor=require "editor/editor"
 
 function love.filedropped( file )
 	editor.createMode:importFromImage(file)
 end
+
 
 function love.load()
 	editor:init()
