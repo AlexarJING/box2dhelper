@@ -10,7 +10,7 @@ function cam:update()
 		self.state="test"
 		if not editor.testMode.dragForcing then self:followSelection() end
 	elseif editor.state~="test" and self.state=="test" then
-		cam:setPosition(0,0)
+		--cam:setPosition(0,0)
 	end
 	editor.mouseX,editor.mouseY = cam.x+ (love.mouse.getX()-w()/2)/cam.scale,cam.y+(love.mouse.getY()-h()/2)/cam.scale
 end
@@ -68,7 +68,7 @@ function cam:followSelection()
 	if self.target then
 		cam:setPosition(self.target:getPosition())
 	else
-		cam:setPosition(0,0)
+		--cam:setPosition(0,0)
 	end
 end
 

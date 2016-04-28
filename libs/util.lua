@@ -642,9 +642,14 @@ function table.save(tab,name,ifCopyFunction)
 			elseif type(v)=="number" or type(v)=="boolean" then
 					output=output..name.."="..tostring(v)..",\n"
 			elseif type(v)=="function" and ifCopyFunction then
-				print(v)
-				print(string.dump(v))
 				output=output .. name .."= loadstring(\""..string.dump(v).."\")(),\n"			
+			elseif type(v)=="userdata" then
+				if v.type and v:type()=="Image" then
+					local str=v:getData():encode("png"):getString()
+					str="abc"
+					output=output .. name .."= love.graphics.newImage(love.image.newImageData( love.filesystem.newFileData([["..str.."]],\"\")))"..",\n"
+					print(output)
+				end
 			end
 		end
 	end
@@ -864,4 +869,11 @@ function math.polygonClip(subjectPolygon, clipPolygon)
     cp1x=cp2x;cp1y=cp2y
   end
   return outputList
+end
+
+function string.strippath(filename)    
+    return string.match(filename, "(.+)\\[^\\]*%.%w+$") --windows
+end
+function string.stripfilename(filename)
+    return string.match(filename, ".+\\([^\\]*%.%w+)$") -- *nix system
 end

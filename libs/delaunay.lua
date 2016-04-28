@@ -58,9 +58,9 @@ end
 -- @type Edge
 local Edge = class()
 Edge.__eq = function(a, b) return (a.p1 == b.p1 and a.p2 == b.p2) end
---Edge.__tostring = function(e)
- -- return (('Edge :\n  %s\n  %s'):format(tostring(e.p1), tostring(e.p2)))
---end
+Edge.__tostring = function(e)
+  return (('Edge :\n  %s\n  %s'):format(tostring(e.p1), tostring(e.p2)))
+end
 
 --- Creates a new `Edge`
 -- @name Edge:new
@@ -120,9 +120,9 @@ end
 -- @type Point
 local Point = class()
 Point.__eq = function(a,b)  return (a.x == b.x and a.y == b.y) end
---Point.__tostring = function(p)
---  return ('Point (%s) x: %.2f y: %.2f'):format(p.id, p.x, p.y)
---end
+Point.__tostring = function(p)
+  return ('Point (%s) x: %.2f y: %.2f'):format(p.id, p.x, p.y)
+end
 
 --- Creates a new `Point`
 -- @name Point:new
@@ -182,10 +182,10 @@ end
 -- @type Triangle
 
 local Triangle = class()
---Triangle.__tostring = function(t)
---  return (('Triangle: \n  %s\n  %s\n  %s')
- --   :format(tostring(t.p1), tostring(t.p2), tostring(t.p3)))
---end
+Triangle.__tostring = function(t)
+  return (('Triangle: \n  %s\n  %s\n  %s')
+    :format(tostring(t.p1), tostring(t.p2), tostring(t.p3)))
+end
 
 --- Creates a new `Triangle`
 -- @name Triangle:new
@@ -202,11 +202,16 @@ local Triangle = class()
 -- print(t) -- print the triangle members p1, p2 and p3
 --
 function Triangle:__init(p1, p2, p3)
-  --assert(not isFlatAngle(p1, p2, p3), ("angle (p1, p2, p3) is flat:\n  %s\n  %s\n  %s")
-  --  :format(tostring(p1), tostring(p2), tostring(p3)))
+  assert(not isFlatAngle(p1, p2, p3), ("angle (p1, p2, p3) is flat:\n  %s\n  %s\n  %s")
+    :format(tostring(p1), tostring(p2), tostring(p3)))
   self.p1, self.p2, self.p3 = p1, p2, p3
   self.e1, self.e2, self.e3 = Edge(p1, p2), Edge(p2, p3), Edge(p3, p1)
 end
+
+function Triangle:isFlat()
+    return isFlatAngle(self.p1, self.p2, self.p3)
+end
+
 
 --- Checks if the triangle is defined clockwise (sequence p1-p2-p3)
 -- @return `true` or `false`
@@ -427,7 +432,9 @@ function Delaunay.triangulate(vertices)
     for j = 1, #edges do
       local n = #triangles
       assert(n <= trmax, "Generated more than needed triangles")
-      triangles[n + 1] = Triangle(edges[j].p1, edges[j].p2, vertices[i])
+      if not isFlatAngle(edges[j].p1, edges[j].p2, vertices[i]) then
+        triangles[n + 1] = Triangle(edges[j].p1, edges[j].p2, vertices[i])
+      end
     end
    
   end

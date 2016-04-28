@@ -853,6 +853,8 @@ function interface:createHelpFrame()
 	list:AddItem(text)
 end
 
+
+
 return function(parent) 
 	editor=parent
 	return interface

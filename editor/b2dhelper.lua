@@ -131,6 +131,21 @@ function helper.drawBody(body,colorStyle)
 	love.graphics.setColor(colorStyle.body)
 	love.graphics.circle("fill", bodyX, bodyY, 4)
 	local bodyType= body:getType()	
+	
+	local data=body:getUserData()
+	local texture
+	if data then
+		for i,v in ipairs(data) do
+			if v.prop=="texture" then texture = v.value end
+		end
+	end
+	if texture then
+		
+		love.graphics.setColor(255, 255, 255, 255)
+		love.graphics.draw(texture, body:getX(), body:getY(), body:getAngle(),
+		 1, 1, texture:getWidth()/2, texture:getHeight()/2)
+	end
+
 	-------------------------------------for shapes-----------------------
 	for i,fixture in ipairs(body:getFixtureList()) do
 		local color

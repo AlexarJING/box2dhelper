@@ -7,6 +7,7 @@ love.physics.setMeter(editor.meter)
 ------------------------------------------------------
 editor.LoveFrames= require "libs.loveframes"
 editor.helper = require "editor/b2dhelper"
+editor.Delaunay=require "libs/delaunay"
 --------------------------------------------------
 editor.log = require "editor/log"(editor)
 editor.bg = require "editor/bg"(editor)
@@ -22,6 +23,10 @@ editor.shapeMode= require "modes/shapeMode"(editor)
 editor.testMode= require "modes/testMode"(editor)
 editor.jointMode= require "modes/jointMode"(editor)
 editor.fixtureMode= require "modes/fixtureMode"(editor)
+
+
+
+
 
 
 function editor:init()
@@ -127,14 +132,7 @@ function editor:draw()
 			self.bodyMode:draw()
 			self.selector:draw()
 		end	
-		love.graphics.setColor(255, 0, 0, 255)
-		if test1 and #test1>2 then
-			love.graphics.polygon("line", test1)
-		end
 
-		if test2 then 
-			love.graphics.polygon("line", test2)
-		end
 	end)
 
 	self.LoveFrames.draw()

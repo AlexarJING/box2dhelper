@@ -126,6 +126,122 @@ function creator:getPoint()
 	end
 end
 
+
+function creator:importFromImage(file)
+	local Point    = editor.Delaunay.Point
+	local points = {}
+	local test,imageData = pcall(love.image.newImageData,file)
+	local imageW = imageData:getWidth()
+	local imageH = imageData:getHeight()
+
+	local rate=imageW/32 > 1 and math.ceil(imageW/32) or 1
+	local threshold= imageW/10
+	function sample( x, y, r, g, b, a )
+	   if x%rate==0 and y%rate==0 then
+	   		if a~=0 then table.insert(points,Point(x,y)) end
+	   end
+	   return r,g,b,a
+	end
+	 
+	imageData:mapPixel(sample)
+	local image = love.graphics.newImage(imageData)
+	
+	local triangles = editor.Delaunay.triangulate(points)
+
+	for i=#triangles,1,-1 do
+		if triangles[i]:getCircumRadius()>threshold then
+			table.remove(triangles, i)
+		end
+	end
+
+
+	local edges={}
+	for i,t in ipairs(triangles) do
+		table.insert(edges,t.e1)
+		table.insert(edges,t.e2)
+		table.insert(edges,t.e3)
+	end
+
+
+	for i,t in ipairs(triangles) do
+		
+		for j,e in ipairs(edges) do
+			if t.e1:same(e) and e~=t.e1 then
+				table.remove(edges, j)	
+				break
+			end
+		end
+		
+		for j,e in ipairs(edges) do
+			if t.e2:same(e) and e~=t.e2 then
+				table.remove(edges, j)
+				break
+			end
+		end
+
+		for j,e in ipairs(edges) do
+			if t.e3:same(e) and e~=t.e3 then
+				table.remove(edges, j)	
+				break
+			end
+		end
+	end
+
+	local target={}
+	table.remove(edges, 1)
+	while #edges~=0 do
+		local verts={edges[1].p1.x,edges[1].p1.y,edges[1].p2.x,edges[1].p2.y}
+			table.insert(target, verts)
+		repeat
+			local test
+			for i,e in ipairs(edges) do
+				if e.p1.x==verts[#verts-1] and e.p1.y==verts[#verts] then
+					table.insert(verts, e.p2.x)
+					table.insert(verts, e.p2.y)
+					table.remove(edges, i)
+					test=true
+					break
+				end
+
+				if e.p2.x==verts[#verts-1] and e.p2.y==verts[#verts] then
+					table.insert(verts, e.p1.x)
+					table.insert(verts, e.p1.y)
+					table.remove(edges, i)
+					test=true
+					break
+				end
+			end
+			
+		until not test or #edges==0
+		
+		if not(verts[#verts-1]==verts[1] and verts[#verts]==verts[2]) then
+			local x,y=verts[1],verts[2]
+			verts[1],verts[2]=verts[3],verts[4]
+			verts[3],verts[4]=x,y
+		end
+	end
+
+
+	local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
+	body:setUserData({})
+	table.insert(body:getUserData(), {prop="texture",value=image})
+	for i,v in ipairs(target) do
+		local test,triangles = pcall(love.math.triangulate,v)
+		if test then
+			for i,v in ipairs(triangles) do
+				local rt,shape = pcall(love.physics.newPolygonShape,
+					math.polygonTrans(-imageW/2,-imageH/2,0,1,v))
+				if rt then
+					local fixture = love.physics.newFixture(body, shape)
+				else
+					
+				end
+			end
+		end
+	end
+	editor.action="importFromImage"
+end
+
 function creator:water()
 	local body = love.physics.newBody(editor.world, self.createTX, self.createTY,"dynamic")
 	local shape = love.physics.newCircleShape(5)

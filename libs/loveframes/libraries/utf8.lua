@@ -1028,7 +1028,7 @@ local function utf8gsub(str, regex, repl, limit)
 	end
 	return ret .. utf8sub(str, prevEnd), n 
 end
-
+--[[
 string.byte    = utf8unicode
 string.char    = utf8char
 string.dump    = dump
@@ -1044,7 +1044,7 @@ string.reverse = utf8reverse
 string.sub     = utf8sub
 string.upper   = upper--utf8upper
 string.gensub  = utf8gensub
-
+]]
 --[[ local utf8 = {}                                                                                             
 utf8.len = utf8len
 utf8.sub = utf8sub
