@@ -1,5 +1,56 @@
 local helper
+local collMode={}
 local func={}
+
+collMode.collisionFunc=func
+
+
+
+
+local function findReaction(callbackType,a,b,...)
+	local data=a:getUserData()
+
+	if data then
+		for i,v in ipairs(data) do
+			if collMode.collisionType[callbackType][v.prop]  then
+				collMode.collisionType[callbackType][v.prop](v.value,a,b,...)
+			end
+		end
+	end
+	local data=b:getUserData()
+	if data then
+		for i,v in ipairs(data) do
+			if collMode.collisionType[callbackType][v.prop]  then
+				collMode.collisionType[callbackType][v.prop](v.value,b,a,...)
+			end
+		end
+	end
+end
+
+
+local function beginC(...)
+	findReaction("begin",...)
+end
+
+local function endC(...)
+	findReaction("over",...)
+end
+
+local function preC(...)
+	findReaction("pre",...)
+end
+
+local function postC(...)
+	findReaction("post",...)
+end
+
+function collMode.setCallbacks(world)
+	world:setCallbacks(beginC,endC,preC,postC)
+end
+
+
+
+
 
 func.explosion=function(boomV,a,b,coll)	
 	coll:setEnabled(false)
@@ -15,23 +66,22 @@ func.explosion=function(boomV,a,b,coll)
 			local fixture = love.physics.newFixture(body, shape,10)
 			fixture:setDensity(99)
 			fixture:setFriction(99)
-			fixture:setRestitution(1)
+			fixture:setRestitution(0.5)
 			local angle= love.math.random()*math.pi*2
 			body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
+			body:setLinearDamping(3)
+			body:setUserData({{prop="anticount",value=4}})
 			fixture:setGroupIndex(-2)
+			fixture:setUserData({
+				{prop="destoryOnHit",value=0}
+				})
+			
 			table.insert(frags, body)
 		end
 		a:getBody():destroy()
 	end
-	table.insert(helper.todo,{func,a,b,coll})
-	local func=function()
-		for i,v in ipairs(frags) do
-			if not v:isDestroyed() then
-				v:destroy()
-			end
-		end
-	end
-	addDelay(func,4)
+	table.insert(helper.system.todo,{func,a,b,coll})
+
 end
 
 func.spark=function(a,b,coll)
@@ -66,7 +116,7 @@ func.spark=function(a,b,coll)
 			for i=1,relativeAB/300 do
 				local body = love.physics.newBody(helper.world, x, y,"dynamic")
 				body:setGravityScale(1)
-				body:setLinearDumping(3)
+				body:setLinearDamping(3)
 				local shape = love.physics.newCircleShape(8)
 				local fixture = love.physics.newFixture(body, shape)
 				fixture:setDensity(0.01)
@@ -80,11 +130,11 @@ func.spark=function(a,b,coll)
 						body:destroy()
 					end
 				end
-				addDelay(func2,3)
+				helper.system.addDelay(func2,3)
 			end
 		end
 	end
-	table.insert(helper.todo,{func,a,b,coll})
+	table.insert(helper.system.todo,{func,a,b,coll})
 end
 	
 func.reverse=function(toggle,a,b,coll)
@@ -98,7 +148,7 @@ func.reverse=function(toggle,a,b,coll)
 			end
 		end
 	end
-	table.insert(helper.todo,{func,a,b,coll})
+	table.insert(helper.system.todo,{func,a,b,coll})
 end
 
 
@@ -119,7 +169,7 @@ func.embed=function(threshold,a,b,coll,np,tp)
 			end 
 		end
 	end
-	table.insert(helper.todo,{func,a,b,coll})
+	table.insert(helper.system.todo,{func,a,b,coll})
 end
 	
 func.crash=function(threshold,a,b,coll,np,tp)
@@ -233,7 +283,7 @@ func.crash=function(threshold,a,b,coll,np,tp)
 		makeFrag()
 		a:getBody():destroy()
 	end
-	table.insert(helper.todo,{func,a,b,coll})
+	table.insert(helper.system.todo,{func,a,b,coll})
 end
 
 function func.oneWayPre(enabled,a,b,coll)
@@ -400,8 +450,38 @@ function func.magnet(power,a,b,coll)
 	end
 end
 
+function func.destoryOnHit(p,a,b,c)
+	local func=function(a) 
+		if a:isDestroyed() then return end
+		a:getBody():destroy() 
+	end
+	table.insert(helper.system.todo,{func,a})
+end
+
+
+collMode.collisionType={
+	begin={
+		makeFrag=collMode.collisionFunc.spark,
+		reverse=collMode.collisionFunc.reverse,
+		explosion=collMode.collisionFunc.explosion,
+		destoryOnHit=collMode.collisionFunc.destoryOnHit,
+		},
+	over={
+		oneWay=collMode.collisionFunc.oneWayEnd,
+	},
+	pre={
+		oneWay=collMode.collisionFunc.oneWayPre,
+		buoyancy=collMode.collisionFunc.buoyancy,
+		magnetField=collMode.collisionFunc.magnet,
+	},
+	post={
+		crashable=collMode.collisionFunc.crash,
+		embed=collMode.collisionFunc.embed,
+
+	}	
+}
 
 return function(parent) 
 	helper=parent
-	return func
+	helper.collMode=collMode
 end

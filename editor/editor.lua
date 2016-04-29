@@ -1,12 +1,12 @@
 local editor={}
-editor.world= love.physics.newWorld(0,9.8*64)
+editor.world= love.physics.newWorld(0,0)
 editor.linearDamping=1
 editor.angularDamping=3
 editor.meter=64
 love.physics.setMeter(editor.meter)
 ------------------------------------------------------
 editor.LoveFrames= require "libs.loveframes"
-editor.helper = require "editor/b2dhelper"
+editor.helper = require "editor/box2dhelper"
 editor.Delaunay=require "libs/delaunay"
 --------------------------------------------------
 editor.log = require "editor/log"(editor)
@@ -30,28 +30,13 @@ editor.fixtureMode= require "modes/fixtureMode"(editor)
 
 
 function editor:init()
-	--[[
-	local body  = love.physics.newBody(self.world, 0, 0, "static")
-	local shape   = love.physics.newRectangleShape(100,300)
+	
+	local body  = love.physics.newBody(self.world, 0, 0, "dynamic")
+	local shape   = love.physics.newRectangleShape(100,100)
 	local fixture = love.physics.newFixture(body, shape)
-	self.createMode:setMaterial(fixture,"magnet",{magnet=1})
-
-
-	local body  = love.physics.newBody(self.world, 100, -200, "dynamic")
-	body:setLinearDamping(3)
-	body:getAngularDamping(3)
-	local shape   = love.physics.newRectangleShape(30,100)
-	local fixture = love.physics.newFixture(body, shape)
-	self.createMode:setMaterial(fixture,"magnet",{magnet=-1})
-
-
-	local body  = love.physics.newBody(self.world, -100, 200, "dynamic")
-	body:setLinearDamping(3)
-	body:getAngularDamping(3)
-	local shape   = love.physics.newRectangleShape(30,100)
-	local fixture = love.physics.newFixture(body, shape)
-	self.createMode:setMaterial(fixture,"magnet",{magnet=1})
-]]
+	self.createMode:setMaterial(fixture,"wood")
+	body:setUserData({{prop="jet",value="w"}})
+	body:setAngle(1)
 	self.W = w()
 	self.H = h()
 	self.bg:init()
