@@ -21,4 +21,8 @@ helper.createWorld=helper.dataMode.createWorld
 
 helper.getStatus=helper.dataMode.getStatus
 helper.setStatus=helper.dataMode.setStatus
+
+helper.press=helper.reactMode.press
+helper.click=helper.reactMode.click
+
 return helper

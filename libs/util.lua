@@ -871,3 +871,66 @@ end
 function string.stripfilename(filename)
     return string.match(filename, ".+\\([^\\]*%.%w+)$") -- *nix system
 end
+
+
+local _rotate=love.graphics.rotate
+local _translate=love.graphics.translate
+local _scale=love.graphics.scale
+local _shear=love.graphics.shear
+local _pop=love.graphics.pop
+local _origin= love.graphics.origin
+local _push=love.graphics.push
+local CoordinateInfo={
+	currentIndex=1,
+	info={{x=0,y=0,rotation=0,sx=1,sy=1,kx=0,ky=0}}
+	}
+love.graphics.coordinateInfo=CoordinateInfo
+love.graphics.getCoordinateInfo=function() 
+	return CoordinateInfo.info[CoordinateInfo.currentIndex].x,
+	CoordinateInfo.info[CoordinateInfo.currentIndex].y,
+	CoordinateInfo.info[CoordinateInfo.currentIndex].rotation,
+	CoordinateInfo.info[CoordinateInfo.currentIndex].sx,
+	CoordinateInfo.info[CoordinateInfo.currentIndex].sy,
+	CoordinateInfo.info[CoordinateInfo.currentIndex].kx,
+	CoordinateInfo.info[CoordinateInfo.currentIndex].ky
+end
+love.graphics.rotate=function(angle)
+	CoordinateInfo.info[CoordinateInfo.currentIndex].angle=angle
+	_rotate(angle)
+end
+love.graphics.translate=function(x,y)
+	CoordinateInfo.info[CoordinateInfo.currentIndex].x=x
+	CoordinateInfo.info[CoordinateInfo.currentIndex].y=y
+	_translate(x,y)
+end
+love.graphics.scale=function(x,y)
+	CoordinateInfo.info[CoordinateInfo.currentIndex].sx=x
+	CoordinateInfo.info[CoordinateInfo.currentIndex].sy=y
+	_scale(x,y)
+end
+love.graphics.shear=function(x,y)
+	CoordinateInfo.info[CoordinateInfo.currentIndex].kx=x
+	CoordinateInfo.info[CoordinateInfo.currentIndex].ky=y
+	_shear(x,y)
+end
+love.graphics.push=function() 
+	CoordinateInfo.currentIndex=CoordinateInfo.currentIndex+1
+	CoordinateInfo.info[CoordinateInfo.currentIndex]={}
+	for k,v in pairs(CoordinateInfo.info[CoordinateInfo.currentIndex-1]) do
+		CoordinateInfo.info[CoordinateInfo.currentIndex][k]=v
+	end
+	_push()
+end
+love.graphics.pop=function()
+	CoordinateInfo.currentIndex=CoordinateInfo.currentIndex-1
+	_pop()
+end
+
+love.graphics.origin=function()
+	CoordinateInfo.currentIndex=1
+	CoordinateInfo.info={{x=0,y=0,rotation=0,
+		sx=1,sy=1,
+		kx=0,ky=0
+		}}
+	_origin()
+end

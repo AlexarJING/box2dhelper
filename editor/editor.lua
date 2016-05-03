@@ -1,7 +1,7 @@
 local editor={}
-editor.world= love.physics.newWorld(0,0)
+editor.world= love.physics.newWorld(0,0,false)
 editor.linearDamping=1
-editor.angularDamping=3
+editor.angularDamping=1
 editor.meter=64
 love.physics.setMeter(editor.meter)
 ------------------------------------------------------
@@ -23,20 +23,39 @@ editor.shapeMode= require "modes/shapeMode"(editor)
 editor.testMode= require "modes/testMode"(editor)
 editor.jointMode= require "modes/jointMode"(editor)
 editor.fixtureMode= require "modes/fixtureMode"(editor)
-
+--------------------------------------------------------
 
 
 
 
 
 function editor:init()
-	
+	--[[
+	for x=-200,200,50 do
+		for y=-200,200,50 do
+			local body  = love.physics.newBody(self.world, x, y, "dynamic")
+			local shape  = love.physics.newCircleShape(0,0,30)
+			local fixture = love.physics.newFixture(body, shape)
+			self.createMode:setMaterial(fixture,"wood")
+			body:setUserData({{prop="turnToMouse",value=true}})
+		end
+	end ]]
 	local body  = love.physics.newBody(self.world, 0, 0, "dynamic")
-	local shape   = love.physics.newRectangleShape(100,100)
+	local shape  = love.physics.newCircleShape(0,0,30)
 	local fixture = love.physics.newFixture(body, shape)
 	self.createMode:setMaterial(fixture,"wood")
-	body:setUserData({{prop="jet",value="w"}})
-	body:setAngle(1)
+	body:setUserData({{prop="turnToMouse",value=true}})
+
+	local body2  = love.physics.newBody(self.world, 100, 0, "dynamic")
+	local shape = love.physics.newRectangleShape(30,30)
+	local fixture = love.physics.newFixture(body2, shape)
+	self.createMode:setMaterial(fixture,"wood")
+	body2:setUserData({
+		{prop="fire",value="l"},
+		{prop="bullet",value=self.createMode:defaultBoom()}
+	})
+	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
+
 	self.W = w()
 	self.H = h()
 	self.bg:init()
@@ -132,6 +151,7 @@ function editor:mousepressed(x, y, button)
 	if button==1 then button="l"
 	elseif button==2 then button="r" end
 	self.LoveFrames.mousepressed(x, y, button)
+	self.helper.click(button)
 end
 
 function editor:mousereleased(x, y, button)
@@ -155,6 +175,7 @@ end
 
 function editor:keypressed(key, isrepeat)
 	self.LoveFrames.keypressed(key, isrepeat)
+	self.helper.press(key)
 	if isrepeat then return end
 	if self.interface:isHover() then return end
 

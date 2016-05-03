@@ -154,7 +154,6 @@ function dataMode.createWorld(world,data,offx,offy)
 		end
 		helper.reactMode.reg(world)
 	end
-
 	return group
 end
 

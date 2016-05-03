@@ -389,7 +389,19 @@ function creator:softpolygon()
 		vert=polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts)})
 end
 
-
+function creator:defaultBoom()
+	local world = love.physics.newWorld(0,0)
+	local body = love.physics.newBody(world,0,0,"dynamic")
+	local shape = love.physics.newCircleShape(30)
+	local fixture = love.physics.newFixture(body, shape)
+	self:setMaterial(fixture,"wood")
+	local userData={prop="explosion",value=true}
+	local data = fixture:getUserData()
+	if not data then data={} end
+	table.insert(data, userData)
+	fixture:setUserData(data)
+	return editor.helper.getWorldData({body})
+end
 
 
 function creator:explosion()
@@ -403,7 +415,6 @@ function creator:explosion()
 	if not data then data={} end
 	table.insert(data, userData)
 	fixture:setUserData(data)
-	return {body=body}
 end
 
 
