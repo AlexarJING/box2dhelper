@@ -79,13 +79,12 @@ function func.turnToMouse(body)
 end
 
 function func.balancer(body)
-	
-	local gx, gy = helper.world:getGravity()
-
 	local vx,vy=body:getLinearVelocity()
-	local mass=body:getMass()
-
-	body:applyLinearImpulse(-vx*mass*1.5,0)
+	--if vy<1 then return end
+	local angle=body:getAngle()
+	local mass = body:getMass()
+	body:setAngularDamping(99)
+	body:applyAngularImpulse(-angle*9999*mass)
 end
 
 function func.roll(body)
@@ -111,13 +110,25 @@ function func.jump(body)
 	if body2:getType()~="static" then return end
 
 	local power=5000
+	local leftkey,rightkey
 	for i,v in ipairs(body:getUserData()) do
 		if v.prop=="power" then power=v.value end
+		if v.prop=="jump_left" then leftkey=v.value end
+		if v.prop=="jump_right" then rightkey=v.value end
 	end
-	local gx, gy = helper.world:getGravity( )
-	local angle=math.getRot(gx,gy,0,0)
+
+	local angle=body:getAngle()
 	local mass=body:getMass( )
-	body:applyLinearImpulse(-power*math.sin(angle)*mass,-power*math.cos(angle)*mass)
+
+	if leftkey and rightkey then
+		if love.keyboard.isDown(leftkey) then
+			angle=angle-Pi/6
+		end
+		if love.keyboard.isDown(rightkey) then
+			angle=angle+Pi/6
+		end
+	end
+	body:applyLinearImpulse(power*math.sin(angle)*mass,-power*math.cos(angle)*mass)
 end
 
 function func.rollback(body)

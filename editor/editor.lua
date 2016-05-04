@@ -70,30 +70,32 @@ function editor:init()
 	local body  = love.physics.newBody(self.world, 0, 60, "dynamic")
 	local shape = love.physics.newRectangleShape(30,30)
 	local fixture = love.physics.newFixture(body, shape)
+	fixture:setGroupIndex(-1)
 	self.createMode:setMaterial(fixture,"wood")
 	body:setUserData({
 		{prop="jump",value="w"},
-		{prop="power",value=3000}
+		{prop="power",value=3000},
+		{prop="jump_right",value="d"},
+		{prop="jump_left",value="a"}
 		})
 
 	local body2  = love.physics.newBody(self.world, 0, 0, "dynamic")
 	local shape = love.physics.newRectangleShape(30,100)
 	local fixture = love.physics.newFixture(body2, shape)
+	fixture:setGroupIndex(-1)
 	self.createMode:setMaterial(fixture,"wood")
-	body2:setUserData({
-		{prop="jet",value="d"},
-		{prop="power",value=-500}
-		})
+	
 
-	local body3  = love.physics.newBody(self.world, 0, -30, "dynamic")
+	local body3  = love.physics.newBody(self.world, 0, 40, "dynamic")
 	local shape = love.physics.newRectangleShape(30,30)
 	local fixture = love.physics.newFixture(body3, shape)
+	fixture:setGroupIndex(-1)
 	self.createMode:setMaterial(fixture,"wood")
 	body2:setUserData({
 		{prop="balancer",value=true},
 		})
 	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
-	local joint = love.physics.newRevoluteJoint(body2, body3, body3:getX(), body3:getY(), false)
+	local joint = love.physics.newWeldJoint(body2, body3, body3:getX(), body3:getY(), false)
 
 	self.W = w()
 	self.H = h()
