@@ -602,7 +602,7 @@ function love.math.createEllipse(rx,ry,segments)
 end
 
 function table.save(tab,name,ifCopyFunction)
-	name=name or "test"
+	name=name or "default"
 	local tableList= {{name="root",tab=tab}} --to protect loop
 	local output="local "..name.."=\n"
 	local function ergodic(target,time)

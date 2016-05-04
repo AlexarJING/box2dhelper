@@ -53,8 +53,8 @@ end
 
 
 func.explosion=function(boomV,a,b,coll)	
-	coll:setEnabled(false)
-	boomV=10000
+	--coll:setEnabled(false)
+	boomV=1000
 	local frags={}
 	local func=function(a,b,coll)
 		if a:isDestroyed() then return end
@@ -63,19 +63,18 @@ func.explosion=function(boomV,a,b,coll)
 		for i=1,r do
 			local body = love.physics.newBody(helper.world, x, y,"dynamic")
 			local shape = love.physics.newCircleShape(3)
-			local fixture = love.physics.newFixture(body, shape,10)
+			local fixture = love.physics.newFixture(body, shape,99)
 			fixture:setDensity(99)
-			fixture:setFriction(99)
+			--fixture:setFriction(99)
 			fixture:setRestitution(0.5)
 			local angle= love.math.random()*math.pi*2
 			body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
 			body:setLinearDamping(3)
-			body:setUserData({{prop="anticount",value=4}})
-			fixture:setGroupIndex(-2)
+			body:setUserData({{prop="anticount",value=love.math.random()*2}})
+			helper.reactMode.addBody(body)
 			fixture:setUserData({
-				{prop="destoryOnHit",value=0}
-				})
-			
+				--{prop="destoryOnHit",value=true}
+							})
 			table.insert(frags, body)
 		end
 		a:getBody():destroy()

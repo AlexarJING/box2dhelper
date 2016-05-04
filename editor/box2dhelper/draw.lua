@@ -264,10 +264,12 @@ end
 
 
 
+
 function drawMode.draw(world,colorStyle,offx,offy,offr)
 	if world==helper.world then
 		helper.system.update()
 	end
+	
 	love.graphics.push( )
 	if offx then
 		love.graphics.translate(offx, offy)
@@ -285,6 +287,13 @@ function drawMode.draw(world,colorStyle,offx,offy,offr)
 	else
 		bodyList=world
 	end
+	-------------------------------------------
+	for i=#bodyList,1,-1 do
+		if bodyList[i]:isDestroyed() then
+			table.remove(bodyList, i)
+		end
+	end
+
 	------------------update------------------------
 	
 	for i,body in ipairs(bodyList) do
@@ -297,6 +306,10 @@ function drawMode.draw(world,colorStyle,offx,offy,offr)
 					table.insert(jointList, joint)
 				end
 			end
+		else
+			for i,joint in ipairs(jointList) do
+				helper.system.addPreserve(joint)
+			end
 		end
 
 		if not contactList then
@@ -306,6 +319,10 @@ function drawMode.draw(world,colorStyle,offx,offy,offr)
 				if not table.getIndex(contactList,contact) then
 					table.insert(contactList, contact)
 				end
+			end
+		else
+			for i,contact in ipairs(contactList) do
+				helper.system.addPreserve(contact)
 			end
 		end
 	end

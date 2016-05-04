@@ -2,9 +2,17 @@ local test={}
 local editor
 
 
-test.mouseMode="power" --or ball
-test.mouseBall={}
+test.mouseMode="std" --or ball
+
 test.pause=false
+test.modeIndex=1
+local mouseModes={"std","power","ball","key"}
+local mouseType={
+	love.mouse.getSystemCursor("arrow"),
+	love.mouse.getSystemCursor("sizeall"),
+	love.mouse.getSystemCursor("hand"),
+	love.mouse.getSystemCursor("arrow"),
+}
 
 function test:new()
 	editor.action="start testing"
@@ -19,10 +27,11 @@ end
 function test:update(dt)
 	if self.mouseMode=="power" then
 		self:dragForce()
-	else
+	elseif self.mouseMode=="ball" then
 		self.mouseBall.joint:setTarget(editor.mouseX,editor.mouseY)
-	end
-	self:downForce()
+	elseif self.mouseMode=="key" then
+		self:downForce()
+	end	
 end
 
 function test:togglePause()
@@ -34,19 +43,32 @@ function test:reset()
 	editor.system:redo()
 end
 
+
+
 function test:toggleMouse()
-	self.mouseMode=self.mouseMode=="power" and "ball" or "power"
+	
+	if mouseModes[self.modeIndex+1] then
+		self.modeIndex=self.modeIndex+1
+		
+	else
+		self.modeIndex=1
+	end
+	self.mouseMode = mouseModes[self.modeIndex]
+	love.mouse.setCursor(mouseType[self.modeIndex])
+
 	if self.mouseMode=="ball" then
-		if self.mouseBall.world~=editor.world or self.mouseBall.isDestroy==true then
+		if not self.mouseball or self.mouseBall.world~=editor.world  then
 			local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
+			body:setUserData({})
 			local shape = love.physics.newCircleShape(0, 0, 10)
 			local fixture = love.physics.newFixture(body, shape, 100)
+			fixture:setUserData({})
 			local joint= love.physics.newMouseJoint(body, 0, 0)
 			self.mouseBall={body=body,shape=shape,fixture=fixture,joint=joint,world=self.world,isDestroy=false}
 		end
-	else
+	elseif self.mouseBall then
 		self.mouseBall.body:destroy()
-		self.mouseBall.isDestroy=true
+		self.mouseBall=nil
 	end
 
 end
@@ -130,6 +152,7 @@ function test:draw()
 	if self.dragForcing then
 		love.graphics.line(self.dragOX,self.dragOY,self.dragTX,self.dragTY)
 	end
+	love.graphics.print(self.mouseMode.." mode",editor.mouseX+10,editor.mouseY+10,0,2,2)
 end
 
 return function(parent) 

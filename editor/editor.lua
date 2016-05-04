@@ -1,5 +1,5 @@
 local editor={}
-editor.world= love.physics.newWorld(0,0,false)
+editor.world= love.physics.newWorld(0,9.8*64,false)
 editor.linearDamping=1
 editor.angularDamping=1
 editor.meter=64
@@ -30,21 +30,30 @@ editor.fixtureMode= require "modes/fixtureMode"(editor)
 
 
 function editor:init()
-	--[[
-	for x=-200,200,50 do
-		for y=-200,200,50 do
-			local body  = love.physics.newBody(self.world, x, y, "dynamic")
-			local shape  = love.physics.newCircleShape(0,0,30)
-			local fixture = love.physics.newFixture(body, shape)
-			self.createMode:setMaterial(fixture,"wood")
-			body:setUserData({{prop="turnToMouse",value=true}})
-		end
-	end ]]
+--[[
+	local body  = love.physics.newBody(self.world, 300, 0, "dynamic")
+	body:setUserData({})
+	local shape = love.physics.newRectangleShape(50,100)
+	local fixture = love.physics.newFixture(body, shape)
+	fixture:setUserData({{prop="crashable",value=true}})
+
+	local body3  = love.physics.newBody(self.world, -30, 0, "dynamic")
+	local shape = love.physics.newRectangleShape(30,30)
+	local fixture = love.physics.newFixture(body3, shape)
+	self.createMode:setMaterial(fixture,"wood")
+	body3:setUserData({
+		{prop="jet",value="w"},
+		{prop="power",value=-5000}
+		})
+
 	local body  = love.physics.newBody(self.world, 0, 0, "dynamic")
 	local shape  = love.physics.newCircleShape(0,0,30)
 	local fixture = love.physics.newFixture(body, shape)
 	self.createMode:setMaterial(fixture,"wood")
-	body:setUserData({{prop="turnToMouse",value=true}})
+	body:setUserData({
+		{prop="roll",value="e"},
+		{prop="rollback",value="q"}
+		})
 
 	local body2  = love.physics.newBody(self.world, 100, 0, "dynamic")
 	local shape = love.physics.newRectangleShape(30,30)
@@ -55,6 +64,36 @@ function editor:init()
 		{prop="bullet",value=self.createMode:defaultBoom()}
 	})
 	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
+	local joint = love.physics.newWeldJoint(body, body3, body3:getX(), body3:getY(), false)
+]]
+
+	local body  = love.physics.newBody(self.world, 0, 60, "dynamic")
+	local shape = love.physics.newRectangleShape(30,30)
+	local fixture = love.physics.newFixture(body, shape)
+	self.createMode:setMaterial(fixture,"wood")
+	body:setUserData({
+		{prop="jump",value="w"},
+		{prop="power",value=3000}
+		})
+
+	local body2  = love.physics.newBody(self.world, 0, 0, "dynamic")
+	local shape = love.physics.newRectangleShape(30,100)
+	local fixture = love.physics.newFixture(body2, shape)
+	self.createMode:setMaterial(fixture,"wood")
+	body2:setUserData({
+		{prop="jet",value="d"},
+		{prop="power",value=-500}
+		})
+
+	local body3  = love.physics.newBody(self.world, 0, -30, "dynamic")
+	local shape = love.physics.newRectangleShape(30,30)
+	local fixture = love.physics.newFixture(body3, shape)
+	self.createMode:setMaterial(fixture,"wood")
+	body2:setUserData({
+		{prop="balancer",value=true},
+		})
+	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
+	local joint = love.physics.newRevoluteJoint(body2, body3, body3:getX(), body3:getY(), false)
 
 	self.W = w()
 	self.H = h()
@@ -113,11 +152,18 @@ function editor:drawKeyBounds()
 	end
 end
 
+
+local bloom=require "libs/bloom"(w()/1.5,h()/1.5)
+local canvas = love.graphics.newCanvas()
+local accum = love.graphics.newCanvas()
+
 function editor:draw()
 	
 	self.bg:draw()
+	self.units:draw()
 
-
+    love.graphics.setCanvas(canvas)
+    love.graphics.clear()
 	self.cam:draw(function()
 		
 		self.helper.draw(self.world)
@@ -138,10 +184,15 @@ function editor:draw()
 		end	
 
 	end)
-
+	love.graphics.setCanvas()
+	love.graphics.setColor(255, 255, 255, 255)
+	bloom:predraw()
+    bloom:enabledrawtobloom()
+    love.graphics.draw(canvas)
+	bloom:postdraw()
+	love.graphics.draw(canvas)
 	self.LoveFrames.draw()
 
-	self.units:draw()
 end
 
 
@@ -151,7 +202,7 @@ function editor:mousepressed(x, y, button)
 	if button==1 then button="l"
 	elseif button==2 then button="r" end
 	self.LoveFrames.mousepressed(x, y, button)
-	self.helper.click(button)
+	if self.state=="test" then self.helper.click(button) end
 end
 
 function editor:mousereleased(x, y, button)
@@ -161,7 +212,9 @@ function editor:mousereleased(x, y, button)
 	if self.interface:isHover() then
 		self.LoveFrames.mousereleased(x, y, button)
 	else
-		if self.state=="body" or self.state=="test" then
+		if self.state=="body" then
+			editor.selector:click(button)
+		elseif self.state=="test" and self.testMode.mouseMode=="power" then
 			editor.selector:click(button)
 		elseif self.state=="fixture" then
 			editor.fixtureMode:click(button)
@@ -175,7 +228,7 @@ end
 
 function editor:keypressed(key, isrepeat)
 	self.LoveFrames.keypressed(key, isrepeat)
-	self.helper.press(key)
+	if self.state=="test" then self.helper.press(key) end
 	if isrepeat then return end
 	if self.interface:isHover() then return end
 

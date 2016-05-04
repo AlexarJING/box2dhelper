@@ -514,6 +514,12 @@ function interface:updatePropFrame()
 
 	local target=selection[1]
 
+	if not target or( target.isDestroyed and target:isDestroyed() )then
+		self:removePropFrame()
+		self.propTarget=nil
+		return 	
+	end
+
 	if target==self.propTarget then
 		if not self:isHover() then 
 			if not self.uiVisible[3].toggle then return end

@@ -18,6 +18,7 @@ end
 
 function love.draw()
 	editor:draw()
+	--if canvas then love.graphics.draw(canvas) end
 end
 
 function love.mousepressed(x, y, button)
