@@ -266,9 +266,7 @@ end
 
 
 function drawMode.draw(world,colorStyle,offx,offy,offr)
-	if world==helper.world then
-		helper.system.update()
-	end
+	
 	
 	love.graphics.push( )
 	if offx then

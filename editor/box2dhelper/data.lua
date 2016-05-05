@@ -1,5 +1,7 @@
 local helper
 local dataMode={}
+dataMode.propBuffer={}
+
 local function getUserData(obj)
 	local raw=obj:getUserData()
 	if raw==nil then return end
@@ -12,6 +14,31 @@ local function setUserData(obj,raw)
 	if raw==nil then return end
 	obj:setUserData(loadstring(raw)())
 end
+
+function dataMode.setProperty(obj,key,value)
+	if obj:getUserData() then
+		obj:setUserData({})
+	end
+	if not dataMode.propBuffer[obj] then
+		dataMode.propBuffer[obj]={}
+	end
+
+	if not dataMode.propBuffer[obj][key] then
+		local data=obj:getUserData()
+		local prop={prop=key,value=value}
+		table.insert(data, prop)
+		dataMode.propBuffer[obj][key]=prop
+	else
+		dataMode.propBuffer[obj][key].value=value
+	end
+end
+
+
+function dataMode.getProperty(obj,key)
+	return dataMode.propBuffer[obj][key].value
+end
+
+
 
 function dataMode.createWorld(world,data,offx,offy)
 	offx=offx or 0
@@ -189,6 +216,7 @@ function dataMode.getWorldData(world,offx,offy,arg) --存储时
 		if world~=helper.world then
 			helper.todo={}
 			helper.delay={}
+			dataMode.propBuffer={}
 		end
 		helper.world=world
 		bodyList=world:getBodyList()

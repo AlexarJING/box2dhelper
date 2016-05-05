@@ -657,16 +657,13 @@ function creator:setMaterial(fixture,m_type,arg)
 		fixture:setFriction(1)
 		fixture:setRestitution(0.2)
 		fixture:setCategory(1)
-		self:setData(fixture,{prop="hardness",value=5})
-		self:setData(fixture,{prop="spark",value=5})
-		
+		editor.helper.setProperty(fixture,"hardness",5)	
 	elseif m_type=="steel" then
 		fixture:setDensity(4)
 		fixture:setFriction(1)
 		fixture:setRestitution(0.2)
 		fixture:setCategory(2)
-		self:setData(fixture,{prop="hardness",value=10})
-		self:setData(fixture,{prop="spark",value=10})
+		editor.helper.setProperty(fixture,"hardness",10)	
 	elseif m_type=="water" then
 		fixture:setDensity(1)
 		fixture:setFriction(0.1)
@@ -678,8 +675,8 @@ function creator:setMaterial(fixture,m_type,arg)
 	elseif m_type=="magnet" then
 		fixture:setRestitution(0)
 		fixture:setFriction(99)
-		self:setData(fixture,{prop="hardness",value=10})
-		self:setData(fixture,{prop="magnet",value=arg.magnet})
+		editor.helper.setProperty(fixture,"hardness",5)
+		editor.helper.setProperty(fixture,"hardness",arg.magnet)	
 		self:magnetField(fixture)
 	end
 end

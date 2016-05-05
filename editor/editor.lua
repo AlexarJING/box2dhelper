@@ -71,15 +71,16 @@ function editor:init()
 	local shape = love.physics.newRectangleShape(30,30)
 	local fixture = love.physics.newFixture(body, shape)
 	self.createMode:setMaterial(fixture,"wood")
-	body:setUserData({
-		{prop="jump",value="w"},
-		{prop="power",value=3000}
-		})
+	editor.helper.setProperty(body,"jump","w")
+	editor.helper.setProperty(body,"jumpPower",3000)	
+
 
 	local body2  = love.physics.newBody(self.world, 0, 0, "dynamic")
 	local shape = love.physics.newRectangleShape(30,100)
 	local fixture = love.physics.newFixture(body2, shape)
 	self.createMode:setMaterial(fixture,"wood")
+	editor.helper.setProperty(body,"jet","d")
+	editor.helper.setProperty(body,"jetPower",-500)
 	body2:setUserData({
 		{prop="jet",value="d"},
 		{prop="power",value=-500}
