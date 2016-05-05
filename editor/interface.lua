@@ -15,6 +15,7 @@ interface.visible={
 
 function interface:init()
 	ui=editor.LoveFrames
+	--ui.config["DEBUG"]=true
 	interface.system=require "ui/system"(editor)
 	interface.build= require "ui/build"(editor)
 	interface.help=require "ui/help"(editor)
@@ -24,16 +25,26 @@ function interface:init()
 	interface.unit = require "ui/unit"(editor)
 	interface.world = require "ui/world"(editor)
 	interface.joint=require "ui/joint"(editor)
+	interface.info= require "ui/info"(editor)
+	
 	interface.fileMenu= require "ui/fileMenu"(editor)
 	interface.editMenu= require "ui/editMenu"(editor)
+	interface.modeMenu= require "ui/modeMenu"(editor)
+	interface.layoutMenu= require "ui/layoutMenu"(editor)
+	interface.viewMenu= require "ui/viewMenu"(editor)
 
 	interface.system:create()
 	interface.build:create()
 	interface.joint:create()
 	interface.unit:create()
 	interface.history:create()
+	interface.info:create()
+
 	interface.fileMenu:create()
 	interface.editMenu:create()
+	interface.modeMenu:create()
+	interface.layoutMenu:create()
+	interface.viewMenu:create()
 end
 
 function interface:update(dt)

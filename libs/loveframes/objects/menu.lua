@@ -314,10 +314,9 @@ end
 	- desc: sets the object's visibility
 --]]---------------------------------------------------------
 function newobject:SetVisible(bool)
-
 	self.visible = bool
 	
-	if not bool then
+	--if not bool then
 		local internals = self.internals
 		for k, v in ipairs(internals) do
 			if v.menu then
@@ -325,7 +324,7 @@ function newobject:SetVisible(bool)
 				v.menu:SetVisible(bool)
 			end
 		end
-	end
+	--end
 	
 	return self
 	

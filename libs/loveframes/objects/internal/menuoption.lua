@@ -187,6 +187,8 @@ function newobject:mousereleased(x, y, button)
 		return
 	end
 	
+	self:CheckHover()
+
 	local hover = self.hover
 	local option_type = self.option_type
 	if hover and option_type ~= "divider" and button == "l" then

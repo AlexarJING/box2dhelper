@@ -16,7 +16,6 @@ function system:create()
 	
 	local b= ui.Create("button")
 	b:SetText("FILE")
-	b:SetSize(70,10)
 	b.OnClick=function(button)
 		local x,y = button:GetPos()
 		interface.fileMenu.menu:SetPos(x,y+30)
@@ -26,7 +25,6 @@ function system:create()
 
 	local b= ui.Create("button")
 	b:SetText("Edit")
-	b:SetSize(70,10)
 	b.OnClick=function(button)
 		local x,y = button:GetPos()
 		interface.editMenu.menu:SetPos(x,y+30)
@@ -34,6 +32,34 @@ function system:create()
 	end
 	list:AddItem(b)
 
+	local b= ui.Create("button")
+	b:SetText("Mode")
+	b.OnClick=function(button)
+		local x,y = button:GetPos()
+		interface.modeMenu.menu:SetPos(x,y+30)
+		interface.modeMenu.menu:SetVisible(true)
+	end
+	list:AddItem(b)
+
+	local b= ui.Create("button")
+	b:SetText("Layout")
+	b.OnClick=function(button)
+		local x,y = button:GetPos()
+		interface.layoutMenu.menu:SetPos(x,y+30)
+		interface.layoutMenu.menu:SetVisible(true)
+	end
+	list:AddItem(b)
+
+	local b= ui.Create("button")
+	b:SetText("View")
+	b.OnClick=function(button)
+		local x,y = button:GetPos()
+		interface.viewMenu.menu:SetPos(x,y+30)
+		interface.viewMenu.menu:SetVisible(true)
+	end
+	list:AddItem(b)
+
+	
 end
 
 function system:update()
