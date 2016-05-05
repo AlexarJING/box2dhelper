@@ -42,10 +42,16 @@ function system.updatePreserve()
 	end
 end
 
-function system.update()
-	helper.reactMode.update()
-	system.updateTodo()
-	system.updateDelay()
+function system.update(...)
+	local data={...}
+	local world=data[1]
+	if world==helper.world then
+		helper.reactMode.update()
+		system.updateTodo()
+		system.updateDelay()
+	end
+	
+	helper.drawMode.draw(...)
 end
 
 
