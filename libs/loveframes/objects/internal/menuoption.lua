@@ -29,7 +29,7 @@ function newobject:initialize(parent, option_type, menu)
 	self.internal = true
 	self.icon = false
 	self.func = nil
-	
+	self.toggle = nil
 end
 
 --[[---------------------------------------------------------
@@ -175,7 +175,8 @@ function newobject:mousereleased(x, y, button)
 	
 	local state = loveframes.state
 	local selfstate = self.state
-	
+	local toggle = self.toggle
+
 	if state ~= selfstate then
 		return
 	end
@@ -189,6 +190,9 @@ function newobject:mousereleased(x, y, button)
 	local hover = self.hover
 	local option_type = self.option_type
 	if hover and option_type ~= "divider" and button == "l" then
+		if toggle~=nil then
+			self.toggle=not toggle
+		end
 		local func = self.func
 		if func then
 			local text = self.text

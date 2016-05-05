@@ -43,7 +43,7 @@ function system:pushUndo()
 	for i=self.undoIndex+1,self.maxUndo  do
 		self.undoStack[i]=nil
 	end
-	editor.interface:updateHistoryFrame()
+	editor.interface.history:update()
 end
 
 function system:setWorld(arg)

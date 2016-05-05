@@ -156,8 +156,8 @@ skin.controls.menu_body_color                       = {255, 255, 255, 255}
 
 -- menuoption
 skin.controls.menuoption_body_hover_color           = {51, 204, 255, 255}
-skin.controls.menuoption_text_hover_color           = {255, 255, 255, 255}
-skin.controls.menuoption_text_color                 = {180, 180, 180, 255}
+skin.controls.menuoption_text_hover_color           = {0, 0, 255, 255}
+skin.controls.menuoption_text_color                 = {0, 0, 0, 255}
 
 local function ParseHeaderText(str, hx, hwidth, tx)
 	
@@ -1893,8 +1893,10 @@ function skin.DrawMenuOption(object)
 	local text_hover_color = skin.controls.menuoption_text_hover_color
 	local text_color = skin.controls.menuoption_text_color
 	local twidth = smallfont:getWidth(text)
-	
-	
+	local toggle=object.toggle
+	local trueImage= skin.images["accept.png"]
+	local falseImage= skin.images["cancel.png"]
+
 	if option_type == "divider" then
 		love.graphics.setColor(200, 200, 200, 255)
 		love.graphics.rectangle("fill", x + 4, y + 2, width - 8, 1)
@@ -1910,10 +1912,22 @@ function skin.DrawMenuOption(object)
 			love.graphics.setColor(text_color)
 			love.graphics.print(text, x + 26, y + 5)
 		end
+		
+
 		if icon then
 			love.graphics.setColor(255, 255, 255, 255)
 			love.graphics.draw(icon, x + 5, y + 5)
 		end
+
+		if toggle~=nil then
+			love.graphics.setColor(255, 255, 255, 255)
+			if toggle==true then
+				love.graphics.draw(trueImage, x + 5, y + 5)
+			else
+				love.graphics.draw(falseImage, x + 5, y + 5)
+			end
+		end
+
 		object.contentwidth = twidth + 31
 		object.contentheight = 25
 	end

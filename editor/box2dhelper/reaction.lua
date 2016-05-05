@@ -46,6 +46,7 @@ function reactMode.reg(world)
 		mouseFollow={},
 		always={}
 	}
+	
 	for i,body in ipairs(world:getBodyList()) do
 		local data=body:getUserData()
 		for i,v in ipairs(data) do
@@ -59,6 +60,7 @@ function reactMode.reg(world)
 end
 
 function reactMode.addBody(body)
+
 	local data=body:getUserData()
 	for i,v in ipairs(data) do
 		for t,react in pairs(reactMode.reactType) do
@@ -84,14 +86,11 @@ function func.balancer(body)
 	local angle=body:getAngle()
 	local mass = body:getMass()
 	body:setAngularDamping(99)
-	body:applyAngularImpulse(-angle*9999*mass)
+	body:applyAngularImpulse(-angle*59999*mass)
 end
 
 function func.roll(body)
-	local power=5000
-	for i,v in ipairs(body:getUserData()) do
-		if v.prop=="power" then power=v.value end
-	end
+	local power=helper.getProperty(body,"rollPower") or 5000
 	body:applyTorque(power)
 end
 
@@ -102,24 +101,20 @@ function func.jump(body)
 		local bodyA,bodyB=fixA:getBody(),fixB:getBody()
 		if bodyA==body then
 			body2=bodyB
-		else
+		elseif bodyB==body then
 			body2=bodyA
 		end
 	end
 	if not body2 then return end
-	if body2:getType()~="static" then return end
+	--if body2:getType()~="static" then return end
 
-	local power=5000
-	local leftkey,rightkey
-	for i,v in ipairs(body:getUserData()) do
-		if v.prop=="power" then power=v.value end
-		if v.prop=="jump_left" then leftkey=v.value end
-		if v.prop=="jump_right" then rightkey=v.value end
-	end
+	local power=helper.getProperty(body,"jumpPower") or 5000
+	local leftkey=helper.getProperty(body,"jumpLeftKey") or "left"
+	local rightkey=helper.getProperty(body,"jumpRightKey") or "right"
 
 	local angle=body:getAngle()
 	local mass=body:getMass( )
-
+	local mass2=body2:getMass()
 	if leftkey and rightkey then
 		if love.keyboard.isDown(leftkey) then
 			angle=angle-Pi/6
@@ -128,24 +123,19 @@ function func.jump(body)
 			angle=angle+Pi/6
 		end
 	end
+	body:setAngle(angle)
 	body:applyLinearImpulse(power*math.sin(angle)*mass,-power*math.cos(angle)*mass)
+	body2:applyLinearImpulse(-power*math.sin(angle)*mass2,power*math.cos(angle)*mass2)
 end
 
 function func.rollback(body)
-	local power=-5000
-	for i,v in ipairs(body:getUserData()) do
-		if v.prop=="powerBack" then 
-			power=-v.value 
-		end
-	end
+	local power=helper.getProperty(body,"rollBackPower") or -5000
 	body:applyTorque(power)
 end
 
 function func.jet(body)
-	local power=50000
-	for i,v in ipairs(body:getUserData()) do
-		if v.prop=="power" then power=v.value end
-	end
+	local power=helper.getProperty(body,"jetPower") or 50000
+	
 	local angle=body:getAngle()-Pi/2
 	body:applyForce(power*math.sin(angle),-power*math.cos(angle))
 
@@ -186,15 +176,10 @@ end
 function func.fire(body)
 	local fixture=body:getFixtureList()[1]
 	fixture:setGroupIndex(-1)
-	local power=500
-	local bullet
-	for i,v in ipairs(body:getUserData()) do
-		if v.prop=="power" then power=v.value end
-		if v.prop=="bullet" then bullet=v.value end
-	end	
-
+	local power=helper.getProperty(body,"firePower") or 500
+	local bullet=helper.getProperty(body,"fireBullet")
+	
 	local boom=helper.createWorld(helper.world,bullet,body:getX(),body:getY())[1].body
-
 	local angle=body:getAngle()-Pi/2
 
 	boom:applyLinearImpulse(-power*math.sin(angle),power*math.cos(angle))

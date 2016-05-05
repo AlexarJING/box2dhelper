@@ -88,19 +88,12 @@ func.spark=function(a,b,coll)
 		if a:isDestroyed() or b:isDestroyed() or coll:isDestroyed() then return end
 		threshold =300
 		local bodyA,bodyB=a:getBody(),b:getBody()
-		local matA,hardA,matB,hardB
-		local tab=a:getUserData()
-		if not tab then return end
-		for i,v in ipairs(tab) do
-			if v.prop=="material" then matA=v.value end
-			if v.prop=="hardness" then hardA=v.value end
-		end
-		tab=b:getUserData()
-		if not tab then return end
-		for i,v in ipairs(tab) do
-			if v.prop=="material" then matB=v.value end
-			if v.prop=="hardness" then hardB=v.value end
-		end
+		
+		local matA=helper.getProperty(a,"material")
+		local hardA=helper.getProperty(a,"hardness")
+		local matB=helper.getProperty(b,"material")
+		local hardB=helper.getProperty(b,"hardness")
+
 		if hardA<=hardB then
 			local vxA,vyA=bodyA:getLinearVelocity()
 			local vxB,vyB=bodyB:getLinearVelocity()
@@ -161,18 +154,12 @@ func.embed=function(threshold,a,b,coll,np,tp)
 		local body1,body2=a:getBody(),b:getBody()
 		local x,y=coll:getPositions()
 		love.physics.newWeldJoint(body1, body2, x, y, false)
-		for i,v in ipairs(a:getUserData()) do
-			if v.prop=="embed" then 
-				v.value=false
-				return
-			end 
-		end
+		helper.setProperty(a,"embed",false)
 	end
 	table.insert(helper.system.todo,{func,a,b,coll})
 end
 	
 func.crash=function(threshold,a,b,coll,np,tp)
-	threshold=100
 	local func=function(a,b,coll,npA,tpA)
 		if a:isDestroyed() or b:isDestroyed() or coll:isDestroyed() then return end
 		if np<threshold then return end
@@ -259,11 +246,11 @@ func.crash=function(threshold,a,b,coll,np,tp)
 				local fixture = love.physics.newFixture(body, shape)
 				local l, t, r, b = fixture:getBoundingBox()
 				if (r-l)*(b-t)>1000 then
-						fixture:setUserData({
-					{prop="crashable",value=true},
-					{prop="material",value="rock"},
-					{prop="hardness",value=3},
-					 })
+					if helper.getProperty(a,"crashcombo") then
+						helper.setProperty(fixture,"crashable",threshold)
+					end
+					helper.setProperty(fixture,"meterial","rock")
+					helper.setProperty(fixture,"hardness",3)			
 				end
 			end
 			
@@ -286,12 +273,12 @@ func.crash=function(threshold,a,b,coll,np,tp)
 end
 
 function func.oneWayPre(enabled,a,b,coll)
-	for i,v in ipairs(a:getUserData()) do
-		if v.prop=="oneWayState" then 
-			coll:setEnabled(v.value)
-			return
-		end 
+	if helper.getProperty(a,"oneWayState")~=nil then
+		coll:setEnabled(helper.getProperty(a,"oneWayState"))
+		return
 	end
+	
+	
 	local bodyA=a:getBody()
 	local bodyB=b:getBody()
 	local x1,y1,x2,y2= coll:getPositions()
@@ -308,21 +295,16 @@ function func.oneWayPre(enabled,a,b,coll)
 	coll:setEnabled(false)
 	if rvy1>0 or (x2 and rvy2>0) then
 		coll:setEnabled(true)
-		table.insert(a:getUserData(), {prop="oneWayState",value=true})
+		helper.setProperty(a,"oneWayState",true)
 	else
-		table.insert(a:getUserData(), {prop="oneWayState",value=false})
+		helper.setProperty(a,"oneWayState",false)
 	end
 	
 end
 
 function func.oneWayEnd(enabled,a,b,coll)
 	coll:setEnabled(true)
-	for i,v in ipairs(a:getUserData()) do
-		if v.prop=="oneWayState" then 
-			table.remove(a:getUserData(), i)
-			return 
-		end 
-	end
+	helper.setProperty(a,"oneWayState",nil)
 end
 
 function func.buoyancy(density,a,b,coll)  --in pre
@@ -409,21 +391,18 @@ end
 
 function func.magnet(power,a,b,coll)
 	coll:setEnabled(false)
-	local tab=b:getUserData()
-	local magB --B的磁场
-	if not tab then return end
-	for i,v in ipairs(tab) do
-		if v.prop=="material" then matB=v.value end
-		if v.prop=="magnetField" then magB=v.value end
-	end
+
+	local magB=helper.getProperty(b,"magnetField")
+	local matB=helper.getProperty(b,"material")
+	
 	local parent = a:getBody():getFixtureList()[#a:getBody():getFixtureList()]
 
-	if (not matB=="steel") and (matB=="magnet") then return end
+	if matB~="steel" and matB~="magnet" then return end
 	local bodyA,bodyB=a:getBody(),b:getBody()
 	local shapeA,shapeB=a:getShape(),b:getShape()
 	local xA,yA= bodyA:getWorldPoint(shapeA:getPoint())
 	local xB,yB
-	--local r = shapeA:getRadius()
+
 	if matB=="steel" and magB==nil then
 		xB,yB= bodyB:getPosition()
 		local distance = math.getDistance(xA,yA,xB,yB)

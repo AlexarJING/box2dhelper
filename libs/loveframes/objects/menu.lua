@@ -26,7 +26,7 @@ function newobject:initialize(menu)
 	self.parentmenu = nil
 	self.options = {}
 	self.internals = {}
-	
+
 end
 
 --[[---------------------------------------------------------
@@ -214,13 +214,13 @@ end
 	- func: AddOption(text, icon, func)
 	- desc: adds an option to the object
 --]]---------------------------------------------------------
-function newobject:AddOption(text, icon, func)
+function newobject:AddOption(text, icon, func,toggleable)
 
 	local menuoption = loveframes.objects["menuoption"]:new(self)
 	menuoption:SetText(text)
 	menuoption:SetIcon(icon)
 	menuoption:SetFunction(func)
-	
+	menuoption.toggle=toggleable
 	table.insert(self.internals, menuoption)
 	return self
 	

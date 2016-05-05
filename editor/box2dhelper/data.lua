@@ -16,7 +16,7 @@ local function setUserData(obj,raw)
 end
 
 function dataMode.setProperty(obj,key,value)
-	if obj:getUserData() then
+	if not obj:getUserData() then
 		obj:setUserData({})
 	end
 	if not dataMode.propBuffer[obj] then
@@ -35,6 +35,20 @@ end
 
 
 function dataMode.getProperty(obj,key)
+	if not dataMode.propBuffer[obj] then
+		dataMode.propBuffer[obj]={}
+	end
+
+	if not dataMode.propBuffer[obj][key] then
+		for i,v in ipairs(obj:getUserData()) do
+			if v.prop==key then
+				dataMode.propBuffer[obj][key]={prop=key,value=v.value}
+				return v.value
+			end
+		end
+		return nil
+	end
+
 	return dataMode.propBuffer[obj][key].value
 end
 
