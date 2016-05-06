@@ -3,7 +3,7 @@ local ui
 local interface
 local help={}
 
-local helpText= require "editor/helpText"
+local helpText= require "editor/helpText2"
 local font = love.graphics.newFont("font/cn.ttf", 20)
 
 function help:create()
@@ -22,7 +22,6 @@ function help:create()
 
 	local text = ui.Create("text",frame)
 	text:SetPos(10,30)
-	text:SetFont(font)
 	text:SetText(helpText)
 
 	list:AddItem(text)

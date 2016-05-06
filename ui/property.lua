@@ -196,8 +196,12 @@ function property:create(target)
 	
 	local frame = self.frame
 	frame:SetName(tType)
+	
 	frame:SetSize(250, 70+count*30)
-	frame:SetPos(w()-250, h()-(70+count*30))
+
+	frame:SetPos(w()-250, h()-(70+count*30)-30)
+	interface.layout.property={frame:GetPos()}
+
 	frame:ShowCloseButton(false)
 
 	local tabs= ui.Create("tabs",frame)

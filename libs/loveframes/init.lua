@@ -26,7 +26,7 @@ loveframes.config["ENABLE_SYSTEM_CURSORS"] = true
 loveframes.config["ENABLE_UTF8_SUPPORT"] = false
 
 -- misc library vars
---loveframes.fontPath="chinese.ttf"
+loveframes.fontPath="font/en.ttf"
 loveframes.state = "none"
 loveframes.drawcount = 0
 loveframes.collisioncount = 0

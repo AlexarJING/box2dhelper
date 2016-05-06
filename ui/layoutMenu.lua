@@ -10,6 +10,7 @@ function layout:create()
 	layout.menu=menu
 	menu:AddOption("ruler grid", false, function() end,true)
 	menu:AddOption("log", false, function() end,true)
+	menu:AddOption("information", false, function() end,true)
 	menu:AddDivider()
 	menu:AddOption("build frame", false, function() end,true)
 	menu:AddOption("joint frame", false, function() end,true)
@@ -20,6 +21,7 @@ function layout:create()
 	menu:AddDivider()
 	menu:AddOption("property frame", false, function() end,true)
 	menu:AddDivider()
+
 	menu:AddOption("hide all", false, function() end,true)
 
 	menu:SetVisible(false)

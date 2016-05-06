@@ -1,3 +1,5 @@
+local str=[[键入文件名]]
+print(string.sub(str,5))
 if arg[#arg] == "-debug" then require("mobdebug").start() end 
 require "libs.util"
 

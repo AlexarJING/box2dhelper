@@ -10,52 +10,37 @@ function info:create()
 	panel:SetPos(0,h()-30)
 
 	local t=ui.Create("text",panel)
-	t:SetPos(100,10)
-	t:SetText("current mode")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(300,10)
-	t:SetText("current selection")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(500,10)
-	t:SetText("screen x")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(600,10)
-	t:SetText("screen y")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(700,10)
-	t:SetText("world x")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(800,10)
-	t:SetText("world y")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(900,10)
-	t:SetText("scale")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(1000,10)
-	t:SetText("Gx")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(1100,10)
-	t:SetText("Gy")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(1200,10)
-	t:SetText("bodyCount")
-
-	local t=ui.Create("text",panel)
-	t:SetPos(1300,10)
-	t:SetText("FPS")
+	self.text=t
+	t:SetPos(10,10)
+	t:SetText("current action")
 end
 
+function info:update()
 
-
+	local action=editor.system.undoStack[editor.system.undoIndex] and 
+		editor.system.undoStack[editor.system.undoIndex].event or "null"
+	local mode = editor.state
+	local selection
+	if editor.selector.selection then 
+		selection=#editor.selector.selection ..editor.selector.selection[1]:type()
+	else
+		selection="null" 
+	end
+	
+	local screenX = love.mouse.getX()
+	local screenY = love.mouse.getY()
+	local worldX = editor.mouseX
+	local worldY = editor.mouseY
+	local scale = editor.cam.scale
+	local gx , gy = editor.world:getGravity()
+	local bodyCount = #editor.world:getBodyList()
+	local fps  = love.timer.getFPS()
+	local str = "|action| %-10s |mode| %-5s |selection| %-10s |screenX| %-5d |screenY| %-5d "..
+				"|worldX| %-5d |worldY| %-5d |Scale| %-5.2f |gravtiyX| %-5.2f |gravityY| %-5.2f "..
+				"|bodyCount| %-5d |FPS| %-5d"
+	self.text:SetText(string.format(str, action,mode,selection,
+		screenX,screenY,worldX,worldY,scale,gx,gy,bodyCount,fps))
+end
 
 return function(parent) 
 	editor=parent

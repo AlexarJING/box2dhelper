@@ -8,7 +8,7 @@ local interface
 function unit:create()
 	local files = love.filesystem.getDirectoryItems("units")
 	local frame =ui.Create("frame")
-	self.unitFrame=frame
+	self.frame=frame
 	local count=#files
 	self.unitCount=count
 	local max=9
@@ -29,7 +29,7 @@ function unit:create()
 			if love.keyboard.isDown("lctrl") and love.keyboard.isDown("lalt") then
 				love.filesystem.remove( "units/"..b:GetText() )
 				frame:Remove()
-				self:createUnitFrame()
+				self:create()
 			else
 				editor.units:load(b:GetText())
 			end
@@ -59,15 +59,12 @@ function unit:createSave()
 		editor.units:save(input:GetText())
 		input:Remove()
 		frame:Remove()
+		self.unitFrame:Remove()
+		self:create()
 	end
 end
 
-function unit:update()
-	if #love.filesystem.getDirectoryItems("units")~=self.unitCount then
-		if self.unitFrame then self.unitFrame:Remove() end
-		self:createUnitFrame()
-	end
-end
+
 
 return function(parent) 
 	editor=parent

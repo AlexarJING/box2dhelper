@@ -51,9 +51,7 @@ function world:createLoadWorldFrame()
 				file:open("r")
 				local str=file:read()
 				editor.world = love.physics.newWorld(0, 9.8*64, false)
-				editor.helper.createWorld(editor.world,loadstring(str)())
-				editor.selector.selection=nil
-				frame:Remove()
+				
 			end
 		end
 	end

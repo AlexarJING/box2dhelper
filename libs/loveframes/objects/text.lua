@@ -320,8 +320,9 @@ function newobject:SetText(t)
 			local key = k
 			if width > maxw then
 				table.remove(self.formattedtext, k)
-				for n=1, string.len(data) do	
-					local item = data:sub(n, n)
+				print(string.sub(data,1,-1))
+				for n=1, string.len(data),3 do	
+					local item = data:sub(n, n+2)
 					local itemw = v.font:getWidth(item)
 					if n ~= string.len(data) then
 						if (curw + itemw) > maxw then

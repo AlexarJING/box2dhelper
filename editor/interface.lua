@@ -12,6 +12,8 @@ interface.visible={
 	log=true
 }
 
+interface.layout={}
+
 
 function interface:init()
 	ui=editor.LoveFrames
@@ -26,7 +28,8 @@ function interface:init()
 	interface.world = require "ui/world"(editor)
 	interface.joint=require "ui/joint"(editor)
 	interface.info= require "ui/info"(editor)
-	
+	interface.scene= require "ui/scene"(editor)
+
 	interface.fileMenu= require "ui/fileMenu"(editor)
 	interface.editMenu= require "ui/editMenu"(editor)
 	interface.modeMenu= require "ui/modeMenu"(editor)
@@ -39,6 +42,7 @@ function interface:init()
 	interface.unit:create()
 	interface.history:create()
 	interface.info:create()
+	interface.scene:create()
 
 	interface.fileMenu:create()
 	interface.editMenu:create()
@@ -49,7 +53,7 @@ end
 
 function interface:update(dt)
 	self.property:update()
-	self.unit:update()
+	self.info:update()
 	ui.update(dt)
 end
 
@@ -63,6 +67,31 @@ function interface:isHover()
 	end
 	if ui.inputobject then self.hover=true end
 	return self.hover
+end
+
+function interface:getLayout()
+	return {
+	build={interface.build.frame:GetPos()},
+	joint={interface.joint.frame:GetPos()},
+	unit={interface.unit.frame:GetPos()},
+	history={interface.history.frame:GetPos()},
+	scene={interface.scene.frame:GetPos()},
+	}	
+end
+
+function interface:resetLayout()
+	interface.system.list:SetPos(0, 0)
+	interface.system.list:SetSize(editor.W, 30)
+
+	interface.info.panel:SetPos(0, editor.H-30)
+	interface.info.panel:SetSize(editor.W, 30)
+
+	interface.build.frame:SetPos(unpack(self.layout.build))
+	interface.joint.frame:SetPos(unpack(self.layout.joint))
+	interface.unit.frame:SetPos(unpack(self.layout.unit))
+	interface.history.frame:SetPos(unpack(self.layout.history))
+	interface.scene.frame:SetPos(unpack(self.layout.scene))
+
 end
 
 

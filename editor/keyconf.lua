@@ -58,11 +58,11 @@ local conf={
 	toggleUnit="f11",
 	toggleHistroy="f12",
 	
+	saveScene="ctrl+s",
+	saveUnit="lshift+s",
+	saveProject="lalt+s",
+	loadProject="lalt+l",
 
-	loadWorld="ctrl+l",
-	saveWorld="ctrl+s",
-
-	saveUnit="ctrl+`"
 }
 
 return conf

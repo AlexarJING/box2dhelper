@@ -1,4 +1,7 @@
 local editor={}
+editor.currentProject="default"
+editor.currentScene="default"
+
 editor.world= love.physics.newWorld(0,9.8*64,false)
 editor.linearDamping=1
 editor.angularDamping=1
@@ -24,8 +27,6 @@ editor.testMode= require "modes/testMode"(editor)
 editor.jointMode= require "modes/jointMode"(editor)
 editor.fixtureMode= require "modes/fixtureMode"(editor)
 --------------------------------------------------------
-
-
 
 
 
@@ -322,13 +323,6 @@ function editor:changeMode(which)
 	
 	self[self.state.."Mode"]:new()
 	
-	for k,v in pairs(self.interface.toggleMode) do
-		if k==self.state then
-			v.toggle=true
-		else
-			v.toggle=false
-		end
-	end
 end
 
 
@@ -389,12 +383,15 @@ function editor:keyBound()
 		reset=function() self.testMode:reset() end,
 
 
+
 		loadWorld=function() self.system:loadFromFile() end,
 		saveWorld=function() self.system:saveToFile() end,
-
-		togglePropFrameStyle=function() self.interface:nextTag() end,
+		saveScene=function() self.system:saveScene() end,
+		saveProject=function() self.system:saveProject() end,
 		saveUnit=function() self.units:getSaveName() end,
 		quickSave=function() self.units:quickSave() end,
+
+
 
 		toggleSystem=function() self.interface.sysList:SetVisible(not self.interface.sysList:GetVisible()) end,
 		togglePropFrameStyle=function() self.interface:toggleBodyType() end, 
@@ -425,8 +422,8 @@ function editor:keyBound()
 	}
 
 	local keys ={}
-
-	for commadName,key in pairs(require "editor/keyconf") do
+	self.keyconf=require "editor/keyconf"
+	for commadName,key in pairs(self.keyconf) do
 		table.insert(keys, {key=key,commad=bound[commadName],name=commadName})
 	end
 	self.commmadBounds=bound

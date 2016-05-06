@@ -6,16 +6,6 @@ system.undoIndex=0
 system.maxUndo=20
 
 
-function system:saveToFile()
-	editor.interface:createSaveWorldFrame()
-end
-
-
-function system:loadFromFile()
-	editor.interface:createLoadWorldFrame()
-end
-
-
 
 function system:clear()
 	editor.world =love.physics.newWorld()
@@ -81,7 +71,171 @@ function system:returnTo(index)
 	editor.helper.createWorld(editor.world,self.undoStack[self.undoIndex].world)
 	self:setWorld(self.undoStack[self.undoIndex].world.world)
 	editor:cancel()
+end
 
+
+
+function system:saveProject()
+
+
+	if editor.currentProject=="default" then
+		system:newProject()
+		return
+	end
+
+	local text=editor.currentProject
+	love.filesystem.createDirectory(text.."/units")
+	love.filesystem.createDirectory(text.."/scenes")
+	love.filesystem.createDirectory(text.."/textures")
+	local project = love.filesystem.newFile(text..".proj", "w")
+	
+	if editor.currentScene~="default" then
+		system:saveScene()
+	end
+	
+	local data={
+		projectName=editor.currentProject,
+		currentScene=editor.currentScene,
+		visible=editor.interface.visible,
+		layout=editor.interface:getLayout(),
+		keyconf=editor.keyconf,
+		resolution={love.graphics.getDimensions( )},
+		createTime=editor.createTime,
+		lastEditTime=os.date("%c")
+	}
+	project:write(table.save(data))
+	project:close()			
+end
+
+
+function system:newProject()
+	system:createSaveProjectFrame()
+	editor.createTime=os.date("%c")
+end
+
+function system:loadProject()
+
+	if not editor.loadProject then
+		system:createLoadProjectFrame()
+		return
+	end
+	local file = love.filesystem.newFile(editor.loadProject ..".proj", "r")
+	local data = loadstring(file:read())()
+	editor.currentProject=data.projectName
+	editor.currentScene=data.currentScene
+	system:loadScene(editor.currentScene)
+	editor.keyconf=data.keyconf
+	editor.createTime=data.createTime
+	editor.lastEditTime=data.lastEditTime
+	love.window.setMode(unpack(data.resolution))
+	editor.W=w()
+	editor.H=h()
+	editor.interface.visible=data.visible
+	editor.interface.layout=data.layout
+	editor.interface:resetLayout()
+	editor.loadProject=nil
+
+end
+
+function system:saveScene()
+	if editor.currentProject=="default" then
+		editor.log:push("need to create a project")
+		return
+	end
+
+	if editor.currentScene=="default" then
+		system:createSaveSceneFrame()
+		return
+	end
+
+	local file = love.filesystem.newFile(editor.currentScene..".scene","w")
+	file:write(table.save(editor.system.undoStack[editor.system.undoIndex].world))
+	file:close()
+	editor.log:push("scene saved")
+end
+
+function system:loadScene(name)
+	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..name,"r")
+	if not file then return end
+	local data = loadstring(file:read())()
+	local world = love.physics.newWorld(xg, yg, sleep)
+	editor.world=world
+	editor.helper.createWorld(editor.world,data)
+	editor.linearDamping=data.world.linearDamping
+	editor.angularDamping=data.world.angularDamping
+	editor.selector.selection=nil
+end
+
+function system:createSaveSceneFrame()
+	local ui=editor.LoveFrames
+	local frame =ui.Create("frame")
+	frame:SetName("save the scene")
+	frame:SetSize(300,80)
+	frame:CenterWithinArea(0,0,w(),h())
+	local input = ui.Create("textinput",frame)
+	input:SetSize(280,30)
+	input:SetPos(10,40)
+	input:SetFocus(true)
+	input.OnEnter=function()
+		editor.currentScene=input:getText()
+		system:saveScene()
+		frame:Remove()
+	end
+end
+
+function system:createSaveProjectFrame()
+	local ui=editor.LoveFrames
+	local frame =ui.Create("frame")
+	frame:SetName("save the project")
+	frame:SetSize(300,80)
+	frame:CenterWithinArea(0,0,w(),h())
+	local input = ui.Create("textinput",frame)
+	input:SetSize(280,30)
+	input:SetPos(10,40)
+	input:SetFocus(true)
+	input.OnEnter=function()
+		editor.currentProject=input:GetText()
+		system:saveProject()
+		input:Remove()
+		frame:Remove()
+	end
+	editor.log:push("project saved")
+end
+
+
+function system:createLoadProjectFrame()
+	local ui=editor.LoveFrames
+	local files = love.filesystem.getDirectoryItems("")
+	for i=#files,1,-1 do
+		if string.sub(files[i],-5,-1)~=".proj" then
+			table.remove(files, i)
+		end
+	end
+	local frame =ui.Create("frame")
+	local count=#files
+	frame:SetName("select a file to load...")
+	frame:SetSize(300,30*count+30)
+	frame:CenterWithinArea(0,0,w(),h())
+	local list = ui.Create("list",frame)
+	list:SetDisplayType("vertical")
+	list:SetPos(5, 30)
+	list:SetSize(280, 28*count)
+	for i,v in ipairs(files) do
+		local b= ui.Create("button")
+		b:SetText(v)
+		list:AddItem(b)
+		b.OnClick=function()
+			if love.keyboard.isDown("lctrl") and love.keyboard.isDown("lalt") then
+				love.filesystem.remove( b:GetText() )
+				frame:Remove()
+				system:createLoadProjectFrame()
+			else
+				editor.loadProject=string.sub(b:GetText(),1,-6)
+				system:loadProject()
+				frame:Remove()
+			end
+		end
+	end
 end
 
 

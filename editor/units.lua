@@ -13,7 +13,8 @@ function units:draw()
 			love.graphics.rectangle("line", -300, -299, 599, 599)
 			love.graphics.line(-20,0,20,0)
 			love.graphics.line(0,-20,0,20)
-			editor.helper.draw(self.world)
+
+			editor.helper.draw({self.world:getBodyList()})
 		end)
 	end
 end
@@ -23,6 +24,7 @@ function units:showPreview(text)
 	local file = love.filesystem.newFile("units/"..text)
 	file:open("r")
 	self.target=loadstring(file:read())()
+	file:close()
 	self.world=love.physics.newWorld(0, 0, true)
 	editor.helper.createWorld(self.world,self.target)
 end
