@@ -202,6 +202,16 @@ function newobject:mousereleased(x, y, button)
 		end
 		local basemenu = self.parent:GetBaseMenu()
 		basemenu:SetVisible(false)
+
+		if self.parent.isSingleChoice then
+			local internals = self.parent.internals
+			for k, v in ipairs(internals) do
+				if v.toggle==true then
+					v.toggle = nil
+				end
+			end
+			self.toggle=true
+		end
 	end
 
 end

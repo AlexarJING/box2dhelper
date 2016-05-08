@@ -170,6 +170,7 @@ end
 
 
 function property:create(target)
+
 	local tType= string.lower(target:type()) 
 	if string.find(tType,"joint") then tType="joint" end
 	if string.find(tType,"shape") then tType="shape" end
@@ -245,7 +246,7 @@ function property:create(target)
 		local v=value:GetText()
 		editor.helper.setProperty(target,k,v)
 		self:remove()
-		self:create()
+		self:create(editor.selector.selection[1])
 		obj.focus=false
 	end
 	value:SetText("none")
@@ -258,7 +259,7 @@ function property:create(target)
 		local v=value:GetText()
 		editor.helper.setProperty(target,k,v)
 		self:remove()
-		self:create()
+		self:create(editor.selector.selection[1])
 		obj.focus=false
 	end
 	self.dataList:AddItem(name,#self.targetData+1,1)

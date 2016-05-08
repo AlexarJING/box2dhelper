@@ -66,7 +66,7 @@ function editor:init()
 	})
 	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
 	local joint = love.physics.newWeldJoint(body, body3, body3:getX(), body3:getY(), false)
-]]
+
 
 	local body  = love.physics.newBody(self.world, 300, -100, "dynamic")
 	local shape = love.physics.newRectangleShape(50,50)
@@ -102,13 +102,16 @@ function editor:init()
 
 	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
 	local joint = love.physics.newWeldJoint(body2, body3, body3:getX(), body3:getY(), false)
-
+]]
 	self.W = w()
 	self.H = h()
+	self.interface:init()
+	
+	editor:beforeStart()
 	self.bg:init()
 	self.state="body"
 	self.keys= self:keyBound()	
-	self.interface:init()
+	
 	self.action="system start"
 	editor.log:push("welcome to LoveBox2D editor !")
 
@@ -168,6 +171,7 @@ local accum = love.graphics.newCanvas()
 function editor:draw()
 	
 	self.bg:draw()
+	self.log:draw()
 	self.units:draw()
 
     love.graphics.setCanvas(canvas)
@@ -194,10 +198,14 @@ function editor:draw()
 	end)
 	love.graphics.setCanvas()
 	love.graphics.setColor(255, 255, 255, 255)
-	bloom:predraw()
-    bloom:enabledrawtobloom()
-    love.graphics.draw(canvas)
-	bloom:postdraw()
+	
+	if editor.enableBloom then
+		bloom:predraw()
+	    bloom:enabledrawtobloom()
+	    love.graphics.draw(canvas)
+		bloom:postdraw()
+	end
+	
 	love.graphics.draw(canvas)
 	self.LoveFrames.draw()
 
@@ -325,7 +333,55 @@ function editor:changeMode(which)
 	
 end
 
+function editor:beforeStart()
+	local file = love.filesystem.newFile("appData", "r")
+	if not file then
+		love.window.showMessageBox("firstMet", "This is our firstMet.\nfor more details QQ1643386616", "info")
+		editor.system.newProject()
+		return 
+	end
+	local data=loadstring(file:read())()
+	editor.loadProject=data.project
+	editor.system:loadProject()
+end
 
+
+
+function editor:beforeQuit()
+	local file = love.filesystem.newFile("appData", "w")
+	local data={project=editor.currentProject,scene=currentScene}
+	file:write(table.save(data))
+	file:close()
+end
+
+function editor:quit()
+	local title = "about to quit..."
+	local message = "Are you sure to quit?"
+	local buttons = {"Save and Quit", "Quit","Cancel", enterbutton=1,escapebutton = 3}
+	 
+	local b = love.window.showMessageBox(title, message, buttons,"warning",true)
+
+	if b==1 then
+		editor.system:saveScene()
+		editor.system:saveProject()
+		editor:beforeQuit()
+		return 
+	elseif b==2 then
+		editor:beforeQuit()
+		return
+	end
+	return true
+--[[
+	local file = love.filesystem.newFile("appData", "w")
+	local data={project=editor.currentProject,scene=currentScene}
+	file:write(table.save(data))
+	file:close()]]
+end
+
+function editor:resize()
+
+
+end
 
 
 function editor:keyBound()

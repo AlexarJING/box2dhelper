@@ -73,7 +73,52 @@ function system:returnTo(index)
 	editor:cancel()
 end
 
+function system:copyProject(source)
+	local files = love.filesystem.getDirectoryItems(source.."/units")
+	if files then
+		for i,name in ipairs(files) do
+			local from = love.filesystem.newFile(source.."/units/"..name, "r")
+			local to = love.filesystem.newFile(editor.currentProject.."/units/"..name, "w")
+			to:write(from:read())
+			from:close()
+			to:close()
+		end
+	end
+	local files = love.filesystem.getDirectoryItems(source.."/scenes")
+	if files then
+		for i,name in ipairs(files) do
+			local from = love.filesystem.newFile(source.."/scenes/"..name, "r")
+			local to = love.filesystem.newFile(editor.currentProject.."/scenes/"..name, "w")
+			to:write(from:read())
+			from:close()
+			to:close()
+		end
+	end
+	local files = love.filesystem.getDirectoryItems(source.."/textures")
+	if files then
+		for i,name in ipairs(files) do
+			local from = love.filesystem.newFile(source.."/textures/"..name, "r")
+			local to = love.filesystem.newFile(editor.currentProject.."/textures/"..name, "w")
+			to:write(from:read())
+			from:close()
+			to:close()
+		end
+	end
+end
 
+function system:saveAsProject()
+	if editor.currentProject=="default" then
+		editor.log:push("can not save an empty project")
+		return
+	end
+
+	local source=editor.currentProject
+	self.saveFrom=source
+	system:createSaveProjectFrame()
+	editor.createTime=os.date("%c")
+	
+	
+end
 
 function system:saveProject()
 
@@ -82,16 +127,12 @@ function system:saveProject()
 		system:newProject()
 		return
 	end
-
+	
 	local text=editor.currentProject
 	love.filesystem.createDirectory(text.."/units")
 	love.filesystem.createDirectory(text.."/scenes")
 	love.filesystem.createDirectory(text.."/textures")
 	local project = love.filesystem.newFile(text..".proj", "w")
-	
-	if editor.currentScene~="default" then
-		system:saveScene()
-	end
 	
 	local data={
 		projectName=editor.currentProject,
@@ -104,13 +145,23 @@ function system:saveProject()
 		lastEditTime=os.date("%c")
 	}
 	project:write(table.save(data))
-	project:close()			
+	project:close()	
+	
+	editor.log:push("project saved")
+	if self.saveFrom then
+		local source=self.saveFrom
+		self.saveFrom=nil
+		system:copyProject(source)
+	end
+
+	editor.interface.system:updateProj()
 end
 
 
 function system:newProject()
 	system:createSaveProjectFrame()
 	editor.createTime=os.date("%c")
+	system:newScene()
 end
 
 function system:loadProject()
@@ -119,11 +170,18 @@ function system:loadProject()
 		system:createLoadProjectFrame()
 		return
 	end
+	
 	local file = love.filesystem.newFile(editor.loadProject ..".proj", "r")
+	if not file then 
+		editor.loadProject = nil
+		system:newProject()
+		return
+	end
+
 	local data = loadstring(file:read())()
 	editor.currentProject=data.projectName
 	editor.currentScene=data.currentScene
-	system:loadScene(editor.currentScene)
+	system:loadScene(editor.currentScene..".scene")
 	editor.keyconf=data.keyconf
 	editor.createTime=data.createTime
 	editor.lastEditTime=data.lastEditTime
@@ -133,9 +191,26 @@ function system:loadProject()
 	editor.interface.visible=data.visible
 	editor.interface.layout=data.layout
 	editor.interface:resetLayout()
+	editor.interface:resetVisible()
 	editor.loadProject=nil
-
+	editor.interface.system:updateProj()
 end
+
+function system:newScene()
+	if editor.currentScene=="default" then
+		system:clear()
+		return
+	end
+	system:saveScene()
+	system:clear()
+
+	editor.currentScene="default"
+	editor.interface.system:updateProj()
+
+	--system:saveScene()
+end
+
+
 
 function system:saveScene()
 	if editor.currentProject=="default" then
@@ -148,9 +223,11 @@ function system:saveScene()
 		return
 	end
 
-	local file = love.filesystem.newFile(editor.currentScene..".scene","w")
+	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..editor.currentScene..".scene","w")
 	file:write(table.save(editor.system.undoStack[editor.system.undoIndex].world))
 	file:close()
+	editor.interface.system:updateProj()
+	system:saveProject()
 	editor.log:push("scene saved")
 end
 
@@ -158,12 +235,17 @@ function system:loadScene(name)
 	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..name,"r")
 	if not file then return end
 	local data = loadstring(file:read())()
-	local world = love.physics.newWorld(xg, yg, sleep)
+	local world = love.physics.newWorld(0, 0, false)
 	editor.world=world
 	editor.helper.createWorld(editor.world,data)
 	editor.linearDamping=data.world.linearDamping
 	editor.angularDamping=data.world.angularDamping
 	editor.selector.selection=nil
+	editor.currentScene=string.sub(name,1,-7)
+	editor.interface.system:updateProj()
+	editor:changeMode("body")
+	editor.log:push("scene loaded")
+	
 end
 
 function system:createSaveSceneFrame()
@@ -177,8 +259,9 @@ function system:createSaveSceneFrame()
 	input:SetPos(10,40)
 	input:SetFocus(true)
 	input.OnEnter=function()
-		editor.currentScene=input:getText()
+		editor.currentScene=input:GetText()
 		system:saveScene()
+		input:Remove()
 		frame:Remove()
 	end
 end
@@ -227,11 +310,13 @@ function system:createLoadProjectFrame()
 		b.OnClick=function()
 			if love.keyboard.isDown("lctrl") and love.keyboard.isDown("lalt") then
 				love.filesystem.remove( b:GetText() )
+				list:Remove()
 				frame:Remove()
 				system:createLoadProjectFrame()
 			else
 				editor.loadProject=string.sub(b:GetText(),1,-6)
 				system:loadProject()
+				list:Remove()
 				frame:Remove()
 			end
 		end

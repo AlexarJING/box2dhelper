@@ -21,6 +21,7 @@ function help:create()
 	list:SetSpacing(5)
 
 	local text = ui.Create("text",frame)
+	text:SetFont(font)
 	text:SetPos(10,30)
 	text:SetText(helpText)
 

@@ -32,6 +32,6 @@ end
 return function(parent) 
 	editor=parent
 	log.x=10
-	log.y=h()
+	log.y=h()-30
 	return log
 end

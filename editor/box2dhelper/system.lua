@@ -30,8 +30,9 @@ function system.updateTodo()
 	system.todo={}
 end
 function system.addPreserve(obj)
-	if not system.preserve[obj] then  system.preserve[obj]=obj end --reg data
-	system.updatePreserve()
+	system.preserve[obj]=obj
+	--if not system.preserve[obj] then  system.preserve[obj]=obj end --reg data
+	--system.updatePreserve()
 end
 
 function system.updatePreserve()

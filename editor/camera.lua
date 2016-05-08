@@ -5,7 +5,7 @@ cam:setPosition(0,0)
 function cam:update()
 	self:shakeProcess()
 	--self:edgeMove()
-	self :holdMove()
+	self:holdMove()
 	if editor.state=="test" then
 		self.state="test"
 		if not editor.testMode.dragForcing then self:followSelection() end
@@ -51,7 +51,7 @@ function cam:edgeMove()
 end
 
 function cam:holdMove()
-	if love.mouse.isDown(1) and love.keyboard.isDown("space") then
+	if love.mouse.isDown(1) and love.keyboard.isDown("space") and  not editor.interface:isHover() then
 		if self.holdOX then
 			self:move((self.holdOX-love.mouse.getX())/self.scale,(self.holdOY-love.mouse.getY())/self.scale)
 			self.holdOX,self.holdOY= love.mouse.getPosition()
@@ -73,7 +73,8 @@ function cam:followSelection()
 end
 
 function cam:scrollScale(y)
-	
+	if editor.LoveFrames.util.GetHover() then return end
+
 	if y>0 then
 		self:setScale(self:getScale()*1.05)
 	else

@@ -59,8 +59,18 @@ function system:create()
 	end
 	list:AddItem(b)
 
-	
+	local t=ui.Create("text")
+	t:SetText("Current Project: "..editor.currentProject..";             Current Scene: "..editor.currentScene..";")
+	t:SetPos(500,10)
+	--list:AddItem(t)
+	self.projInfo=t
 end
+
+function system:updateProj()
+	self.projInfo:SetText("Current Project: "..editor.currentProject..";             Current Scene: "..editor.currentScene..";")
+	interface.scene:create()
+end
+
 
 function system:update()
 

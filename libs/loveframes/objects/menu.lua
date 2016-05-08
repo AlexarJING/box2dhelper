@@ -26,7 +26,7 @@ function newobject:initialize(menu)
 	self.parentmenu = nil
 	self.options = {}
 	self.internals = {}
-
+	self.isSingleChoise=false
 end
 
 --[[---------------------------------------------------------
@@ -202,7 +202,7 @@ function newobject:mousereleased(x, y, button)
 	if not visible then
 		return
 	end
-	
+	self:MoveToTop()
 	local internals = self.internals
 	for k, v in ipairs(internals) do
 		v:mousereleased(x, y, button)
@@ -222,7 +222,7 @@ function newobject:AddOption(text, icon, func,toggleable)
 	menuoption:SetFunction(func)
 	menuoption.toggle=toggleable
 	table.insert(self.internals, menuoption)
-	return self
+	return menuoption
 	
 end
 

@@ -8,22 +8,45 @@ local interface
 function layout:create()
 	local menu = ui.Create("menu")
 	layout.menu=menu
-	menu:AddOption("ruler grid", false, function() end,true)
-	menu:AddOption("log", false, function() end,true)
-	menu:AddOption("information", false, function() end,true)
+	self.options={}
+	self.options.bg=menu:AddOption("ruler grid", false, 
+		function(obj) interface.visible.bg=obj.toggle;editor.interface:resetVisible() end,true)
+	self.options.log=menu:AddOption("log", false,
+		function(obj) interface.visible.log=obj.toggle;editor.interface:resetVisible() end,true)
+	self.options.info=menu:AddOption("information", false, 
+		function(obj) interface.visible.info=obj.toggle;editor.interface:resetVisible() end,true)
 	menu:AddDivider()
-	menu:AddOption("build frame", false, function() end,true)
-	menu:AddOption("joint frame", false, function() end,true)
+	self.options.build=menu:AddOption("build frame", false, 
+		function(obj) interface.visible.build=obj.toggle;editor.interface:resetVisible() end,true)
+	self.options.joint=menu:AddOption("joint frame", false, 
+		function(obj) interface.visible.joint=obj.toggle;editor.interface:resetVisible() end,true)
 	menu:AddDivider()
 
-	menu:AddOption("histroy frame", false, function() end,true)
-	menu:AddOption("units frame", false, function() end,true)
+	self.options.history=menu:AddOption("histroy frame", false, 
+		function(obj) interface.visible.history=obj.toggle;editor.interface:resetVisible() end,true)
+	self.options.unit=menu:AddOption("units frame", false, 
+		function(obj) interface.visible.unit=obj.toggle;editor.interface:resetVisible()end,true)
+	self.options.scene=menu:AddOption("scene frame", false, 
+		function(obj) interface.visible.scene=obj.toggle;editor.interface:resetVisible()end,true)
 	menu:AddDivider()
-	menu:AddOption("property frame", false, function() end,true)
+	self.options.property=menu:AddOption("property frame", false, 
+		function(obj) interface.visible.property=obj.toggle;editor.interface:resetVisible() end,true)
 	menu:AddDivider()
 
-	menu:AddOption("hide all", false, function() end,true)
-
+	menu:AddOption("hide all", false, function() 
+			for k,v in pairs(interface.visible) do
+				if k~="system" then
+					interface:setVisible(k,false)
+				end
+			end
+		end)
+	menu:AddOption("show all", false, function() 
+			for k,v in pairs(interface.visible) do
+				if k~="system" then
+					interface:setVisible(k,true)
+				end
+			end
+		end)
 	menu:SetVisible(false)
 end
 

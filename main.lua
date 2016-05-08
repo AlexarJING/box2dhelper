@@ -1,5 +1,3 @@
-local str=[[键入文件名]]
-print(string.sub(str,5))
 if arg[#arg] == "-debug" then require("mobdebug").start() end 
 require "libs.util"
 
@@ -7,6 +5,14 @@ local editor=require "editor/editor"
 
 function love.filedropped( file )
 	editor.createMode:importFromImage(file)
+end
+
+function love.resize()
+	editor:resize()
+end
+
+function love.quit()
+	return editor:quit()
 end
 
 
@@ -22,6 +28,7 @@ function love.draw()
 	editor:draw()
 	--if canvas then love.graphics.draw(canvas) end
 end
+
 
 function love.mousepressed(x, y, button)
 	editor:mousepressed(x, y, button)

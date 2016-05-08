@@ -173,6 +173,7 @@ function drawMode.drawJoint(joint,color)
 		love.graphics.line(jX, jY, aX, aY)
 		love.graphics.line(jX, jY, bX, bY)
 	elseif jointType=="revolute" then
+		print(helper.system.preserve[joint])
 		local jX,jY=joint:getAnchors()
 		local jAngle=joint:getJointAngle( )
 		love.graphics.circle("line", jX, jY, 10)

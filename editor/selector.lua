@@ -52,6 +52,17 @@ function selector:clearSelection()
 	self.selectToggle=nil
 end
 
+function selector:inverseSelection()
+	if not self.selection then self:selectAll() end
+	local all=editor.world:getBodyList()
+	for i,v in ipairs(self.selection) do
+		if table.getIndex(all,v) then
+			table.remove(all, i)
+		end
+	end
+	self.selection=#self.selection==0 and nil or all
+end
+
 function selector:inRect(x,y)
 	if x==clamp(x,self.dragOX,self.dragTX) 
 		and y==clamp(y,self.dragOY,self.dragTY) then

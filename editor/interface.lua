@@ -9,7 +9,9 @@ interface.visible={
 	history=true,
 	property=true,
 	bg=true,
-	log=true
+	log=true,
+	info=true,
+	scene=true,
 }
 
 interface.layout={}
@@ -25,7 +27,6 @@ function interface:init()
 	interface.history=require "ui/history"(editor)
 	interface.property= require "ui/property"(editor)
 	interface.unit = require "ui/unit"(editor)
-	interface.world = require "ui/world"(editor)
 	interface.joint=require "ui/joint"(editor)
 	interface.info= require "ui/info"(editor)
 	interface.scene= require "ui/scene"(editor)
@@ -91,9 +92,45 @@ function interface:resetLayout()
 	interface.unit.frame:SetPos(unpack(self.layout.unit))
 	interface.history.frame:SetPos(unpack(self.layout.history))
 	interface.scene.frame:SetPos(unpack(self.layout.scene))
+end
+
+function interface:resetVisible()
+ 	editor.bg.visible=interface.visible.bg
+	editor.log.visible=interface.visible.log
+	editor.interface.info.panel:SetVisible(interface.visible.info)
+	editor.interface.build.frame:SetVisible(interface.visible.build)
+	editor.interface.joint.frame:SetVisible(interface.visible.joint)
+	editor.interface.history.frame:SetVisible(interface.visible.history)
+	editor.interface.unit.frame:SetVisible(interface.visible.unit)
+	editor.interface.scene.frame:SetVisible(interface.visible.scene)
+	if editor.interface.property.frame then
+		editor.interface.property.frame:SetVisible(interface.visible.property)
+	end
+	editor.interface.system.list:SetVisible(interface.visible.system)
+	editor.bg:init()
+end
+
+function interface:setVisible(tag,toggle)
+	interface.visible[tag]=toggle
+	if tag~="system" then
+		interface.layoutMenu.options[tag].toggle=toggle
+	end
+	editor.interface:resetVisible()
 
 end
 
+function interface:resetView()
+	for k,v in pairs(editor.helper.visible) do
+		interface.viewMenu.options[tag].toggle=v
+	end
+	interface.viewMenu.options.bloom.toggle=editor.enableBloom
+end
+
+
+function interface:setView(tag,toggle)
+	interface.viewMenu.options[tag].toggle=toggle
+	editor.helper.visible[tag]=toggle
+end
 
 return function(parent) 
 	editor=parent

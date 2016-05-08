@@ -6,7 +6,7 @@ local interface
 
 
 function scene:create()
-	if self.sceneFrame then self.sceneFrame:Remove() end
+	if self.frame then self.frame:Remove() end
 	local files = love.filesystem.getDirectoryItems(editor.currentProject.."/scenes")
 	local frame =ui.Create("frame")
 	self.frame=frame
@@ -36,9 +36,7 @@ function scene:create()
 			end
 		end
 	end
-
 end
-
 
 
 return function(parent) 

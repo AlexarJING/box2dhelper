@@ -8,22 +8,57 @@ local interface
 function view:create()
 	local menu = ui.Create("menu")
 	view.menu=menu
+	self.options={}
 	menu:AddDivider()
-	menu:AddOption("body", false, function() end,true)
+	self.options.body=menu:AddOption("body", false, 
+		function(obj) editor.helper.visible.body=obj.toggle end,true)
 	menu:AddDivider()
-	menu:AddOption("texture", false, function() end,true)
+	self.options.texture=menu:AddOption("texture", false, 
+		function(obj) editor.helper.visible.texture=obj.toggle end,true)
 	menu:AddDivider()
-	menu:AddOption("fixture", false, function() end,true)
+	self.options.fixture=menu:AddOption("fixture", false, 
+		function(obj) editor.helper.visible.fixture=obj.toggle end,true)
 	menu:AddDivider()
-	menu:AddOption("joint", false, function() end,true)
+	self.options.joint=menu:AddOption("joint", false,
+		function(obj) editor.helper.visible.joint=obj.toggle end,true)
 	menu:AddDivider()
-	menu:AddOption("contact", false, function() end,true)
+	self.options.contact=menu:AddOption("contact", false, function() end,true)
 	menu:AddDivider()
-	menu:AddOption("texture only", false, function() end,true)
+	self.options.bloom=menu:AddOption("global bloom", false, 
+		function(obj) 
+			editor.enableBloom=obj.toggle
+		end,true)
 	menu:AddDivider()
-	menu:AddOption("bloom", false, function() end,true)
+	menu:AddOption("texture only", false, 
+		function() 
+			interface:setView("body",false)
+			interface:setView("texture",true)
+			interface:setView("fixture",false)
+			interface:setView("joint",false)
+			interface:setView("contact",false)
+		end)
 	menu:AddDivider()
-	menu:AddOption("all", false, function() end,true)
+	menu:AddOption("fixture only", false, 
+		function() 
+			interface:setView("body",false)
+			interface:setView("texture",false)
+			interface:setView("fixture",true)
+			interface:setView("joint",false)
+			interface:setView("contact",false)
+		end)
+	menu:AddDivider()
+	
+	menu:AddOption("all", false, 
+		function() 
+			interface:setView("body",true)
+			interface:setView("texture",true)
+			interface:setView("fixture",true)
+			interface:setView("joint",true)
+			interface:setView("contact",true)
+			view.options.bloom.toggle=true
+			editor.enableBloom=true
+
+		end)
 	menu:AddDivider()
 	menu:SetVisible(false)
 end

@@ -131,10 +131,11 @@ end
 function func.rollback(body)
 	local power=helper.getProperty(body,"rollBackPower") or -5000
 	body:applyTorque(power)
+	print(123)
 end
 
 function func.jet(body)
-	local power=helper.getProperty(body,"jetPower") or 50000
+	local power=helper.getProperty(body,"jetPower") or 5000
 	
 	local angle=body:getAngle()-Pi/2
 	body:applyForce(power*math.sin(angle),-power*math.cos(angle))

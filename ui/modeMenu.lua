@@ -8,14 +8,18 @@ local interface
 function mode:create()
 	local menu = ui.Create("menu")
 	mode.menu=menu
+	menu.isSingleChoice=true
+	self.choice={}
 	menu:AddDivider()
-	menu:AddOption("Body Mode", false, function() end,true)
+	self.choice.body=menu:AddOption("Body Mode", false, function() editor:changeMode("body") end,true)
 	menu:AddDivider()
-	menu:AddOption("Fixture Mode", false, function() end)
+	self.choice.fixture=menu:AddOption("Fixture Mode", false, function() editor:changeMode("fixture")end)
 	menu:AddDivider()
-	menu:AddOption("Shape Mode", false, function() end)
+	self.choice.shape=menu:AddOption("Shape Mode", false, function() editor:changeMode("shape")end)
 	menu:AddDivider()
-	menu:AddOption("Test Mode", false, function() end)
+	self.choice.joint=menu:AddOption("joint Mode", false, function() editor:changeMode("joint")end)
+	menu:AddDivider()
+	self.choice.test=menu:AddOption("Test Mode", false, function() editor:changeMode("test")end)
 
 
 	menu:SetVisible(false)

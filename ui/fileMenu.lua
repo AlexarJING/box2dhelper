@@ -4,7 +4,6 @@ local ui
 local interface
 
 
-
 function file:create()
 	local menu = ui.Create("menu")
 	file.menu=menu
@@ -13,27 +12,25 @@ function file:create()
 	menu:AddOption("Load Project", false, function() editor.system:loadProject()end)
 	menu:AddOption("Save Project As ", false, 
 		function() 
-			editor.currentProject="default";
-			editor.system:saveProject() 
+			editor.system:saveAsProject() 
 		end)
 	menu:AddDivider()
 
 	menu:AddOption("New Scene", false, function() editor.system:newScene()end)
 	menu:AddOption("Save Scene", false, function() editor.system:saveScene()end)
-	menu:AddOption("Load Scene", false, function() editor.system:loadScene()end)
 	menu:AddOption("Save Scene As ", false, 
 		function() 
-			editor.currentProject="default"
+			editor.currentScene="default"
 			editor.system:saveScene() 
 		end)
 	menu:AddDivider()
 
 	menu:AddOption("Option", false, function() end)
 	menu:AddOption("Help", false, function() interface.help:create() end)
-	menu:AddOption("About", false, function() end)
+	menu:AddOption("About", false, function() interface.about:create() end)
 	menu:AddDivider()
 
-	menu:AddOption("Quit", false, function() end)
+	menu:AddOption("Quit", false, function() love.event.quit() end)
 	menu:SetVisible(false)
 end
 
