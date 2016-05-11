@@ -237,11 +237,11 @@ function property:createFrame()
 	self.frame:SetVisible(interface.visible.property)
 	local count
 	if self.targetType=="body" then
-		count=#self.targetData+2>#self.targetProp and  
-		#self.targetData+2 or #self.targetProp
+		count=#self.targetData+1>#self.targetProp+1 and  
+		#self.targetData+1 or #self.targetProp+1
 	elseif self.targetType=="fixture" then
-		count=#self.targetData+2>#self.targetProp+1 and  
-		#self.targetData+2 or #self.targetProp+1
+		count=#self.targetData+1>#self.targetProp+2 and  
+		#self.targetData+1 or #self.targetProp+2
 	else
 		count=#self.targetData+1>#self.targetProp and  
 		#self.targetData+1 or #self.targetProp
@@ -279,7 +279,13 @@ function property:createPropertyTab()
 
 	if self.targetType=="fixture" then
 		self:createMaterialRow()
+		self:createReactRow()
 	end
+
+	if self.targetType=="body" then
+		self:createInteractRow()
+	end
+
 	self.propList:update()
 	
 end
@@ -289,22 +295,12 @@ function property:createUserDataTab()
 	self.dataList=makeList(self.rowCount)
 	self.tabs:AddTab("UserData", self.dataList)
 	self.dataGrid={}
-	local addrow=0
-	
-	if self.targetType=="body" then
-		self:createInteractRow()
-		addrow=addrow+1
-	end
-	if self.targetType=="fixture" then
-		self:createReactRow()
-		addrow=addrow+1
-	end
 
 	for i,v in ipairs(self.targetData) do
-		local key,value= self:setListItems(self.dataList,i+addrow,self.target,v,true)
+		local key,value= self:setListItems(self.dataList,i,self.target,v,true)
 		table.insert(self.dataGrid, {key,value})
 	end
-	self:createAddRow(addrow+#self.targetData+1)
+	self:createAddRow(#self.targetData+1)
 	self.dataList:update()
 end
 
@@ -380,8 +376,8 @@ function property:createInteractRow()
 	value.OnChoiceSelected = function(object, choice)
 	   
 	end
-	self.dataList:AddItem(name,1,1)
-	self.dataList:AddItem(value,1,2)
+	self.propList:AddItem(name,#self.propGrid+1,1)
+	self.propList:AddItem(value,#self.propGrid+1,2)
 end
 
 
@@ -427,8 +423,8 @@ function property:createReactRow()
 	value.OnChoiceSelected = function(object, choice)
 	    print(choice .. " was selected.")
 	end
-	self.dataList:AddItem(name,1,1)
-	self.dataList:AddItem(value,1,2)
+	self.propList:AddItem(name,#self.propGrid+1,1)
+	self.propList:AddItem(value,#self.propGrid+1,2)
 end
 
 

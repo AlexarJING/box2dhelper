@@ -131,7 +131,6 @@ end
 function func.rollback(body)
 	local power=helper.getProperty(body,"rollBackPower") or -5000
 	body:applyTorque(power)
-	print(123)
 end
 
 function func.jet(body)
