@@ -23,6 +23,8 @@ function dataMode.setProperty(obj,key,value)
 		dataMode.propBuffer[obj]={}
 	end
 
+	if not key then return end
+
 	if not dataMode.propBuffer[obj][key] then
 		local data=obj:getUserData()
 		local prop={prop=key,value=value}

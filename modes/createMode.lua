@@ -29,6 +29,9 @@ end
 
 local Softbody=require "editor/softbody"
 
+creator.materials=require "editor/materials"
+
+
 function creator:update()
 	self:getPoint()
 	self:getPoints()
@@ -586,6 +589,7 @@ end
 
 
 function creator:magnetField(fixture)
+	editor.helper.setProperty(fixture,"magnet",1000)
 	local body=fixture:getBody()
 	local shape=fixture:getShape()
 	local power
@@ -650,33 +654,17 @@ function creator:setMaterial(fixture,m_type,arg)
 	local body=fixture:getBody()
 	body:setLinearDamping(editor.linearDamping)
 	body:setAngularDamping(editor.angularDamping)
-	self:setData(body)
-	self:setData(fixture,{prop="material",value=m_type})
-	if m_type=="wood" then
-		fixture:setDensity(0.8)
-		fixture:setFriction(1)
-		fixture:setRestitution(0.2)
-		fixture:setCategory(1)
-		editor.helper.setProperty(fixture,"hardness",5)	
-	elseif m_type=="steel" then
-		fixture:setDensity(4)
-		fixture:setFriction(1)
-		fixture:setRestitution(0.2)
-		fixture:setCategory(2)
-		editor.helper.setProperty(fixture,"hardness",10)	
-	elseif m_type=="water" then
-		fixture:setDensity(1)
-		fixture:setFriction(0.1)
-		fixture:setRestitution(0.1)
-	elseif m_type=="boom" then
-		fixture:setDensity(100)
-		fixture:setFriction(99)
-		fixture:setRestitution(0.5)
-	elseif m_type=="magnet" then
-		fixture:setRestitution(0)
-		fixture:setFriction(99)
-		editor.helper.setProperty(fixture,"hardness",5)
-		editor.helper.setProperty(fixture,"hardness",arg.magnet)	
+	editor.helper.setProperty(body)
+	editor.helper.setProperty(fixture,"material",m_type)
+
+	local mat=self.materials[m_type]
+	fixture:setDensity(mat.density)
+	fixture:setFriction(mat.friction)
+	fixture:setRestitution(mat.restitution)
+	editor.helper.setProperty(fixture,"hardness",mat.restitution)	
+
+	
+	if m_type=="magnet" then
 		self:magnetField(fixture)
 	end
 end

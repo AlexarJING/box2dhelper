@@ -457,6 +457,8 @@ end
 --]]---------------------------------------------------------
 function newobject:SwitchToTab(tabnumber)
 	
+	if not self.children[tabnumber] then return end
+
 	local children = self.children
 	
 	for k, v in ipairs(children) do
@@ -464,6 +466,7 @@ function newobject:SwitchToTab(tabnumber)
 	end
 	
 	self.tab = tabnumber
+
 	self.children[tabnumber].visible = true
 	
 	return self

@@ -49,20 +49,8 @@ end
 
 
 function property:reset()  --update all data
-	local target=self.target
-	local tType=self.targetType
 	
-	local prop={}
-	local data = target.getUserData and target:getUserData()
-
-	local tmp=editor.helper.getStatus(target,tType)
-	for i,v in ipairs(editor.helper.properties[tType]) do
-		if tmp[v]~=nil then table.insert(prop,{prop=v,value=tmp[v]}) end
-	end
-
-	self.targetProp=prop
-	self.targetData=data
-
+	self:prepairData()
 
 	for i,v in ipairs(self.targetProp) do
 		local value=self.propGrid[i][2]
@@ -78,7 +66,9 @@ function property:reset()  --update all data
 end
 
 function property:remove()
+	
 	if self.frame then
+		property.tabIndex=property.tabs.tab
 		self.frame:Remove() 
 	end
 	self.target=nil
@@ -102,9 +92,34 @@ local function setProp(target,prop,...)
 	editor.action="change property"
 end
 
-function property:setListItems(target,data)
+local function removeProp(target,prop,...)
+	local data=target:getUserData()
+	for i,v in ipairs(data) do
+		if v.prop==prop then
+			table.remove(data, i)
+			return
+		end
+	end
+	
+	editor.action="remove property"
+end
+
+function property:setListItems(parent,pos,target,data,itemCanRemove)
 	local key = ui.Create("button")
 	key:SetText(data.prop)
+
+	if itemCanRemove then
+		key.OnClick=function(obj)
+			if love.keyboard.isDown("lctrl") and 
+				love.keyboard.isDown("lalt") then
+				removeProp(target,data.prop)
+				self:remove()
+				self:create()
+			end
+		end
+	end
+
+
 	local value
 	if type(data.value)=="number" then
 		value = ui.Create("textinput")
@@ -153,6 +168,9 @@ function property:setListItems(target,data)
 		value:SetEditable(false)
 	end
 
+	parent:AddItem(key,pos,1)
+	parent:AddItem(value,pos,2)
+
 	return key,value
 end
 
@@ -170,13 +188,35 @@ end
 
 
 function property:create(target)
+	target = target or editor.selector.selection[1]
+	self:prepairData(target)
+	self:createFrame()
+	self:createPropertyTab()
+	
+	if self.targetData then 
+		property:createUserDataTab()
+	end
+	
+	if self.targetType=="body" then 
+		self:createWorldTab()
+	end
+	self.tabs:SwitchToTab(self.tabIndex or 1)
+end
 
-	local tType= string.lower(target:type()) 
-	if string.find(tType,"joint") then tType="joint" end
-	if string.find(tType,"shape") then tType="shape" end
+function property:prepairData(target)
+	local tType
 
-	self.target=target
-	self.targetType=tType
+	if target then
+		tType= string.lower(target:type()) 
+		if string.find(tType,"joint") then tType="joint" end
+		if string.find(tType,"shape") then tType="shape" end
+
+		self.target=target
+		self.targetType=tType
+	else
+		target=self.target
+		tType=self.targetType
+	end
 
 
 	
@@ -189,51 +229,105 @@ function property:create(target)
 	end
 	self.targetProp=prop
 	self.targetData=data
+end
 
+
+function property:createFrame()
 	self.frame= ui.Create("frame")
 	self.frame:SetVisible(interface.visible.property)
+	local count
+	if self.targetType=="body" then
+		count=#self.targetData+2>#self.targetProp and  
+		#self.targetData+2 or #self.targetProp
+	elseif self.targetType=="fixture" then
+		count=#self.targetData+2>#self.targetProp+1 and  
+		#self.targetData+2 or #self.targetProp+1
+	else
+		count=#self.targetData+1>#self.targetProp and  
+		#self.targetData+1 or #self.targetProp
+	end
 
-	local count=#self.targetData+1>#self.targetProp and  #self.targetData+1 or #self.targetProp
-	
+	self.rowCount=count
 	local frame = self.frame
-	frame:SetName(tType)
+	frame:SetName(self.targetType)
 	
 	frame:SetSize(250, 70+count*30)
 
-	frame:SetPos(w()-250, h()-(70+count*30)-30)
+	frame:SetPos(w()-250, 30)
 	interface.layout.property={frame:GetPos()}
 
 	frame:ShowCloseButton(false)
-
-	local tabs= ui.Create("tabs",frame)
+	local tabs= ui.Create("tabs",self.frame)
+	self.tabs=tabs
 	tabs:SetPos(5, 30)
 	tabs:SetSize(240, count*30+35)
 
-	self.propList=makeList(count)
-	tabs:AddTab("Property", self.propList)
+end
 
+
+function property:createPropertyTab()
+	
+	self.propList=makeList(self.rowCount)
+	self.tabs:AddTab("Property", self.propList)
 	self.propGrid={}
+
+	
 	for i,v in ipairs(self.targetProp) do
-		local key,value= self:setListItems(target,v)
-		self.propList:AddItem(key,i,1)
-		self.propList:AddItem(value,i,2)
+		local key,value= self:setListItems(self.propList,i,self.target,v)
 		table.insert(self.propGrid, {key,value})
 	end
+
+	if self.targetType=="fixture" then
+		self:createMaterialRow()
+	end
 	self.propList:update()
+	
+end
 
-	if not self.targetData then return end
 
-	self.dataList=makeList(count)
-	tabs:AddTab("UserData", self.dataList)
+function property:createUserDataTab()
+	self.dataList=makeList(self.rowCount)
+	self.tabs:AddTab("UserData", self.dataList)
 	self.dataGrid={}
+	local addrow=0
+	
+	if self.targetType=="body" then
+		self:createInteractRow()
+		addrow=addrow+1
+	end
+	if self.targetType=="fixture" then
+		self:createReactRow()
+		addrow=addrow+1
+	end
+
 	for i,v in ipairs(self.targetData) do
-		local key,value= self:setListItems(target,v)
-		self.dataList:AddItem(key,i,1)
-		self.dataList:AddItem(value,i,2)
+		local key,value= self:setListItems(self.dataList,i+addrow,self.target,v,true)
 		table.insert(self.dataGrid, {key,value})
 	end
-	
-	
+	self:createAddRow(addrow+#self.targetData+1)
+	self.dataList:update()
+end
+
+function property:createWorldTab()
+	self.worldList=makeList(self.rowCount)
+	self.tabs:AddTab("  world  ", self.worldList)
+	self.worldGrid={}
+	self.worldData={
+		{prop="meter",value= love.physics.getMeter()},
+		{prop="Gravity",value={editor.world:getGravity()}},
+		{prop="linearDamping",value=editor.linearDamping},
+		{prop="angularDamping",value=editor.angularDamping},
+		{prop="SleepingAllowed",value=editor.world:isSleepingAllowed()}
+
+	}
+	for i,v in ipairs(self.worldData) do
+		local key,value= self:setListItems(self.worldList,i,editor.world,v)
+		table.insert(self.worldGrid, {key,value})
+	end
+	self.worldList:update()
+end
+
+function property:createAddRow(pos)
 	local name = ui.Create("textinput")
 	local value = ui.Create("textinput")
 	name:SetText("*new")
@@ -244,7 +338,7 @@ function property:create(target)
 	name.OnEnter=function(obj)
 		local k=name:GetText()
 		local v=value:GetText()
-		editor.helper.setProperty(target,k,v)
+		editor.helper.setProperty(self.target,k,v)
 		self:remove()
 		self:create(editor.selector.selection[1])
 		obj.focus=false
@@ -257,37 +351,86 @@ function property:create(target)
 	value.OnEnter=function(obj)
 		local k=name:GetText()
 		local v=value:GetText()
-		editor.helper.setProperty(target,k,v)
+		editor.helper.setProperty(self.target,k,v)
 		self:remove()
 		self:create(editor.selector.selection[1])
 		obj.focus=false
 	end
-	self.dataList:AddItem(name,#self.targetData+1,1)
-	self.dataList:AddItem(value,#self.targetData+1,2)
+	self.dataList:AddItem(name,pos,1)
+	self.dataList:AddItem(value,pos,2)
 	
-	self.dataList:update()
+end
 
-	if tType~="body" then return end
+local interacts={
+	a={key=1,key2=2,key3=3},
+	b={key=1,key2=2,key3=3},
+}
+
+function property:createInteractRow()
+	local name = ui.Create("button")
+	local value = ui.Create("multichoice")
+	name:SetText("reaction")
 	
-	self.worldList=makeList(count)
-	tabs:AddTab("  world  ", self.worldList)
-	self.worldGrid={}
-	self.worldData={
-		{prop="meter",value= love.physics.getMeter()},
-		{prop="Gravity",value={editor.world:getGravity()}},
-		{prop="linearDamping",value=editor.linearDamping},
-		{prop="angularDamping",value=editor.angularDamping},
-		{prop="SleepingAllowed",value=editor.world:isSleepingAllowed()}
+	
+	value:SetText("Add a Reaction")
+	for k,v in pairs(interacts) do
+		value:AddChoice(k)
+	end
+	
+	value.OnChoiceSelected = function(object, choice)
+	   
+	end
+	self.dataList:AddItem(name,1,1)
+	self.dataList:AddItem(value,1,2)
+end
 
-	}
-	for i,v in ipairs(self.worldData) do
-		local key,value= self:setListItems(editor.world,v)
-		self.worldList:AddItem(key,i,1)
-		self.worldList:AddItem(value,i,2)
-		table.insert(self.worldGrid, {key,value})
+
+function property:createMaterialRow()
+	local name = ui.Create("button")
+	local value = ui.Create("multichoice")
+	name:SetText("material")
+
+	local mat= editor.helper.getProperty(self.target,"material")
+
+	if mat then
+		value:SetText(mat)
+	else
+		value:SetText("select")
+	end
+	
+	for k,v in pairs(editor.createMode.materials) do
+		value:AddChoice(k)
+	end
+	
+	value.OnChoiceSelected = function(object, choice)
+	    editor.createMode:setMaterial(self.target,choice)
+	    self:remove()
+		self:create(editor.selector.selection[1])
 	end
 
+	self.propList:AddItem(name,#self.propGrid+1,1)
+	self.propList:AddItem(value,#self.propGrid+1,2)
 end
+
+
+function property:createReactRow()
+	local name = ui.Create("button")
+	local value = ui.Create("multichoice")
+	name:SetText("reaction")
+	
+	
+	value:SetText("Add a Reaction")
+	for k,v in pairs(interacts) do
+		value:AddChoice(k)
+	end
+	
+	value.OnChoiceSelected = function(object, choice)
+	    print(choice .. " was selected.")
+	end
+	self.dataList:AddItem(name,1,1)
+	self.dataList:AddItem(value,1,2)
+end
+
 
 return function(parent) 
 	editor=parent

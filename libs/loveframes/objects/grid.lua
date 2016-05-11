@@ -248,6 +248,9 @@ function newobject:GetItem(row, column)
 	
 end
 
+
+
+
 --[[---------------------------------------------------------
 	- func: SetItemAutoSize(bool)
 	- desc: sets whether or not the object should auto-size
