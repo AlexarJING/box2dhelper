@@ -392,19 +392,6 @@ function creator:softpolygon()
 		vert=polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts)})
 end
 
-function creator:defaultBoom()
-	local world = love.physics.newWorld(0,0)
-	local body = love.physics.newBody(world,0,0,"dynamic")
-	local shape = love.physics.newCircleShape(30)
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	local userData={prop="explosion",value=true}
-	local data = fixture:getUserData()
-	if not data then data={} end
-	table.insert(data, userData)
-	fixture:setUserData(data)
-	return editor.helper.getWorldData({body})
-end
 
 
 function creator:explosion()
@@ -534,7 +521,7 @@ function creator:distance()
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
 	local joint = love.physics.newDistanceJoint(body1, body2, x1, y1, x2, y2, false)
-	joint:setFrequency(10)
+	--joint:setFrequency(10)
 end
 
 function creator:weld()
@@ -544,7 +531,7 @@ function creator:weld()
 	editor.action="create weld joint"
 	local x1,y1 = body1:getPosition()
 	local joint = love.physics.newWeldJoint(body1, body2, x1, y1, false)
-	joint:setFrequency(10)
+	--joint:setFrequency(0)
 end
 
 function creator:prismatic()
@@ -663,7 +650,6 @@ function creator:setMaterial(fixture,m_type,arg)
 	fixture:setRestitution(mat.restitution)
 	editor.helper.setProperty(fixture,"hardness",mat.restitution)	
 
-	
 	if m_type=="magnet" then
 		self:magnetField(fixture)
 	end

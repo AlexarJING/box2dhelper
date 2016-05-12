@@ -53,8 +53,11 @@ end
 
 
 func.explosion=function(boomV,a,b,coll)	
-	--coll:setEnabled(false)
-	boomV=1000
+	if helper.getProperty(a,"bullet") then
+		return
+	end
+	
+	boomV=boomV or 1000
 	local frags={}
 	local func=function(a,b,coll)
 		if a:isDestroyed() then return end
@@ -72,9 +75,6 @@ func.explosion=function(boomV,a,b,coll)
 			body:setLinearDamping(3)
 			body:setUserData({{prop="anticount",value=love.math.random()*2}})
 			helper.reactMode.addBody(body)
-			fixture:setUserData({
-				--{prop="destoryOnHit",value=true}
-							})
 			table.insert(frags, body)
 		end
 		a:getBody():destroy()
@@ -83,10 +83,11 @@ func.explosion=function(boomV,a,b,coll)
 
 end
 
-func.spark=function(a,b,coll)
+func.spark=function(threshold,a,b,coll)
+	threshold = threshold or 300
 	local func=function(threshold,a,b,coll)
 		if a:isDestroyed() or b:isDestroyed() or coll:isDestroyed() then return end
-		threshold =300
+		
 		local bodyA,bodyB=a:getBody(),b:getBody()
 		
 		local matA=helper.getProperty(a,"material")
@@ -129,7 +130,8 @@ func.spark=function(a,b,coll)
 	table.insert(helper.system.todo,{func,a,b,coll})
 end
 	
-func.reverse=function(toggle,a,b,coll)
+func.reverse=function(enabled,a,b,coll)
+	if not enabled then return end
 	local func=function(a,b,coll)
 		if a:isDestroyed() then return end
 		local body=a:getBody()
@@ -302,9 +304,23 @@ function func.oneWayPre(enabled,a,b,coll)
 	
 end
 
+
 function func.oneWayEnd(enabled,a,b,coll)
 	coll:setEnabled(true)
 	helper.setProperty(a,"oneWayState",nil)
+end
+
+function func.bulletPre(enabled,a,b,coll)
+	if not enabled then return end
+	coll:setEnabled(false)
+	a:setSensor(true)
+end
+
+function func.bulletEnd(enabled,a,b,coll)
+	if helper.getProperty(a,"lancher")==b then
+		a:setSensor(false)
+		helper.setProperty(a,"bullet",false)
+	end
 end
 
 function func.buoyancy(density,a,b,coll)  --in pre
@@ -428,7 +444,8 @@ function func.magnet(power,a,b,coll)
 	end
 end
 
-function func.destoryOnHit(p,a,b,c)
+function func.destroyOnHit(p,a,b,c)
+	if not p then return end
 	local func=function(a) 
 		if a:isDestroyed() then return end
 		a:getBody():destroy() 
@@ -442,13 +459,15 @@ collMode.collisionType={
 		makeFrag=collMode.collisionFunc.spark,
 		reverse=collMode.collisionFunc.reverse,
 		explosion=collMode.collisionFunc.explosion,
-		destoryOnHit=collMode.collisionFunc.destoryOnHit,
+		destroyOnHit=collMode.collisionFunc.destroyOnHit,
 		},
 	over={
 		oneWay=collMode.collisionFunc.oneWayEnd,
+		bullet=collMode.collisionFunc.bulletEnd,
 	},
 	pre={
 		oneWay=collMode.collisionFunc.oneWayPre,
+		bullet=collMode.collisionFunc.bulletPre,
 		buoyancy=collMode.collisionFunc.buoyancy,
 		magnetField=collMode.collisionFunc.magnet,
 	},
@@ -457,6 +476,38 @@ collMode.collisionType={
 		embed=collMode.collisionFunc.embed,
 
 	}	
+}
+
+collMode.collisions={
+	makeFrag={
+		{prop="makeFrag",value=500},
+	},
+	reverse={
+		{prop="reverse",value=true},
+	},
+	explosion={
+		{prop="explosion",value=1000},
+	},
+	destroyOnHit={
+		{prop="destroyOnHit",value=true}
+	},
+	oneWay={
+		{prop="oneWay",value=true},
+	},
+	buoyancy={
+		{prop="buoyancy",value=1}
+	},
+	magnetField={
+		{prop="magnetField",value=5000}
+	},
+	crashable={
+		{prop="crashable",value=100},
+		{prop="crashcombo",value=true}
+	},
+	embed={
+		{prop="embed",value=500},
+	},
+
 }
 
 return function(parent) 

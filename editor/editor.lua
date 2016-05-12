@@ -103,6 +103,11 @@ function editor:init()
 	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
 	local joint = love.physics.newWeldJoint(body2, body3, body3:getX(), body3:getY(), false)
 ]]
+	
+
+	--editor.helper.setProperty(body,"turnToMouse",5000)
+
+
 	self.W = w()
 	self.H = h()
 	self.interface:init()
@@ -113,6 +118,7 @@ function editor:init()
 	self.keys= self:keyBound()	
 	
 	self.action="system start"
+
 	editor.log:push("welcome to LoveBox2D editor !")
 
 end
@@ -215,10 +221,11 @@ end
 -------------------------------------------------------------
 
 function editor:mousepressed(x, y, button)
+	if self.state=="test" then self.helper.click(button) end
 	if button==1 then button="l"
 	elseif button==2 then button="r" end
 	self.LoveFrames.mousepressed(x, y, button)
-	if self.state=="test" then self.helper.click(button) end
+	
 end
 
 function editor:mousereleased(x, y, button)
@@ -243,8 +250,8 @@ function editor:mousereleased(x, y, button)
 end
 
 function editor:keypressed(key, isrepeat)
-	self.LoveFrames.keypressed(key, isrepeat)
 	if self.state=="test" then self.helper.press(key) end
+	self.LoveFrames.keypressed(key, isrepeat)
 	if isrepeat then return end
 	if self.interface:isHover() then return end
 

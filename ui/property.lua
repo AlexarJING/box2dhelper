@@ -166,7 +166,12 @@ function property:setListItems(parent,pos,target,data,itemCanRemove)
 		value = ui.Create("textinput")
 		value:SetText(tostring(data.value))
 		value:SetEditable(false)
+	else
+		value = ui.Create("textinput")
+		value:SetText("nil")
+		value:SetEditable(false)
 	end
+
 
 	parent:AddItem(key,pos,1)
 	parent:AddItem(value,pos,2)
@@ -279,11 +284,11 @@ function property:createPropertyTab()
 
 	if self.targetType=="fixture" then
 		self:createMaterialRow()
-		self:createReactRow()
+		self:createCollideRow()
 	end
 
 	if self.targetType=="body" then
-		self:createInteractRow()
+		self:createReactRow()
 	end
 
 	self.propList:update()
@@ -362,19 +367,23 @@ local interacts={
 	b={key=1,key2=2,key3=3},
 }
 
-function property:createInteractRow()
+function property:createReactRow()
 	local name = ui.Create("button")
 	local value = ui.Create("multichoice")
 	name:SetText("reaction")
-	
-	
-	value:SetText("Add a Reaction")
-	for k,v in pairs(interacts) do
+
+	value:SetText("selec a function")
+	for k,v in pairs(editor.helper.reactMode.reactions) do
 		value:AddChoice(k)
 	end
 	
 	value.OnChoiceSelected = function(object, choice)
-	   
+	   local data=editor.helper.reactMode.reactions[choice]
+	   for i,v in ipairs(data) do
+	   		editor.helper.setProperty(self.target,v.prop,v.value)
+	   end
+	   self:remove()
+	   self:create()
 	end
 	self.propList:AddItem(name,#self.propGrid+1,1)
 	self.propList:AddItem(value,#self.propGrid+1,2)
@@ -401,7 +410,7 @@ function property:createMaterialRow()
 	value.OnChoiceSelected = function(object, choice)
 	    editor.createMode:setMaterial(self.target,choice)
 	    self:remove()
-		self:create(editor.selector.selection[1])
+		self:create()
 	end
 
 	self.propList:AddItem(name,#self.propGrid+1,1)
@@ -409,22 +418,27 @@ function property:createMaterialRow()
 end
 
 
-function property:createReactRow()
+function property:createCollideRow()
 	local name = ui.Create("button")
 	local value = ui.Create("multichoice")
-	name:SetText("reaction")
+	name:SetText("collisions")
 	
 	
-	value:SetText("Add a Reaction")
-	for k,v in pairs(interacts) do
+	value:SetText("Add a func")
+	for k,v in pairs(editor.helper.collMode.collisions) do
 		value:AddChoice(k)
 	end
 	
 	value.OnChoiceSelected = function(object, choice)
-	    print(choice .. " was selected.")
+	   	local data=editor.helper.collMode.collisions[choice]
+	   	for i,v in ipairs(data) do
+	   		editor.helper.setProperty(self.target,v.prop,v.value)
+	   	end
+	    self:remove()
+	   	self:create()
 	end
-	self.propList:AddItem(name,#self.propGrid+1,1)
-	self.propList:AddItem(value,#self.propGrid+1,2)
+	self.propList:AddItem(name,#self.propGrid+2,1)
+	self.propList:AddItem(value,#self.propGrid+2,2)
 end
 
 

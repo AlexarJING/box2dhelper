@@ -42,7 +42,9 @@ function dataMode.getProperty(obj,key)
 	end
 
 	if not dataMode.propBuffer[obj][key] then
-		for i,v in ipairs(obj:getUserData()) do
+		local data=obj:getUserData()
+		if not data then obj:setUserData({});return end
+		for i,v in ipairs(data) do
 			if v.prop==key then
 				dataMode.propBuffer[obj][key]={prop=key,value=v.value}
 				return v.value

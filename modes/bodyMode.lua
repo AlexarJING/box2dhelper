@@ -160,7 +160,7 @@ function edit:dragMove()
 		self.dragTX,self.dragTY=mouseX,mouseY
 		if love.keyboard.isDown("lctrl") then 
 			self.dragCopy=true 
-			self.dragCopyObj=editor.helper.getWorldData(selection)
+			self.dragCopyObj=editor.helper.getWorldData(editor.selector.selection)
 		else
 			self.dragCopy=false 
 			self.dragCopyObj=nil

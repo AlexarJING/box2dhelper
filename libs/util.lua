@@ -483,10 +483,7 @@ end
 
 
 function math.unitAngle(angle)  --convert angle to 0,2*Pi
-  angle=math.fmod(angle,2*Pi+0.0000000001)
-  --angle= (angle/(2*Pi) - math.floor(angle/(2*Pi)))*2*Pi
-  angle= angle<0 and angle+2*Pi or angle
-  return angle
+ 	return math.asin(math.sin(angle))
 end
 
 function math.vertToLine(a,b,c,x,y) --过已知点垂线公式
