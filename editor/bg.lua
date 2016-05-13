@@ -26,7 +26,7 @@ function bg:init()
 	screenQuad=self.screenQuad
 
 	cam=self.editor.cam
-	self.visible=true
+	self.visible=editor.interface.visible.bg
 	return self
 end
 
@@ -48,7 +48,7 @@ function bg:draw()
 	love.graphics.line(-W/2,0,W/2,0)
 	love.graphics.line(0, -H/2, 0,H/2)
 	end)
-	editor.log:draw()
+	
 end
 return function(parent) 
 	editor=parent

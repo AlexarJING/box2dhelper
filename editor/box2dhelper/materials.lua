@@ -1,4 +1,6 @@
+local materialMode={}
 local mat={}
+materialMode.materialType=mat
 
 mat.wood={ --实心木料
 	name="wood",
@@ -107,13 +109,23 @@ mat.water={ --实心铅
 }
 
 mat.magnet={ --钢磁体
-	name="steel",
+	name="magnet",
 	density=8,  
 	friction=0.1, 
 	restitution=0.1, 
 	hardness=9, 
 }
 
+function materialMode.setMaterial(fixture,material)
+	helper.setProperty(fixture,"material",material)
+
+	local mat=materialMode.materialType[material]
+	fixture:setDensity(mat.density)
+	fixture:setFriction(mat.friction)
+	fixture:setRestitution(mat.restitution)
+	helper.setProperty(fixture,"hardness",mat.hardness)
 
 
-return mat
+end
+
+return function(parent) helper=parent;helper.materialMode=materialMode end

@@ -24,9 +24,18 @@ function dataMode.setProperty(obj,key,value)
 	end
 
 	if not key then return end
-
 	if not dataMode.propBuffer[obj][key] then
 		local data=obj:getUserData()
+		
+		for i,v in ipairs(data) do
+			if v.prop==key then
+				v.value=value
+				dataMode.propBuffer[obj][key]=v
+				return
+			end
+		end
+
+
 		local prop={prop=key,value=value}
 		table.insert(data, prop)
 		dataMode.propBuffer[obj][key]=prop
@@ -56,6 +65,23 @@ function dataMode.getProperty(obj,key)
 	return dataMode.propBuffer[obj][key].value
 end
 
+function dataMode.removeProperty(obj,key)
+	if not dataMode.propBuffer[obj] then
+		dataMode.propBuffer[obj]={}
+	end
+
+	if dataMode.propBuffer[obj][key] then	
+		dataMode.propBuffer[obj][key]=nil
+	end
+
+	local data=obj:getUserData()
+	for i,v in ipairs(data) do
+		if v.prop==key then
+			table.remove(data, i)
+			return
+		end
+	end
+end
 
 
 function dataMode.createWorld(world,data,offx,offy,editor)
@@ -327,7 +353,8 @@ function dataMode.getStatus(obj,type)
 	for i,prop in ipairs(dataMode.properties[type]) do
 		local func=obj["get"..prop] or obj["is"..prop] or obj["has"..prop]
 		if func then
-			local value,value2=func(obj,1)
+			--local value,value2=func(obj,1)
+			local res,value,value2=pcall(func,obj,1)
 			if value2 then
 				value={func(obj,1)}
 			end
