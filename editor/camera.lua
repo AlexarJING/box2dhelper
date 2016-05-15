@@ -1,4 +1,4 @@
-local cam = require("libs.gamera").new(-5000,-5000,10000,10000)
+local cam = require("libs.gamera").new(-50000,-50000,100000,100000)
 local editor
 cam:setPosition(0,0)
 
@@ -80,6 +80,11 @@ function cam:scrollScale(y)
 	else
 		self:setScale(self:getScale()*0.95)
 	end
+	editor.bg:resize()
+end
+
+function cam:resize()
+	cam:setWindow(0,0,w(),h())
 end
 
 return function(parent) cam.editor=parent; editor=parent return cam end

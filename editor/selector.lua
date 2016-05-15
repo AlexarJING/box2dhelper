@@ -82,7 +82,33 @@ function selector:dragSelect()
 	elseif love.mouse.isDown(1) and self.dragSelecting then
 		self.dragTX,self.dragTY=mouseX,mouseY
 	elseif not love.mouse.isDown(1) and self.dragSelecting then
-		local selection=selector:bodyAreaTest()
+		local selection={}
+		local fixtureIndex={}
+		for i,body in ipairs(editor.world:getBodyList()) do
+			for i,fix in ipairs(body:getFixtureList()) do
+				local shape=fix:getShape()
+				if shape:type()=="CircleShape" then
+					local x,y=body:getPosition()
+					local r=shape:getRadius()
+					if self:inRect(x,y) and self:inRect(x+r,y) and self:inRect(x-r,y)
+						and self:inRect(x,y+r) and self:inRect(x,y-r) then
+						table.insert(selection,body)
+					end
+				elseif shape:type()~="ChainShape" then
+					local points={shape:getPoints()}
+					local check=true
+					for i=1,#points/2-1,2 do
+						if not self:inRect(points[i]+body:getX(),points[i+1]+body:getY()) then
+							check=false
+							break
+						end
+					end
+					if check then
+						table.insert(selection, body)
+					end
+				end
+			end
+		end
 		if selection[1] then
 			self:clearSelection()
 			self.selection=selection
@@ -93,44 +119,10 @@ end
 
 
 function selector:click(key)
-	self:bodyPointTest(key)
-end
 
-
-
-function selector:bodyAreaTest()
-	local selection={}
-	for i,body in ipairs(editor.world:getBodyList()) do
-		for i,fix in ipairs(body:getFixtureList()) do
-			local shape=fix:getShape()
-			if shape:type()=="CircleShape" then
-				local x,y=body:getPosition()
-				local r=shape:getRadius()
-				if self:inRect(x,y) and self:inRect(x+r,y) and self:inRect(x-r,y)
-					and self:inRect(x,y+r) and self:inRect(x,y-r) 
-					and not table.getIndex(selection,body) then
-					table.insert(selection,body)
-				end
-			elseif shape:type()~="ChainShape" then
-				local points={shape:getPoints()}
-				local check=true
-				for i=1,#points/2-1,2 do
-					if not self:inRect(points[i]+body:getX(),points[i+1]+body:getY()) then
-						check=false
-						break
-					end
-				end
-				if check and not table.getIndex(selection,body) then
-					table.insert(selection,body)
-				end
-			end
-		end
-	end
-	return selection
-end
-
-function selector:bodyPointTest(key)
 	if editor.bodyMode.dragMoving then return end
+
+
 	if key=="l" then
 		local selectTest={}
 		for i,body in ipairs(editor.world:getBodyList()) do
@@ -166,7 +158,7 @@ function selector:bodyPointTest(key)
 			end
 			self.selectToggle=selectTest
 		else
-			self.selection=nil
+			--self.selection=nil
 		end
 
 	elseif key=="r" then
@@ -184,7 +176,40 @@ function selector:bodyPointTest(key)
 	end
 end
 
+
+
+
+
+
+
+
 return function(parent) 
 	editor=parent
 	return selector
 end
+
+
+--[[
+	todo:
+	new frame named component
+	including
+
+	lancher 一个刚体矩形，在内部可以生成一个物体，物体可以被指定为 标准刚体/爆炸/烟雾等 生成物体与本身不碰撞
+			同时，对生成物体和本身施力
+			拥有属性：bullet  rate key demand force 等
+	bouncer  一个标准刚体和一组感受器，如果感受器与任何物体接触，则jumper的受反向力与被接触的物体速度变化量成正比。
+			拥有属性：sensors jumpforce key demand等
+	roller 一个标准刚体，在有指定按键时受转向力。
+			拥有属性：key rollforce
+	jumper 两个标准刚体，以prismatic和distance双重连接 在无按键时，保持distance 在指定按键时 连接失效
+
+	jet 一个标准刚体，在有按键时 默认 w ，向正方向施加力，同时向反方向 制造烟雾
+
+	mouseTurn 一个标准刚体，随鼠标方向转向。
+		
+	keyTurn 一个标准刚体，随按键 左右 或 a d  转向
+
+	piston 两个刚体，做活塞运动
+
+
+]]

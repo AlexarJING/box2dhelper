@@ -6,23 +6,16 @@ local interface
 
 
 function scene:create()
-	if self.frame then 
-		interface.layout.scene={self.frame:GetPos()}
-		interface.visible.scene=self.frame:GetVisible()
-		self.frame:Remove() 
-	end
+	if self.frame then self.frame:Remove() end
 	local files = love.filesystem.getDirectoryItems(editor.currentProject.."/scenes")
 	local frame =ui.Create("frame")
 	self.frame=frame
 	local count=#files
 	self.sceneCount=count
 	local max=9
-	frame:SetVisible(interface.visible.scene)
-	frame:ShowCloseButton(false)
 	frame:SetName("scenes")
 	frame:SetSize(100,30*max+28)
-	frame:SetPos(interface.layout.scene and interface.layout.scene[1] or 290 ,
-				interface.layout.scene and interface.layout.scene[2] or  40)
+	frame:SetPos(290,40)
 	local list = ui.Create("list",frame)
 	list:SetDisplayType("vertical")
 	list:SetPos(5, 30)

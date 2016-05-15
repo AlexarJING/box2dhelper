@@ -4,7 +4,7 @@ log.lines={}
 log.maxLine=100
 log.showLine=10
 log.currentLine=1
-log.x=500
+log.x=10
 log.visible=true
 
 function log:push(text)
@@ -31,7 +31,7 @@ end
 
 return function(parent) 
 	editor=parent
-	log.x=500
+	log.x=10
 	log.y=h()-30
 	return log
 end

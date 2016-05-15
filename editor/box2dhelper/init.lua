@@ -5,8 +5,6 @@ require(path.."/draw")(helper)
 require(path.."/data")(helper)
 require(path.."/collision")(helper)
 require(path.."/reaction")(helper)
-require(path.."/materials")(helper)
-
 helper.world=nil
 helper.visible=helper.drawMode.visible
 helper.properties=helper.dataMode.properties
@@ -26,12 +24,8 @@ helper.setStatus=helper.dataMode.setStatus
 
 helper.setProperty=helper.dataMode.setProperty
 helper.getProperty=helper.dataMode.getProperty
-helper.removeProperty=helper.dataMode.removeProperty
-
 
 helper.press=helper.reactMode.press
 helper.click=helper.reactMode.click
-
-helper.setMaterial=helper.materialMode.setMaterial
 
 return helper

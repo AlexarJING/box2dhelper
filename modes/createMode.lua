@@ -29,6 +29,8 @@ end
 
 local Softbody=require "editor/softbody"
 
+creator.materials=require "editor/materials"
+
 
 function creator:update()
 	self:getPoint()
@@ -634,14 +636,19 @@ function creator:setData(target,data)
 end
 
 
-function creator:setMaterial(fixture,material,arg)
-	editor.action="set material:"..material
+function creator:setMaterial(fixture,m_type,arg)
+	editor.action="set material"..m_type
 	local body=fixture:getBody()
 	body:setLinearDamping(editor.linearDamping)
 	body:setAngularDamping(editor.angularDamping)
-	
 	editor.helper.setProperty(body)
-	editor.helper.setMaterial(fixture,material)
+	editor.helper.setProperty(fixture,"material",m_type)
+
+	local mat=self.materials[m_type]
+	fixture:setDensity(mat.density)
+	fixture:setFriction(mat.friction)
+	fixture:setRestitution(mat.restitution)
+	editor.helper.setProperty(fixture,"hardness",mat.restitution)	
 
 	if m_type=="magnet" then
 		self:magnetField(fixture)

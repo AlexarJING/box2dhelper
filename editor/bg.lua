@@ -19,9 +19,9 @@ function bg:init()
 	love.graphics.setColor(0, 0, 255)
 	love.graphics.rectangle('line',0.5,0.5,gridSize,gridSize)	
 	love.graphics.setCanvas()
+	W=w()/editor.cam.scale
+	H=h()/editor.cam.scale
 	
-	W=self.editor.W
-	H=self.editor.H
 	self.screenQuad = love.graphics.newQuad(0,0,W, H, gridSize, gridSize)
 	screenQuad=self.screenQuad
 
@@ -31,9 +31,16 @@ function bg:init()
 end
 
 
+function bg:resize()
+	W=w()/editor.cam.scale
+	H=h()/editor.cam.scale
+	self.screenQuad = love.graphics.newQuad(0,0,W, H, gridSize, gridSize)
+	screenQuad=self.screenQuad
+end
+
 
 function bg:update()
-	screenQuad:setViewport(cam.x+5, cam.y+35, W, H )
+	screenQuad:setViewport(cam.x-W/cam.scale, cam.y-H/cam.scale, W, H )
 end
 
 
@@ -41,14 +48,14 @@ end
 function bg:draw()
 	if not self.visible then return end
 	love.graphics.setColor(255, 255, 255, 155)
-	love.graphics.draw(gridCanvas,screenQuad,W*(1-cam.scale)/2,H*(1-cam.scale)/2,0,cam.scale,cam.scale)
-
+	love.graphics.draw(gridCanvas,screenQuad,0,0,0,cam.scale,cam.scale)
 	cam:draw(function()
+
 	love.graphics.setColor(255, 0, 0, 255)
 	love.graphics.line(-W/2,0,W/2,0)
 	love.graphics.line(0, -H/2, 0,H/2)
 	end)
-	
+	editor.log:draw()
 end
 return function(parent) 
 	editor=parent
