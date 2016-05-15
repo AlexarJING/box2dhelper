@@ -1,7 +1,6 @@
 if arg[#arg] == "-debug" then require("mobdebug").start() end 
 require "libs.util"
 
-
 local editor=require "editor/editor"
 
 function love.filedropped( file )

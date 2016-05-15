@@ -14,7 +14,9 @@ interface.visible={
 	scene=true,
 }
 
-interface.layout={}
+interface.layout={
+	
+}
 
 
 function interface:init()
@@ -44,6 +46,7 @@ function interface:init()
 	interface.history:create()
 	interface.info:create()
 	interface.scene:create()
+	interface.property:create()
 
 	interface.fileMenu:create()
 	interface.editMenu:create()
@@ -71,14 +74,14 @@ function interface:isHover()
 end
 
 function interface:getLayout()
-	self.layout= {
+	return {
 	build={interface.build.frame:GetPos()},
 	joint={interface.joint.frame:GetPos()},
 	unit={interface.unit.frame:GetPos()},
 	history={interface.history.frame:GetPos()},
 	scene={interface.scene.frame:GetPos()},
+	property={interface.property.frame:GetPos()}
 	}	
-	return self.layout
 end
 
 function interface:resetLayout()
@@ -93,11 +96,10 @@ function interface:resetLayout()
 	interface.unit.frame:SetPos(unpack(self.layout.unit))
 	interface.history.frame:SetPos(unpack(self.layout.history))
 	interface.scene.frame:SetPos(unpack(self.layout.scene))
-
-	editor.bg:init()
 end
 
 function interface:resetVisible()
+	editor.bg:init()
  	editor.bg.visible=interface.visible.bg
 	editor.log.visible=interface.visible.log
 	editor.interface.info.panel:SetVisible(interface.visible.info)
@@ -110,7 +112,11 @@ function interface:resetVisible()
 		editor.interface.property.frame:SetVisible(interface.visible.property)
 	end
 	editor.interface.system.list:SetVisible(interface.visible.system)
-	editor.bg:init()
+	for k,v in pairs(interface.visible) do
+		if k~="system" then
+			interface.layoutMenu.options[k].toggle=v
+		end
+	end
 end
 
 function interface:setVisible(tag,toggle)
@@ -124,9 +130,17 @@ end
 
 function interface:resetView()
 	for k,v in pairs(editor.helper.visible) do
-		interface.viewMenu.options[tag].toggle=v
+		interface.viewMenu.options[k].toggle=v
 	end
 	interface.viewMenu.options.bloom.toggle=editor.enableBloom
+end
+
+function interface:reset()
+	self:resetVisible()
+	self:resetView()
+	self:resetLayout()
+	self.system:updateProj()
+	self.unit:create()
 end
 
 

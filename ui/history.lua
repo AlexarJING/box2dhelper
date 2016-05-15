@@ -29,7 +29,10 @@ function history:create()
 	local max=9
 	frame:SetName("history")
 	frame:SetSize(100,30*max+28)
-	frame:SetPos(180, 40)
+	frame:ShowCloseButton(false)
+	frame:SetPos(interface.layout.history and interface.layout.history[1] or 180 ,
+				interface.layout.history and interface.layout.history[2] or  40)
+
 	local list = ui.Create("list",frame)
 	list:SetDisplayType("vertical")
 	list:SetPos(5, 30)

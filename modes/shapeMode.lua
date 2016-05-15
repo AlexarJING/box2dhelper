@@ -108,10 +108,14 @@ function vertex:changeR()
 	local cx,cy = shape:getPoint()
 	local bx,by = self.selectedVert.body:getPosition()
 	local r=getDist(cx+bx,cy+by,self.dragTX,self.dragTY)
+	local prop=editor.helper.getStatus(self.selectedVert.fixture,"fixture")
+	local data=self.selectedVert.fixture:getUserData()
 	local newShape = love.physics.newCircleShape(cx,cy,r)
 	local newFixture= love.physics.newFixture(self.selectedVert.body,newShape)
+	editor.helper.setStatus(newFixture,"fixture",prop)
+	newFixture:setUserData(data)
 	self.selectedVert.fixture:destroy()
-	self.action="change radius"
+	editor.action="change radius"
 end
 
 function vertex:changeNormal()
@@ -120,6 +124,8 @@ function vertex:changeNormal()
 	local shape=self.selectedVert.fixture:getShape()
 	local shapeType=shape:getType()
 	local verts=self.selectedVert.verts
+	local prop=editor.helper.getStatus(self.selectedVert.fixture,"fixture")
+	local data=self.selectedVert.fixture:getUserData()
 	verts[self.selectedVert.index],verts[self.selectedVert.index+1]=self.dragTX,self.dragTY
 	local newShape 
 	if shapeType=="polygon" then
@@ -133,8 +139,10 @@ function vertex:changeNormal()
 		polygonTrans(-offx,-offy,0,1,verts)) )
 	end
 	local newFixture=love.physics.newFixture(body,newShape)
+	editor.helper.setStatus(newFixture,"fixture",prop)
+	newFixture:setUserData(data)
 	self.selectedVert.fixture:destroy()
-	self.action="translate vertex"
+	editor.action="translate vertex"
 end
 
 function vertex:rotate()
@@ -173,7 +181,7 @@ function vertex:rotate()
 	
 
 	
-	self.action="rotate fixture"
+	editor.action="rotate fixture"
 end
 
 function vertex:click()
@@ -234,6 +242,7 @@ function vertex:draw()
 		else
 			local shapeVerts=vert.verts
 			local i = vert.index
+			local shapeType=self.selectedVert.fixture:getShape():getType()
 			local nextIndex = shapeVerts[i+2] and i+2 or 1
 			local prevIndex = shapeVerts[i-2] and i-2 or #shapeVerts-1
 			love.graphics.line(shapeVerts[prevIndex],shapeVerts[prevIndex+1],self.dragTX,self.dragTY)

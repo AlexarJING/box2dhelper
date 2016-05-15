@@ -457,7 +457,9 @@ end
 --]]---------------------------------------------------------
 function newobject:SwitchToTab(tabnumber)
 	
-	if not self.children[tabnumber] then return end
+	if not self.children[tabnumber] then 
+		tabnumber=1
+	end
 
 	local children = self.children
 	

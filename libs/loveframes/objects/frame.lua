@@ -144,6 +144,9 @@ function newobject:update(dt)
 	
 	-- dragging check
 	if dragging then
+		if self.onDrag then
+			self.onDrag()
+		end
 		if parent == base then
 			local width = self.width
 			local height = self.height

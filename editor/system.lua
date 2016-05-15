@@ -140,9 +140,10 @@ function system:saveProject()
 		visible=editor.interface.visible,
 		layout=editor.interface:getLayout(),
 		keyconf=editor.keyconf,
-		windowMode={love.window.getMode()},
+		resolution={love.graphics.getDimensions( )},
 		createTime=editor.createTime,
-		lastEditTime=os.date("%c")
+		lastEditTime=os.date("%c"),
+		groupIndex=editor.groupIndex
 	}
 	project:write(table.save(data))
 	project:close()	
@@ -179,20 +180,26 @@ function system:loadProject()
 	end
 
 	local data = loadstring(file:read())()
+	if not data then
+		editor.loadProject = nil
+		system:newProject()
+		return
+	end
 	editor.currentProject=data.projectName
 	editor.currentScene=data.currentScene
 	system:loadScene(editor.currentScene..".scene")
 	editor.keyconf=data.keyconf
 	editor.createTime=data.createTime
 	editor.lastEditTime=data.lastEditTime
-	
-	editor.interface.layout=data.layout
-	love.window.setMode(unpack(data.windowMode))
-	editor:resize()
+	love.window.setMode(unpack(data.resolution))
+	editor.W=w()
+	editor.H=h()
+	editor.groupIndex=data.groupIndex or 1
 	editor.interface.visible=data.visible
-	editor.interface:resetVisible()
+	editor.interface.layout=data.layout
+	editor.interface:reset()
 	editor.loadProject=nil
-	editor.interface.system:updateProj()
+	
 end
 
 function system:newScene()

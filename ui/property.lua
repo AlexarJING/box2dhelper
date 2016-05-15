@@ -8,14 +8,14 @@ function property:update()
 	local selection = editor.selector.selection
 	
 	if not selection then 
-		self:remove()
+		self:hide()
 		return 
 	end
 
 	local target=selection[1]
 
 	if not target or ( target.isDestroyed and target:isDestroyed() )then
-		self:remove()
+		self:hide()
 		return 	
 	end
 
@@ -25,7 +25,7 @@ function property:update()
 			self:reset()
 		end
 	else
-		self:remove() --rebuild frame
+		self:hide() --rebuild frame
 		self:create(target)
 	end
 	
@@ -65,15 +65,22 @@ function property:reset()  --update all data
 	end
 end
 
-function property:remove()
+function property:hide()
 	
 	if self.frame then
-		property.tabIndex=property.tabs.tab
-		self.frame:Remove() 
+		if self.tabs then
+			self.tabIndex=self.tabs.tab
+		end
+		self.frame:SetVisible(false) 
 	end
 	self.target=nil
 end
 
+function property:nextTab()
+	self.tabs:SwitchToTab(self.tabIndex+1)
+	property.tabIndex=property.tabs.tab
+
+end
 
 local function setProp(target,prop,...)
 	
@@ -92,17 +99,7 @@ local function setProp(target,prop,...)
 	editor.action="change property"
 end
 
-local function removeProp(target,prop,...)
-	local data=target:getUserData()
-	for i,v in ipairs(data) do
-		if v.prop==prop then
-			table.remove(data, i)
-			return
-		end
-	end
-	
-	editor.action="remove property"
-end
+
 
 function property:setListItems(parent,pos,target,data,itemCanRemove)
 	local key = ui.Create("button")
@@ -112,8 +109,8 @@ function property:setListItems(parent,pos,target,data,itemCanRemove)
 		key.OnClick=function(obj)
 			if love.keyboard.isDown("lctrl") and 
 				love.keyboard.isDown("lalt") then
-				removeProp(target,data.prop)
-				self:remove()
+				editor.helper.removeProperty(target,data.prop)
+				editor.action="remove property"
 				self:create()
 			end
 		end
@@ -193,7 +190,12 @@ end
 
 
 function property:create(target)
-	target = target or editor.selector.selection[1]
+	target = target or (editor.selector.selection and editor.selector.selection[1])
+	if not target then
+		self.frame= ui.Create("frame")
+		self.frame:SetVisible(false)
+		return
+	end
 	self:prepairData(target)
 	self:createFrame()
 	self:createPropertyTab()
@@ -206,6 +208,7 @@ function property:create(target)
 		self:createWorldTab()
 	end
 	self.tabs:SwitchToTab(self.tabIndex or 1)
+	self.tabIndex=self.tabs.tab
 end
 
 function property:prepairData(target)
@@ -238,8 +241,15 @@ end
 
 
 function property:createFrame()
+	if self.frame then 
+		if self.tabs then
+			interface.layout.property={self.frame:GetPos()}
+		end
+		self.frame:Remove() 
+	end
 	self.frame= ui.Create("frame")
 	self.frame:SetVisible(interface.visible.property)
+	
 	local count
 	if self.targetType=="body" then
 		count=#self.targetData+1>#self.targetProp+1 and  
@@ -248,8 +258,7 @@ function property:createFrame()
 		count=#self.targetData+1>#self.targetProp+2 and  
 		#self.targetData+1 or #self.targetProp+2
 	else
-		count=#self.targetData+1>#self.targetProp and  
-		#self.targetData+1 or #self.targetProp
+		count=#self.targetProp
 	end
 
 	self.rowCount=count
@@ -258,7 +267,10 @@ function property:createFrame()
 	
 	frame:SetSize(250, 70+count*30)
 
-	frame:SetPos(w()-250, 30)
+	frame:SetPos(interface.layout.property and interface.layout.property[1] or w()-250 ,
+				interface.layout.property and interface.layout.property[2] or  40)
+
+
 	interface.layout.property={frame:GetPos()}
 
 	frame:ShowCloseButton(false)
@@ -340,7 +352,7 @@ function property:createAddRow(pos)
 		local k=name:GetText()
 		local v=value:GetText()
 		editor.helper.setProperty(self.target,k,v)
-		self:remove()
+		
 		self:create(editor.selector.selection[1])
 		obj.focus=false
 	end
@@ -353,7 +365,7 @@ function property:createAddRow(pos)
 		local k=name:GetText()
 		local v=value:GetText()
 		editor.helper.setProperty(self.target,k,v)
-		self:remove()
+		
 		self:create(editor.selector.selection[1])
 		obj.focus=false
 	end
@@ -372,7 +384,7 @@ function property:createReactRow()
 	local value = ui.Create("multichoice")
 	name:SetText("reaction")
 
-	value:SetText("selec a function")
+	value:SetText("select a function")
 	for k,v in pairs(editor.helper.reactMode.reactions) do
 		value:AddChoice(k)
 	end
@@ -381,8 +393,9 @@ function property:createReactRow()
 	   local data=editor.helper.reactMode.reactions[choice]
 	   for i,v in ipairs(data) do
 	   		editor.helper.setProperty(self.target,v.prop,v.value)
+	   		editor.action="set property"
 	   end
-	   self:remove()
+	   
 	   self:create()
 	end
 	self.propList:AddItem(name,#self.propGrid+1,1)
@@ -403,13 +416,12 @@ function property:createMaterialRow()
 		value:SetText("select")
 	end
 	
-	for k,v in pairs(editor.createMode.materials) do
+	for k,v in pairs(editor.helper.materialMode.materialType) do
 		value:AddChoice(k)
 	end
 	
 	value.OnChoiceSelected = function(object, choice)
 	    editor.createMode:setMaterial(self.target,choice)
-	    self:remove()
 		self:create()
 	end
 
@@ -433,8 +445,9 @@ function property:createCollideRow()
 	   	local data=editor.helper.collMode.collisions[choice]
 	   	for i,v in ipairs(data) do
 	   		editor.helper.setProperty(self.target,v.prop,v.value)
+	   		editor.action="set property"
 	   	end
-	    self:remove()
+	    
 	   	self:create()
 	end
 	self.propList:AddItem(name,#self.propGrid+2,1)

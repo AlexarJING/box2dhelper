@@ -6,6 +6,7 @@ editor.world= love.physics.newWorld(0,9.8*64,false)
 editor.linearDamping=1
 editor.angularDamping=1
 editor.meter=64
+editor.groupIndex=1
 love.physics.setMeter(editor.meter)
 ------------------------------------------------------
 editor.LoveFrames= require "libs.loveframes"
@@ -171,16 +172,16 @@ end
 
 
 local bloom=require "libs/bloom"(w()/1.5,h()/1.5)
-editor.renderCanvas = love.graphics.newCanvas()
-editor.accumCanvas = love.graphics.newCanvas()
+local canvas = love.graphics.newCanvas()
+local accum = love.graphics.newCanvas()
 
 function editor:draw()
 	
 	self.bg:draw()
 	self.log:draw()
-	self.units:draw()
+	
 
-    love.graphics.setCanvas(editor.renderCanvas)
+    love.graphics.setCanvas(canvas)
     love.graphics.clear()
 	self.cam:draw(function()
 		
@@ -208,13 +209,13 @@ function editor:draw()
 	if editor.enableBloom then
 		bloom:predraw()
 	    bloom:enabledrawtobloom()
-	    love.graphics.draw(editor.renderCanvas)
+	    love.graphics.draw(canvas)
 		bloom:postdraw()
 	end
 	
-	love.graphics.draw(editor.renderCanvas)
+	love.graphics.draw(canvas)
 	self.LoveFrames.draw()
-
+	self.units:draw()
 end
 
 
@@ -386,14 +387,8 @@ function editor:quit()
 end
 
 function editor:resize()
-	editor.W=w()
-	editor.H=h()
-		
-	editor.interface:resetLayout()
-	editor.renderCanvas = love.graphics.newCanvas()
-	editor.accumCanvas = love.graphics.newCanvas()
-	editor.cam:resize()
-	editor.bg:resize()
+
+
 end
 
 
@@ -457,37 +452,35 @@ function editor:keyBound()
 		saveWorld=function() self.system:saveToFile() end,
 		saveScene=function() self.system:saveScene() end,
 		saveProject=function() self.system:saveProject() end,
-		saveUnit=function() self.units:getSaveName() end,
+		saveUnit=function() self.units:save() end,
 		quickSave=function() self.units:quickSave() end,
 
 
 
-		toggleSystem=function() self.interface.sysList:SetVisible(not self.interface.sysList:GetVisible()) end,
-		togglePropFrameStyle=function() self.interface:toggleBodyType() end, 
+		toggleSystem=function() 
+			editor.interface:setVisible("system", not editor.interface.visible.system) 
+		end,
+		nextPropTab=function() 
+			editor.interface.property:nextTab() 
+		end, 
 		toggleGrid=function() 
-						self.interface.uiVisible[1].toggle=not self.interface.uiVisible[1].toggle
-						editor.bg.visible=not editor.bg.visible
-						editor.log.visible= not editor.log.visible
-					end,
-		toggleCreate=function()
-						self.interface.uiVisible[2].toggle=not self.interface.uiVisible[2].toggle
-						self.interface.createFrame:SetVisible(not self.interface.createFrame:GetVisible())
-						self.interface.jointFrame:SetVisible(self.interface.createFrame:GetVisible())
-					end,
+			editor.interface:setVisible("grid", not editor.interface.visible.grid) 
+		end,
+		toggleLog=function() 
+			editor.interface:setVisible("log", not editor.interface.visible.log) 
+		end,
+		toggleBuild=function()
+			editor.interface:setVisible("build", not editor.interface.visible.build) 
+		end,
 		toggleProperty=function()
-						self.interface.uiVisible[3].toggle=not self.interface.uiVisible[3].toggle
-						if self.interface.propFrame then
-							self.interface.propFrame:SetVisible(not self.interface.propFrame:GetVisible())
-						end
-					end,
+			editor.interface:setVisible("property", not editor.interface.visible.property)
+		end,
 		toggleUnit=function()
-						self.interface.uiVisible[4].toggle=not self.interface.uiVisible[4].toggle
-						self.interface.unitFrame:SetVisible(not self.interface.unitFrame:GetVisible())						
-					end,
+			editor.interface:setVisible("unit", not editor.interface.visible.unit)						
+		end,
 		toggleHistroy=function()
-						self.interface.uiVisible[5].toggle=not self.interface.uiVisible[5].toggle
-						self.interface.historyFrame:SetVisible(not self.interface.historyFrame:GetVisible())						
-					end,
+			editor.interface:setVisible("history", not editor.interface.visible.history)		
+		end,
 	}
 
 	local keys ={}

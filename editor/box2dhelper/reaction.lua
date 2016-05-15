@@ -105,7 +105,7 @@ function func.roll(body)
 end
 
 function func.rollback(body)
-	local power=helper.getProperty(body,"rollBackPower") or -5000
+	local power=helper.getProperty(body,"rollbackPower") or -5000
 	body:applyTorque(power)
 end
 
@@ -127,7 +127,7 @@ function func.jump(body)
 	local leftkey=helper.getProperty(body,"jumpLeftKey") or "left"
 	local rightkey=helper.getProperty(body,"jumpRightKey") or "right"
 
-	local angle=body:getAngle()
+	local angle=0
 	local mass=body:getMass( )
 	local mass2=body2:getMass()
 	if leftkey and rightkey then
@@ -138,7 +138,8 @@ function func.jump(body)
 			angle=angle+Pi/6
 		end
 	end
-	body:setAngle(angle)
+	
+	--body:setAngle(angle)
 	body:applyLinearImpulse(power*math.sin(angle)*mass,-power*math.cos(angle)*mass)
 	body2:applyLinearImpulse(-power*math.sin(angle)*mass2,power*math.cos(angle)*mass2)
 end
@@ -247,8 +248,8 @@ reactMode.reactions={
 		{prop="rollPower",value=5000},
 	},
 	rollback={
-		{prop="roll",value="a"},
-		{prop="rollPower",value=-5000},
+		{prop="rollback",value="a"},
+		{prop="rollbackPower",value=-5000},
 	},
 	jump={
 		{prop="jump",value="space"},

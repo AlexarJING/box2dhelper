@@ -40,7 +40,7 @@ local conf={
 	redo="ctrl+y",
 	toggleBodyType="`",
 
-	toggleMode="tab",
+	nextPropTab="tab",
 	bodyMode="1",
 	fixtureMode="2",
 	shapeMode="3",
@@ -51,17 +51,17 @@ local conf={
 	toggleMouse="f2",
 	reset="f4",
 
-	toggleSystem="lalt",
+	toggleSystem="ctrl+h",
 	toggleGrid="f8",
-	toggleCreate="f9",
+	toggleBuild="f9",
 	toggleProperty="f10",
 	toggleUnit="f11",
 	toggleHistroy="f12",
 	
 	saveScene="ctrl+s",
-	saveUnit="lshift+s",
-	saveProject="lalt+s",
-	loadProject="lalt+l",
+	saveUnit="shift+s",
+	saveProject="alt+s",
+	loadProject="alt+l",
 
 }
 

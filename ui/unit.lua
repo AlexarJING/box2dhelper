@@ -6,15 +6,23 @@ local interface
 
 
 function unit:create()
-	local files = love.filesystem.getDirectoryItems("units")
+	if self.frame then 
+		interface.layout.unit={self.frame:GetPos()}
+		interface.visible.unit=self.frame:GetVisible()
+		self.frame:Remove() 
+	end
+	local files = love.filesystem.getDirectoryItems(editor.currentProject.."/units")
 	local frame =ui.Create("frame")
 	self.frame=frame
 	local count=#files
 	self.unitCount=count
 	local max=9
+	frame:SetVisible(interface.visible.unit)
 	frame:SetName("units")
 	frame:SetSize(100,30*max+28)
-	frame:SetPos(70,40)
+	frame:ShowCloseButton(false)
+	frame:SetPos(interface.layout.unit and interface.layout.unit[1] or 70 ,
+				interface.layout.unit and interface.layout.unit[2] or  40)
 	local list = ui.Create("list",frame)
 	list:SetDisplayType("vertical")
 	list:SetPos(5, 30)
@@ -27,7 +35,7 @@ function unit:create()
 		list:AddItem(b)
 		b.OnClick=function() --copy to editor.selector.copied
 			if love.keyboard.isDown("lctrl") and love.keyboard.isDown("lalt") then
-				love.filesystem.remove( "units/"..b:GetText() )
+				love.filesystem.remove( editor.currentProject.."/units/"..b:GetText() )
 				frame:Remove()
 				self:create()
 			else
@@ -44,26 +52,6 @@ function unit:create()
 	end
 
 end
-
-
-function unit:createSave()
-	local frame =ui.Create("frame")
-	frame:SetName("save to file...")
-	frame:SetSize(300,80)
-	frame:CenterWithinArea(0,0,w(),h())
-	local input = ui.Create("textinput",frame)
-	input:SetSize(280,30)
-	input:SetPos(10,40)
-	input:SetFocus(true)
-	input.OnEnter=function()
-		editor.units:save(input:GetText())
-		input:Remove()
-		frame:Remove()
-		self.unitFrame:Remove()
-		self:create()
-	end
-end
-
 
 
 return function(parent) 
