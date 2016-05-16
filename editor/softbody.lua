@@ -50,7 +50,7 @@ function softbody:newBall(arg)
 	local y=arg.y
 	self.centerBody = love.physics.newBody(self.world, x, y, "dynamic");
 	self.centerShape = love.physics.newCircleShape(r/2);
-	self.centerfixture = love.physics.newFixture(self.centerBody, self.centerShape);
+	self.centerFixture = love.physics.newFixture(self.centerBody, self.centerShape);
 	--self.centerfixture:setMask(1);
 
 	--create 'nodes' (outer bodies) & connect to center body
@@ -71,7 +71,7 @@ function softbody:newBall(arg)
 		local f = love.physics.newFixture(b, self.nodeShape);
 		f:setFriction(30);
 		f:setRestitution(0);
-		f:setUserData(node)
+		--f:setUserData(node)
 		
 		local j = love.physics.newDistanceJoint(self.centerBody, b, posx, posy, posx, posy, false);
 		j:setDampingRatio(0.1);
@@ -109,7 +109,7 @@ function softbody:newPolygon(arg)
 		x+(topLeftX+bottomRightX)/2, 
 		y+(topLeftY+ bottomRightY)/2, "dynamic");
 	
-	self.centerfixture = love.physics.newFixture(self.centerBody, self.centerShape);
+	self.centerFixture = love.physics.newFixture(self.centerBody, self.centerShape);
 	self.nodeShape = love.physics.newCircleShape(8);
 	
 	
@@ -140,7 +140,7 @@ function softbody:newPolygon(arg)
 			local f = love.physics.newFixture(b, self.nodeShape);
 			f:setFriction(30);
 			f:setRestitution(0);
-			f:setUserData(node)
+			--f:setUserData(node)
 			
 			local j = love.physics.newDistanceJoint(self.centerBody, b, posx, posy, posx, posy, false);
 			j:setDampingRatio(0.1);
@@ -173,7 +173,7 @@ function softbody:newRect(arg)
 	local vert={-w/2,-h/2,w/2,-h/2,w/2,h/2,-w/2,h/2}
 	self.centerBody = love.physics.newBody(self.world, x, y, "dynamic");
 	self.centerShape  = love.physics.newPolygonShape(unpack(math.polygonTrans(0,0,0,0.5,vert)))
-	self.centerfixture = love.physics.newFixture(self.centerBody, self.centerShape);
+	self.centerFixture = love.physics.newFixture(self.centerBody, self.centerShape);
 	self.nodeShape = love.physics.newCircleShape(8);
 	
 	self.nodes = {};
@@ -202,7 +202,7 @@ function softbody:newRect(arg)
 			local f = love.physics.newFixture(b, self.nodeShape);
 			f:setFriction(30);
 			f:setRestitution(0);
-			f:setUserData(node)
+			--f:setUserData(node)
 			
 			local j = love.physics.newDistanceJoint(self.centerBody, b, posx, posy, posx, posy, false);
 			j:setDampingRatio(0.1);
@@ -250,6 +250,7 @@ function softbody:init(world, type ,arg, s, t, reinit) -- arg={x,y,r}
 	end
 
 	self.dead = false;
+
 end
 
 function softbody:update()

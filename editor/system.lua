@@ -140,7 +140,7 @@ function system:saveProject()
 		visible=editor.interface.visible,
 		layout=editor.interface:getLayout(),
 		keyconf=editor.keyconf,
-		resolution={love.graphics.getDimensions( )},
+		windowMode={love.window.getMode( )},
 		createTime=editor.createTime,
 		lastEditTime=os.date("%c"),
 		groupIndex=editor.groupIndex
@@ -191,12 +191,11 @@ function system:loadProject()
 	editor.keyconf=data.keyconf
 	editor.createTime=data.createTime
 	editor.lastEditTime=data.lastEditTime
-	love.window.setMode(unpack(data.resolution))
-	editor.W=w()
-	editor.H=h()
 	editor.groupIndex=data.groupIndex or 1
-	editor.interface.visible=data.visible
+	love.window.setMode(unpack(data.windowMode))
 	editor.interface.layout=data.layout
+	editor.interface.visible=data.visible
+	editor:resize()
 	editor.interface:reset()
 	editor.loadProject=nil
 	

@@ -345,8 +345,9 @@ function creator:softrope()
 			self.createOX+i*stepX, self.createOY+i*stepY,"dynamic")
 		body:setAngle(angle+math.pi/2)
 		local shape = love.physics.newRectangleShape(len,1)
-		local fixture = love.physics.newFixture(body, shape,1000)
+		local fixture = love.physics.newFixture(body, shape,1)
 		fixture:setGroupIndex(-1)
+		self:setMaterial(fixture,"wood")
 		table.insert(chain, body)
 	end
 	love.physics.newRevoluteJoint(body1, chain[1], body1:getX(),body1:getY(), false)
@@ -371,23 +372,36 @@ end
 
 function creator:softcircle()
 	editor.action="create softcircle"
-	Softbody(editor.world, "ball",{x=self.createOX,y=self.createOY,r=self.createR})
+	local soft=Softbody(editor.world, "ball",{x=self.createOX,y=self.createOY,r=self.createR})
+	print(soft.centerFixture)
+	self:setMaterial(soft.centerFixture,"wood")
+	for i,v in ipairs(soft.nodes) do
+		self:setMaterial(v.fixture,"wood")
+	end
 end
 
 function creator:softbox()
 	editor.action="create softbox"
-	Softbody(editor.world, "rect",{
+	local soft=Softbody(editor.world, "rect",{
 		x=(self.createOX+self.createTX)/2,
 		y=(self.createTY+self.createOY)/2,
 		w=math.abs(self.createOX-self.createTX),
 		h=math.abs(self.createTY-self.createOY)}
 		)
+	self:setMaterial(soft.centerFixture,"wood")
+	for i,v in ipairs(soft.nodes) do
+		self:setMaterial(v.fixture,"wood")
+	end
 end
 
 function creator:softpolygon()
 	editor.action="create softpolygon"
-	Softbody(editor.world, "polygon",{x=self.createOX,y=self.createOY,
+	local soft=Softbody(editor.world, "polygon",{x=self.createOX,y=self.createOY,
 		vert=polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts)})
+	self:setMaterial(soft.centerFixture,"wood")
+	for i,v in ipairs(soft.nodes) do
+		self:setMaterial(v.fixture,"wood")
+	end
 end
 
 
@@ -398,11 +412,6 @@ function creator:explosion()
 	local shape = love.physics.newCircleShape(self.createR)
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
-	local userData={prop="explosion",value=true}
-	local data = fixture:getUserData()
-	if not data then data={} end
-	table.insert(data, userData)
-	fixture:setUserData(data)
 end
 
 
@@ -500,6 +509,20 @@ function creator:getBodies()
 		return body1,body2 
 	end
 end
+
+function creator:getContBodies()
+	local selection=editor.selector.selection
+	if not selection then return end
+	for i=1,#selection do
+
+	end
+
+	local body1,body2=selection[1],selection[2]
+	if body1 and body2 then 
+		return body1,body2 
+	end
+end
+
 
 function creator:rope()
 	local body1,body2=self:getBodies()

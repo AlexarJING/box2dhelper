@@ -12,6 +12,7 @@ love.physics.setMeter(editor.meter)
 editor.LoveFrames= require "libs.loveframes"
 editor.helper = require "editor/box2dhelper"
 editor.Delaunay=require "libs/delaunay"
+editor.bloom=require "libs/bloom"(w()/1.5,h()/1.5)
 --------------------------------------------------
 editor.log = require "editor/log"(editor)
 editor.bg = require "editor/bg"(editor)
@@ -28,86 +29,11 @@ editor.testMode= require "modes/testMode"(editor)
 editor.jointMode= require "modes/jointMode"(editor)
 editor.fixtureMode= require "modes/fixtureMode"(editor)
 --------------------------------------------------------
-
+editor.renderCanvas = love.graphics.newCanvas()
+editor.accumCanvas = love.graphics.newCanvas()
 
 
 function editor:init()
---[[
-	local body  = love.physics.newBody(self.world, 300, 0, "dynamic")
-	body:setUserData({})
-	local shape = love.physics.newRectangleShape(50,100)
-	local fixture = love.physics.newFixture(body, shape)
-	fixture:setUserData({{prop="crashable",value=true}})
-
-	local body3  = love.physics.newBody(self.world, -30, 0, "dynamic")
-	local shape = love.physics.newRectangleShape(30,30)
-	local fixture = love.physics.newFixture(body3, shape)
-	self.createMode:setMaterial(fixture,"wood")
-	body3:setUserData({
-		{prop="jet",value="w"},
-		{prop="power",value=-5000}
-		})
-
-	local body  = love.physics.newBody(self.world, 0, 0, "dynamic")
-	local shape  = love.physics.newCircleShape(0,0,30)
-	local fixture = love.physics.newFixture(body, shape)
-	self.createMode:setMaterial(fixture,"wood")
-	body:setUserData({
-		{prop="roll",value="e"},
-		{prop="rollback",value="q"}
-		})
-
-	local body2  = love.physics.newBody(self.world, 100, 0, "dynamic")
-	local shape = love.physics.newRectangleShape(30,30)
-	local fixture = love.physics.newFixture(body2, shape)
-	self.createMode:setMaterial(fixture,"wood")
-	body2:setUserData({
-		{prop="fire",value="l"},
-		{prop="bullet",value=self.createMode:defaultBoom()}
-	})
-	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
-	local joint = love.physics.newWeldJoint(body, body3, body3:getX(), body3:getY(), false)
-
-
-	local body  = love.physics.newBody(self.world, 300, -100, "dynamic")
-	local shape = love.physics.newRectangleShape(50,50)
-	local fixture = love.physics.newFixture(body, shape)
-	self.createMode:setMaterial(fixture,"wood")
-	editor.helper.setProperty(fixture,"crashable",100)
-	editor.helper.setProperty(fixture,"crashcombo",false)
-	body:setType("static")
-
-	local body  = love.physics.newBody(self.world, 0, 60, "dynamic")
-	local shape = love.physics.newRectangleShape(30,30)
-	local fixture = love.physics.newFixture(body, shape)
-	fixture:setGroupIndex(-1)
-	self.createMode:setMaterial(fixture,"wood")
-	editor.helper.setProperty(body,"jump","w")
-	editor.helper.setProperty(body,"jumpPower",3000)	
-	editor.helper.setProperty(body,"jumpLeftKey","a")
-	editor.helper.setProperty(body,"jumpRightKey","d")
-
-	local body2  = love.physics.newBody(self.world, 0, 0, "dynamic")
-	local shape = love.physics.newRectangleShape(30,70)
-	local fixture = love.physics.newFixture(body2, shape)
-	fixture:setGroupIndex(-1)
-	self.createMode:setMaterial(fixture,"wood")
-
-
-	local body3  = love.physics.newBody(self.world, 0, 40, "dynamic")
-	local shape = love.physics.newRectangleShape(30,30)
-	local fixture = love.physics.newFixture(body3, shape)
-	fixture:setGroupIndex(-1)
-	self.createMode:setMaterial(fixture,"wood")
-	editor.helper.setProperty(body3,"balancer",true)
-
-	local joint = love.physics.newWeldJoint(body, body2, body2:getX(), body2:getY(), false)
-	local joint = love.physics.newWeldJoint(body2, body3, body3:getX(), body3:getY(), false)
-]]
-	
-
-	--editor.helper.setProperty(body,"turnToMouse",5000)
-
 
 	self.W = w()
 	self.H = h()
@@ -171,21 +97,19 @@ function editor:drawKeyBounds()
 end
 
 
-local bloom=require "libs/bloom"(w()/1.5,h()/1.5)
-local canvas = love.graphics.newCanvas()
-local accum = love.graphics.newCanvas()
+
+
 
 function editor:draw()
 	
-	self.bg:draw()
-	self.log:draw()
-	
-
-    love.graphics.setCanvas(canvas)
+    love.graphics.setCanvas(self.renderCanvas)
     love.graphics.clear()
 	self.cam:draw(function()
 		
 		self.helper.draw(self.world)
+		love.graphics.setColor(255, 0, 0, 255)
+		love.graphics.line(-editor.W/2,0,editor.W/2,0)
+		love.graphics.line(0, -editor.H/2, 0,editor.H/2)
 		if self.state=="create" then
 			self.createMode:draw()
 		elseif self.state=="shape" then
@@ -209,13 +133,20 @@ function editor:draw()
 	if editor.enableBloom then
 		bloom:predraw()
 	    bloom:enabledrawtobloom()
-	    love.graphics.draw(canvas)
+	    love.graphics.draw(self.renderCanvas)
 		bloom:postdraw()
 	end
-	
-	love.graphics.draw(canvas)
+	if self.bg.visible then
+		love.graphics.setShader(self.bg.gridShader)
+		love.graphics.draw(self.renderCanvas)
+		love.graphics.setShader()
+	else
+		love.graphics.draw(self.renderCanvas)
+	end
+
 	self.LoveFrames.draw()
 	self.units:draw()
+	self.log:draw()
 end
 
 
@@ -335,6 +266,10 @@ function editor:changeMode(which)
 		self.state=modeList[i+1] and modeList[i+1] or modeList[1]
 	end
 
+	if editor.selector.selection and editor.selector.selection[1]:type()=="Body" then
+		editor.cam.target=editor.selector.selection[1]
+	end
+
 	self:cancel()
 	
 	self[self.state.."Mode"]:new()
@@ -353,7 +288,15 @@ function editor:beforeStart()
 	editor.system:loadProject()
 end
 
-
+function editor:resize()
+	editor.W=w()
+	editor.H=h()
+	editor.renderCanvas = love.graphics.newCanvas()
+	editor.accumCanvas = love.graphics.newCanvas()
+	editor.interface:resetLayout()
+	editor.cam:resize()
+	
+end
 
 function editor:beforeQuit()
 	local file = love.filesystem.newFile("appData", "w")
@@ -379,17 +322,10 @@ function editor:quit()
 		return
 	end
 	return true
---[[
-	local file = love.filesystem.newFile("appData", "w")
-	local data={project=editor.currentProject,scene=currentScene}
-	file:write(table.save(data))
-	file:close()]]
-end
-
-function editor:resize()
-
 
 end
+
+
 
 
 function editor:keyBound()

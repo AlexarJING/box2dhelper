@@ -8,9 +8,9 @@ function cam:update()
 	self:holdMove()
 	if editor.state=="test" then
 		self.state="test"
-		if not editor.testMode.dragForcing then self:followSelection() end
-	elseif editor.state~="test" and self.state=="test" then
-		--cam:setPosition(0,0)
+		self:followSelection()
+	else
+		self.target=nil
 	end
 	editor.mouseX,editor.mouseY = cam.x+ (love.mouse.getX()-w()/2)/cam.scale,cam.y+(love.mouse.getY()-h()/2)/cam.scale
 end
@@ -64,7 +64,7 @@ function cam:holdMove()
 end
 
 function cam:followSelection()
-	self.target=editor.selector.selection and editor.selector.selection[1] or nil
+	
 	if self.target then
 		cam:setPosition(self.target:getPosition())
 	else
@@ -80,6 +80,11 @@ function cam:scrollScale(y)
 	else
 		self:setScale(self:getScale()*0.95)
 	end
+end
+
+function cam:resize()
+	self:setWindow(0,0,editor.W,editor.H)
+
 end
 
 return function(parent) cam.editor=parent; editor=parent return cam end

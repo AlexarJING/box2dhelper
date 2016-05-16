@@ -96,6 +96,7 @@ function interface:resetLayout()
 	interface.unit.frame:SetPos(unpack(self.layout.unit))
 	interface.history.frame:SetPos(unpack(self.layout.history))
 	interface.scene.frame:SetPos(unpack(self.layout.scene))
+	interface.property.frame:SetPos(unpack(self.layout.scene))
 end
 
 function interface:resetVisible()

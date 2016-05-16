@@ -5,7 +5,7 @@ materialMode.materialType=mat
 mat.wood={ --实心木料
 	name="wood",
 	density=0.8,  --密度 水密度为1
-	friction=0.4, --0~1 粗糙程度，0为无摩擦，1为完全受阻
+	friction=0.7, --0~1 粗糙程度，0为无摩擦，1为完全受阻
 	restitution=0.3, --0~1 弹性 0为不回弹，1为完全回弹
 	hardness=5, --硬度大的碰到硬度小的 小的碎裂并且产生碎片
 }

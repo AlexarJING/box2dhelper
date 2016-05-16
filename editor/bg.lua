@@ -1,58 +1,77 @@
 local bg={}
 local editor
 
-local gridSize
+local gridSize=64
 local screenQuad
 local gridCanvas
 local W
 local H
-local cam
+
+
+local gridShaderCode=[[
+	extern number offx;
+	extern number offy;
+	extern number gridSize;
+	extern number screenW;
+	extern number screenH;
+	vec4 effect( vec4 color, Image texture, vec2 tc, vec2 sc ){
+		if (abs(mod(floor(sc.x-screenW/2)+offx,gridSize))<=1 || 
+			abs(mod(floor(sc.y-screenH/2)+offy,gridSize))<=1 ){
+			vec4 c=Texel(texture,tc);
+			if (c.a==0.0) {
+				return vec4(0,0,1,0.5);
+			}
+			else{
+				return color*c;
+			}	
+		}
+		else {
+			return color*Texel(texture,tc);
+		}
+	}
+
+]]
+
+
+local gridShader = love.graphics.newShader(gridShaderCode)
+
 
 function bg:init()
-	self.gridSize=64
-	gridSize=self.gridSize
+	self.gridShader=gridShader
 	
-	self.gridCanvas=love.graphics.newCanvas(gridSize,gridSize)
-	gridCanvas=self.gridCanvas
-	gridCanvas:setWrap('repeat','repeat')
-	love.graphics.setCanvas(gridCanvas)
-	love.graphics.setColor(0, 0, 255)
-	love.graphics.rectangle('line',0.5,0.5,gridSize,gridSize)	
-	love.graphics.setCanvas()
-	
-	W=self.editor.W
-	H=self.editor.H
-	self.screenQuad = love.graphics.newQuad(0,0,W, H, gridSize, gridSize)
-	screenQuad=self.screenQuad
-
-	cam=self.editor.cam
 	self.visible=editor.interface.visible.bg
+
 	return self
 end
 
 
 
 function bg:update()
-	screenQuad:setViewport(cam.x+5, cam.y+35, W, H )
+	gridShader:send("offx",editor.cam.x*editor.cam.scale)
+	gridShader:send("offy",editor.cam.y*editor.cam.scale)
+	gridShader:send("screenW",editor.W)
+	gridShader:send("screenH",editor.H)
+	gridShader:send("gridSize",64*editor.cam.scale)
 end
 
 
-
 function bg:draw()
+	--[[
 	if not self.visible then return end
-	love.graphics.setColor(255, 255, 255, 155)
-	love.graphics.draw(gridCanvas,screenQuad,W*(1-cam.scale)/2,H*(1-cam.scale)/2,0,cam.scale,cam.scale)
+	love.graphics.setColor(255, 255, 255, 255)
+	love.graphics.draw(self.gridCanvas,self.screenQuad,
+		editor.W/2,editor.H/2,0,editor.cam.scale,editor.cam.scale,
+		editor.W/editor.cam.scale/2,editor.H/editor.cam.scale/2)
 
-	cam:draw(function()
+	editor.cam:draw(function()
 	love.graphics.setColor(255, 0, 0, 255)
-	love.graphics.line(-W/2,0,W/2,0)
-	love.graphics.line(0, -H/2, 0,H/2)
-	end)
+	love.graphics.line(-editor.W/2,0,editor.W/2,0)
+	love.graphics.line(0, -editor.H/2, 0,editor.H/2)
+	end)]]
 	
 end
 return function(parent) 
 	editor=parent
-	bg.editor=editor
 	bg.cam=editor.cam
 	return bg
 end

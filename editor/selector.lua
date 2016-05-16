@@ -74,7 +74,7 @@ end
 
 
 function selector:dragSelect()
-
+	if love.keyboard.isDown("space") then return end
 	if love.mouse.isDown(1) and not self.dragSelecting then
 		self.dragOX,self.dragOY=mouseX,mouseY
 		self.dragSelecting=true	

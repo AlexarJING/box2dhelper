@@ -59,9 +59,16 @@ function system:create()
 	end
 	list:AddItem(b)
 
+	local b= ui.Create("button")
+	b:SetText("Donate Me")
+	b.OnClick=function(button)
+		print("yeeeeaaaah!")
+	end
+	list:AddItem(b)
+
 	local t=ui.Create("text")
 	t:SetText("Current Project: "..editor.currentProject..";             Current Scene: "..editor.currentScene..";")
-	t:SetPos(500,10)
+	t:SetPos(700,10)
 	--list:AddItem(t)
 	self.projInfo=t
 end

@@ -245,11 +245,11 @@ reactMode.reactions={
 	},
 	roll={
 		{prop="roll",value="d"},
-		{prop="rollPower",value=5000},
+		{prop="rollPower",value=9000},
 	},
 	rollback={
 		{prop="rollback",value="a"},
-		{prop="rollbackPower",value=-5000},
+		{prop="rollbackPower",value=-9000},
 	},
 	jump={
 		{prop="jump",value="space"},
