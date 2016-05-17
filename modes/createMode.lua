@@ -320,7 +320,7 @@ function creator:softrope()
 	local angle=getRot(self.createOX, self.createOY,self.createTX, self.createTY)
 	local stepX=math.sin(angle)
 	local stepY=-math.cos(angle)
-	local len=50
+	local len=10
 	local rest=self.createR%30
 	self.createTX,self.createTY=self.createTX-rest*stepX,self.createTY-rest*stepY
 
@@ -339,14 +339,14 @@ function creator:softrope()
 
 	
 	local chain={}
-	
+	editor.groupIndex=editor.groupIndex+1
 	for i=len/2,self.createR-len/2,len do
 		local body = love.physics.newBody(editor.world, 
 			self.createOX+i*stepX, self.createOY+i*stepY,"dynamic")
 		body:setAngle(angle+math.pi/2)
 		local shape = love.physics.newRectangleShape(len,1)
 		local fixture = love.physics.newFixture(body, shape,1)
-		fixture:setGroupIndex(-1)
+		fixture:setGroupIndex(-editor.groupIndex)
 		self:setMaterial(fixture,"wood")
 		table.insert(chain, body)
 	end
@@ -373,10 +373,11 @@ end
 function creator:softcircle()
 	editor.action="create softcircle"
 	local soft=Softbody(editor.world, "ball",{x=self.createOX,y=self.createOY,r=self.createR})
-	print(soft.centerFixture)
 	self:setMaterial(soft.centerFixture,"wood")
+	editor.groupIndex=editor.groupIndex+1
 	for i,v in ipairs(soft.nodes) do
 		self:setMaterial(v.fixture,"wood")
+		v.fixture:setGroupIndex(-editor.groupIndex)
 	end
 end
 
@@ -389,8 +390,10 @@ function creator:softbox()
 		h=math.abs(self.createTY-self.createOY)}
 		)
 	self:setMaterial(soft.centerFixture,"wood")
+	editor.groupIndex=editor.groupIndex+1
 	for i,v in ipairs(soft.nodes) do
 		self:setMaterial(v.fixture,"wood")
+		v.fixture:setGroupIndex(-editor.groupIndex)
 	end
 end
 
@@ -399,8 +402,10 @@ function creator:softpolygon()
 	local soft=Softbody(editor.world, "polygon",{x=self.createOX,y=self.createOY,
 		vert=polygonTrans(-self.createOX, -self.createOY,0,1,self.createVerts)})
 	self:setMaterial(soft.centerFixture,"wood")
+	editor.groupIndex=editor.groupIndex+1
 	for i,v in ipairs(soft.nodes) do
 		self:setMaterial(v.fixture,"wood")
+		v.fixture:setGroupIndex(-editor.groupIndex)
 	end
 end
 
@@ -504,55 +509,68 @@ end
 function creator:getBodies()
 	local selection=editor.selector.selection
 	if not selection then return end
-	local body1,body2=selection[1],selection[2]
-	if body1 and body2 then 
-		return body1,body2 
-	end
+	return selection[1],selection[2]
 end
 
 function creator:getContBodies()
 	local selection=editor.selector.selection
 	if not selection then return end
-	for i=1,#selection do
-
+	if #selection<2 then return end
+	local rt={}
+	for i=1,#selection-1 do
+		table.insert(rt, {selection[i],selection[i+1]})
 	end
-
-	local body1,body2=selection[1],selection[2]
-	if body1 and body2 then 
-		return body1,body2 
-	end
+	if #rt~=0 then return rt end
 end
 
 
 function creator:rope()
-	local body1,body2=self:getBodies()
-	if not body1 then return end
+	local p=self:getContBodies()
+	if not p then return end
+	for i,v in ipairs(p) do
+		local body1,body2=v[1],v[2]
+		local x1,y1 = body1:getPosition()
+		local x2,y2 = body2:getPosition()
+		love.physics.newRopeJoint(body1, body2, x1, y1, x2, y2, getDist(x1, y1, x2, y2), false)
+	end
 	editor.action="create rope joint"
-	local x1,y1 = body1:getPosition()
-	local x2,y2 = body2:getPosition()
-	local joint=love.physics.newRopeJoint(body1, body2, x1, y1, x2, y2, getDist(x1, y1, x2, y2), false)
-	return joint
 end
 
 function creator:distance()
-	
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	editor.action="create distance joint"
-	local x1,y1 = body1:getPosition()
-	local x2,y2 = body2:getPosition()
-	local joint = love.physics.newDistanceJoint(body1, body2, x1, y1, x2, y2, false)
-	--joint:setFrequency(10)
+	local p=self:getContBodies()
+	if not p then return end
+	for i,v in ipairs(p) do
+		local body1,body2=v[1],v[2]
+		local x1,y1 = body1:getPosition()
+		local x2,y2 = body2:getPosition()
+		love.physics.newDistanceJoint(body1, body2, x1, y1, x2, y2, false)
+	end
+	editor.action="create distance joint"	
 end
 
 function creator:weld()
-	
-	local body1,body2=self:getBodies()
-	if not body1 then return end
+	local p=self:getContBodies()
+	if not p then return end
+	for i,v in ipairs(p) do
+		local body1,body2=v[1],v[2]
+		local x1,y1 = body1:getPosition()
+		love.physics.newWeldJoint(body1, body2, x1, y1, false)
+	end
+
 	editor.action="create weld joint"
-	local x1,y1 = body1:getPosition()
-	local joint = love.physics.newWeldJoint(body1, body2, x1, y1, false)
-	--joint:setFrequency(0)
+
+end
+
+function creator:revolute()
+	local p=self:getContBodies()
+	if not p then return end
+	for i,v in ipairs(p) do
+		local body1,body2=v[1],v[2]
+		local x,y = body2:getPosition()
+		love.physics.newRevoluteJoint(body1, body2, x, y, false)
+	end
+
+	editor.action="create revolute joint"
 end
 
 function creator:prismatic()
@@ -565,13 +583,7 @@ function creator:prismatic()
 	local joint = love.physics.newPrismaticJoint(body1, body2, x2, y2, math.sin(angle), -math.cos(angle), false)
 end
 
-function creator:revolute()
-	local body1,body2=self:getBodies()
-	if not body1 then return end
-	editor.action="create revolute joint"
-	local x,y = body2:getPosition()
-	local joint = love.physics.newRevoluteJoint(body1, body2, x, y, false)
-end
+
 
 function creator:pully()
 	local body1,body2=self:getBodies()
