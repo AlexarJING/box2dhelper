@@ -195,6 +195,32 @@ function jMode:click()
 end
 
 
+function jMode:comboSet()
+	local t=editor.interface.property.targetType
+	local target=editor.interface.property.target
+	if not t=="joint" then return end
+	local data=editor.helper.getStatus(target,"joint")
+	local targetType=target:getType()
+	local tested={}
+	tested[target]=true
+	local toTest={target}
+	repeat
+		local tmp={}
+		for i,joint in ipairs(toTest) do
+			local body1,body2=joint:getBodies()
+			for i,j in ipairs(body1:getJointList()) do
+				if not tested[j] and j:getType()==targetType then
+					editor.helper.setStatus(j,"joint",data)
+					table.insert(tmp, j)
+					tested[j]=true
+				end
+			end
+		end
+		toTest=tmp
+	until #toTest==0
+end
+
+
 
 local gearShape = CreateGear(20)
 

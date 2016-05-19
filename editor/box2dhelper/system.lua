@@ -1,6 +1,5 @@
 local system={}
 local helper
-system.preserve={}
 system.todo={}
 system.delay={}
 function system.addDelay(func,delay,...)
@@ -29,19 +28,7 @@ function system.updateTodo()
 	end
 	system.todo={}
 end
-function system.addPreserve(obj)
-	system.preserve[obj]=obj
-	--if not system.preserve[obj] then  system.preserve[obj]=obj end --reg data
-	--system.updatePreserve()
-end
 
-function system.updatePreserve()
-	for k,v in pairs(system.preserve) do
-		if v:isDestroyed() then
-			system.preserve[k]=nil
-		end
-	end
-end
 
 function system.update(...)
 	local data={...}
@@ -54,6 +41,8 @@ function system.update(...)
 	
 	helper.drawMode.draw(...)
 end
+
+
 
 
 return function(parent) helper=parent;helper.system=system end

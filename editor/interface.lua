@@ -12,6 +12,7 @@ interface.visible={
 	log=true,
 	info=true,
 	scene=true,
+	bloom=true
 }
 
 interface.layout={
@@ -114,7 +115,9 @@ function interface:resetVisible()
 	end
 	editor.interface.system.list:SetVisible(interface.visible.system)
 	for k,v in pairs(interface.visible) do
-		if k~="system" then
+		if k=="bloom" then
+			interface.viewMenu.options[k].toggle=v
+		elseif k~="system" then
 			interface.layoutMenu.options[k].toggle=v
 		end
 	end
@@ -122,6 +125,7 @@ end
 
 function interface:setVisible(tag,toggle)
 	interface.visible[tag]=toggle
+	
 	if tag~="system" then
 		interface.layoutMenu.options[tag].toggle=toggle
 	end
@@ -133,7 +137,7 @@ function interface:resetView()
 	for k,v in pairs(editor.helper.visible) do
 		interface.viewMenu.options[k].toggle=v
 	end
-	interface.viewMenu.options.bloom.toggle=editor.enableBloom
+	--interface.viewMenu.options.bloom.toggle=interface.visible.bloom
 end
 
 function interface:reset()
@@ -147,7 +151,11 @@ end
 
 function interface:setView(tag,toggle)
 	interface.viewMenu.options[tag].toggle=toggle
-	editor.helper.visible[tag]=toggle
+	if tag=="bloom" then
+		interface.visible.bloom=toggle
+	else
+		editor.helper.visible[tag]=toggle
+	end
 end
 
 return function(parent) 

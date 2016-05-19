@@ -282,6 +282,9 @@ function drawMode.draw(world,colorStyle,offx,offy,offr)
 		bodyList=world:getBodyList()
 		jointList=world:getJointList()
 		contactList=world:getContactList()
+		helper.bodyList=bodyList
+		helper.jointList=jointList
+		helper.contactList=contactList
 	else
 		bodyList=world
 	end
@@ -295,32 +298,21 @@ function drawMode.draw(world,colorStyle,offx,offy,offr)
 	------------------update------------------------
 	
 	for i,body in ipairs(bodyList) do
-		helper.system.addPreserve(body)
 		if not jointList then
 			jointList={}
 			for i,joint in ipairs(body:getJointList()) do
-				helper.system.addPreserve(joint)
 				if not table.getIndex(jointList,joint) then
 					table.insert(jointList, joint)
 				end
-			end
-		else
-			for i,joint in ipairs(jointList) do
-				helper.system.addPreserve(joint)
 			end
 		end
 
 		if not contactList then
 			contactList={}
 			for i,contact in ipairs(body:getContactList()) do
-				helper.system.addPreserve(contact)
 				if not table.getIndex(contactList,contact) then
 					table.insert(contactList, contact)
 				end
-			end
-		else
-			for i,contact in ipairs(contactList) do
-				helper.system.addPreserve(contact)
 			end
 		end
 	end

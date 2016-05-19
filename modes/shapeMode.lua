@@ -196,6 +196,9 @@ function vertex:click()
 end
 
 
+
+
+
 function vertex:draw()
 	
 	for i,vert in ipairs(self.verts) do

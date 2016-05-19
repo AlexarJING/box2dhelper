@@ -12,7 +12,8 @@ love.physics.setMeter(editor.meter)
 editor.LoveFrames= require "libs.loveframes"
 editor.helper = require "editor/box2dhelper"
 editor.Delaunay=require "libs/delaunay"
-editor.bloom=require "libs/bloom"(w()/1.5,h()/1.5)
+editor.bloom=require "libs/bloom"(w()/2,h()/2)
+
 --------------------------------------------------
 editor.log = require "editor/log"(editor)
 editor.bg = require "editor/bg"(editor)
@@ -103,13 +104,15 @@ end
 function editor:draw()
 	
     love.graphics.setCanvas(self.renderCanvas)
-    love.graphics.clear()
+    --love.graphics.clear()
 	self.cam:draw(function()
-		
-		self.helper.draw(self.world)
+		love.graphics.setLineWidth(1)
 		love.graphics.setColor(255, 0, 0, 255)
 		love.graphics.line(-editor.W/2,0,editor.W/2,0)
 		love.graphics.line(0, -editor.H/2, 0,editor.H/2)
+		love.graphics.setLineWidth(3)
+		self.helper.draw(self.world)
+		
 		if self.state=="create" then
 			self.createMode:draw()
 		elseif self.state=="shape" then
@@ -130,11 +133,11 @@ function editor:draw()
 	love.graphics.setCanvas()
 	love.graphics.setColor(255, 255, 255, 255)
 	
-	if editor.enableBloom then
-		bloom:predraw()
-	    bloom:enabledrawtobloom()
+	if self.interface.visible.bloom then
+		editor.bloom:predraw()
+	    editor.bloom:enabledrawtobloom()
 	    love.graphics.draw(self.renderCanvas)
-		bloom:postdraw()
+		editor.bloom:postdraw()
 	end
 	if self.bg.visible then
 		love.graphics.setShader(self.bg.gridShader)

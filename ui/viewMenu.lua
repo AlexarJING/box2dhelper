@@ -22,11 +22,14 @@ function view:create()
 	self.options.joint=menu:AddOption("joint", false,
 		function(obj) editor.helper.visible.joint=obj.toggle end,true)
 	menu:AddDivider()
-	self.options.contact=menu:AddOption("contact", false, function() end,true)
+	self.options.contact=menu:AddOption("contact", false, function(obj)
+		editor.helper.visible.contact=obj.toggle
+	end,true)
 	menu:AddDivider()
 	self.options.bloom=menu:AddOption("global bloom", false, 
-		function(obj) 
-			editor.enableBloom=obj.toggle
+		function(obj)
+			interface:setView("bloom",obj.toggle)
+			--interface.visible.bloom=obj.toggle
 		end,true)
 	menu:AddDivider()
 	menu:AddOption("texture only", false, 
@@ -55,9 +58,6 @@ function view:create()
 			interface:setView("fixture",true)
 			interface:setView("joint",true)
 			interface:setView("contact",true)
-			view.options.bloom.toggle=true
-			editor.enableBloom=true
-
 		end)
 	menu:AddDivider()
 	menu:SetVisible(false)
