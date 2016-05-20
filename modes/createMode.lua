@@ -283,6 +283,15 @@ function creator:getVerts()
 		self.createTX,self.createTY=self.createOX,self.createOY
 		self.createVerts={self.createOX,self.createOY}
 	elseif self.createOX and love.mouse.isDown(1) then
+		if love.keyboard.isDown("lalt") then
+			self.createTX=self.createVerts[self.createVerts-1]
+			self.createTY=editor.mouseY
+		elseif love.keyboard.isDown("lshift") then
+			self.createTX=editor.mouseX
+			self.createTY=self.createVerts[self.createVerts]
+		else
+
+		end
 		self.createTX,self.createTY=editor.mouseX,editor.mouseY
 		if love.mouse.isDown(2) and not self.rIsDown then
 			self.rIsDown=true
