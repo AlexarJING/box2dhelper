@@ -104,7 +104,7 @@ end
 function editor:draw()
 	
     love.graphics.setCanvas(self.renderCanvas)
-    --love.graphics.clear()
+    love.graphics.clear()
 	self.cam:draw(function()
 		love.graphics.setLineWidth(1)
 		love.graphics.setColor(255, 0, 0, 255)
@@ -128,7 +128,7 @@ function editor:draw()
 			self.bodyMode:draw()
 			self.selector:draw()
 		end	
-
+		if convex then love.graphics.polygon("line", convex) end
 	end)
 	love.graphics.setCanvas()
 	love.graphics.setColor(255, 255, 255, 255)
@@ -280,6 +280,7 @@ function editor:changeMode(which)
 end
 
 function editor:beforeStart()
+	
 	local file = love.filesystem.newFile("appData", "r")
 	if not file then
 		love.window.showMessageBox("firstMet", "This is our firstMet.\nfor more details QQ1643386616", "info")
@@ -298,7 +299,7 @@ function editor:resize()
 	editor.accumCanvas = love.graphics.newCanvas()
 	editor.interface:resetLayout()
 	editor.cam:resize()
-	
+	editor.bloom=require "libs/bloom"(w()/2,h()/2)
 end
 
 function editor:beforeQuit()

@@ -479,7 +479,15 @@ function creator:freeline()
 	return {body=body,shape=shape,fixture=fixture}
 end
 
-
+local function getLocalPoints(body,vert)
+	local rt={}
+	for i=1,#vert-1,2 do
+		local x,y=body:getLocalPoint(vert[i],vert[i+1])
+		table.insert(rt,x)
+		table.insert(rt,y)
+	end
+	return rt
+end
 
 
 function creator:polygon()
@@ -489,19 +497,32 @@ function creator:polygon()
 	if #self.createVerts>16 or not love.math.isConvex(self.createVerts) then
 		local x,y=math.getPolygonArea(self.createVerts)
 		local body = love.physics.newBody(editor.world, x, y,"dynamic")
-		local triangles = love.math.triangulate( self.createVerts )
+		local test ,triangles =pcall(love.math.triangulate,self.createVerts )
+		if not test then return end
+		local points={}
+		local mainFixture
 		for i,triangle in ipairs(triangles) do
-			local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,triangle))
+			local verts=polygonTrans(-x, -y,0,1,triangle)
+			local shape = love.physics.newPolygonShape(verts)
 			local fixture = love.physics.newFixture(body, shape)
 			self:setMaterial(fixture,"wood")
+			if i==1 then
+				editor.helper.setProperty(fixture,"mainFixture",true)
+				editor.helper.setProperty(fixture,"fixturesOutline",
+					getLocalPoints(body,self.createVerts))
+				mainFixture=fixture
+			else
+				editor.helper.setProperty(fixture,"subFixture",mainFixture)
+			end
+			
 		end
-
 	else
 		local x,y=math.getPolygonArea(self.createVerts)
 		local body = love.physics.newBody(editor.world, x, y,"dynamic")
 		local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,self.createVerts))
 		local fixture = love.physics.newFixture(body, shape)
 		self:setMaterial(fixture,"wood")
+
 	end
 
 end

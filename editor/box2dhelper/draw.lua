@@ -91,6 +91,13 @@ function drawMode.drawFixture(fixture,color)
 	local shapeType = shape:type()
 	local shapeR=shape:getRadius()
 	
+	local width = love.graphics.getLineWidth()
+	local c3=color[3]
+	if helper.getProperty(fixture,"subFixture") or helper.getProperty(fixture,"mainFixture") then
+		love.graphics.setLineWidth(1)
+		color[3]=100
+	end
+
 	if shapeType=="CircleShape" then
 		color[4]=255
 		local fx,fy=shape:getPoint()
@@ -115,6 +122,21 @@ function drawMode.drawFixture(fixture,color)
 		love.graphics.polygon("fill", body:getWorldPoints(shape:getPoints()))
 	end
 
+	color[3]=c3
+	love.graphics.setLineWidth(width)
+	
+
+	if helper.getProperty(fixture,"mainFixture") then
+		color[4]=255
+		love.graphics.setLineWidth(love.graphics.getLineWidth()+1)
+		love.graphics.setColor(color)
+
+		love.graphics.polygon("line", body:getWorldPoints(
+			unpack(helper.getProperty(fixture,"fixturesOutline"))
+			)
+		)
+		love.graphics.setLineWidth(love.graphics.getLineWidth()-1)
+	end
 end
 
 

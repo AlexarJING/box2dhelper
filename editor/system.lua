@@ -192,13 +192,15 @@ function system:loadProject()
 	editor.createTime=data.createTime
 	editor.lastEditTime=data.lastEditTime
 	editor.groupIndex=data.groupIndex or 1
+	
 	love.window.setMode(unpack(data.windowMode))
+	
 	editor.interface.layout=data.layout
 	editor.interface.visible=data.visible
 	editor:resize()
 	editor.interface:reset()
 	editor.loadProject=nil
-	
+
 end
 
 function system:newScene()

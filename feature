@@ -72,5 +72,9 @@ features list
 	balancer	will take torque when the body angle is offside from 0. works with jump.
 
 
+1. UI rebuild
 
+2. Project management
+
+3. scene mangement
 
