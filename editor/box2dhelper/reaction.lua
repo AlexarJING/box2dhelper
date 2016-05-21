@@ -189,13 +189,14 @@ end
 
 function func.fire(body)
 	local bfixture=body:getFixtureList()[1]
+	local group=bfixture:getGroupIndex()
 	--fixture:setGroupIndex(-1)
 	local power=helper.getProperty(body,"firePower")
 	local bullet=helper.getProperty(body,"fireBullet")  or reactMode.defaultBullet()
 	local boom=helper.createWorld(helper.world,bullet,body:getX(),body:getY())[1].body
 	local fixture=boom:getFixtureList()[1]
-	helper.setProperty(fixture,"bullet",true)
-	helper.setProperty(fixture,"lancher",bfixture)
+	fixture:setGroupIndex(group)
+	--helper.setProperty(fixture,"lancher",bfixture)
 	local angle=body:getAngle()-Pi/2
 
 	boom:applyLinearImpulse(-power*math.sin(angle),power*math.cos(angle))
@@ -229,14 +230,14 @@ reactMode.defaultBullet=function()
 	local shape = love.physics.newCircleShape(30)
 	local fixture = love.physics.newFixture(body, shape)
 	body:setUserData({prop="anticount",value=10})
-	fixture:setUserData({{prop="explosion",value=1000}})
+	fixture:setUserData({{prop="explosion",value=9000}})
 	return helper.getWorldData({body})
 end
 
 reactMode.reactions={
 	fire={
 		{prop="fire",value=1},
-		{prop="firePower",value=500}
+		{prop="firePower",value=1000}
 	},
 	jet={
 		{prop="jet",value="w"},

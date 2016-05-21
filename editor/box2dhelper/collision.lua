@@ -53,9 +53,7 @@ end
 
 
 func.explosion=function(boomV,a,b,coll)	
-	if helper.getProperty(a,"bullet") then
-		return
-	end
+	
 	
 	boomV=boomV or 1000
 	local frags={}
@@ -324,6 +322,7 @@ function func.bulletEnd(enabled,a,b,coll)
 end
 
 function func.buoyancy(density,a,b,coll)  --in pre
+	
 	local bodyA,bodyB=a:getBody(),b:getBody()
 	coll:setEnabled(false)
 	if bodyB:getType()~="dynamic" then return end
@@ -342,14 +341,18 @@ function func.buoyancy(density,a,b,coll)  --in pre
 		bVerts={bodyB:getWorldPoints(shapeB:getPoints())}
 	end
 
+
+	local gx,gy=helper.world:getGravity()
 	local aVerts={bodyA:getWorldPoints(shapeA:getPoints())}
 	local intersection = math.polygonClip(bVerts,aVerts)
 	if not intersection then return end
 	local cx,cy,area = math.getPolygonArea(intersection)
 	if not area then return end
 
-	local displacedMass = area*density/love.physics.getMeter( )
-	bodyB:applyForce(0,-displacedMass*9.8,cx,cy)
+	local displacedMass = area*density/love.physics.getMeter()^2
+	bodyB:applyForce(-displacedMass*gx ,-displacedMass*gy,cx,cy)
+	local fixtureB=bodyB:getFixtureList()[1]
+	--bodyB:resetMassData()
 	local vx,vy= bodyB:getLinearVelocity()
 	bodyB:applyForce(-vx/10,-vy/10)
 	local vr = bodyB:getAngularVelocity()

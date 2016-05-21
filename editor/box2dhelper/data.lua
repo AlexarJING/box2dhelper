@@ -139,6 +139,7 @@ function dataMode.createWorld(world,data,offx,offy,editor)
 
 			setUserData(shell.fixture,param.fixture.userdata)
 			table.insert(obj.fixtures, shell)
+			obj.body:resetMassData()
 		end
 	end
 

@@ -124,8 +124,7 @@ function materialMode.setMaterial(fixture,material)
 	fixture:setFriction(mat.friction)
 	fixture:setRestitution(mat.restitution)
 	helper.setProperty(fixture,"hardness",mat.hardness)
-
-
+	fixture:getBody():resetMassData()
 end
 
 return function(parent) helper=parent;helper.materialMode=materialMode end

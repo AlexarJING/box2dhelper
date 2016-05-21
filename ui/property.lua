@@ -85,7 +85,12 @@ end
 local function setProp(target,prop,...)
 	
 	if target["get"..prop] or target["is"..prop] or target["has"..prop] then
-		if target["set"..prop] then target["set"..prop](target,...) end
+		if target["set"..prop] then 
+			target["set"..prop](target,...) 
+			if target:type()=="Fixture" then 
+				target:getBody():resetMassData()
+			end
+		end
 	elseif target.update then --tt's a world
 		if prop=="meter" then
 			love.physics.setMeter(...)
