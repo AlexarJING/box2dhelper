@@ -171,6 +171,8 @@ function selector:bodyPointTest(key)
 
 	elseif key=="r" then
 		
+		if not self.selection then return end
+
 		if not self.selectToggle then return end
 		self.selectIndex=self.selectIndex+1
 		if not self.selectToggle[self.selectIndex] then self.selectIndex=1 end

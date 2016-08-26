@@ -3,6 +3,7 @@ local ui
 local interface
 local build={}
 local createShape={"circle","box","polygon","line","edge","freeline"}
+local advanced = {"softcircle","softbox","softpolygon","softrope","explosion","water"}
 
 function build:create()
 	self.frame= ui.Create("frame")
@@ -28,7 +29,12 @@ function build:create()
 		table.insert(self.buttons, b)
 		list:AddItem(b)
 		b.OnClick=function(obj)
-			editor.createMode:new(v)
+			if love.keyboard.isDown("lshift") then
+				editor.createMode:new(advanced[i])
+			else
+				editor.createMode:new(v)
+			end
+			
 		end
 	end
 end

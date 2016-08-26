@@ -154,7 +154,7 @@ function system:saveProject()
 		self.saveFrom=nil
 		system:copyProject(source)
 	end
-
+	editor.interface:reset()
 	editor.interface.system:updateProj()
 end
 
@@ -163,6 +163,7 @@ function system:newProject()
 	system:createSaveProjectFrame()
 	editor.createTime=os.date("%c")
 	system:newScene()
+
 end
 
 function system:loadProject()

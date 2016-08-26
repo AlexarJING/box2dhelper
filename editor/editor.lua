@@ -150,6 +150,8 @@ function editor:draw()
 	self.LoveFrames.draw()
 	self.units:draw()
 	self.log:draw()
+	love.graphics.setColor(255, 255, 255, 100)
+	love.graphics.printf(self.state.. " mode",0,200,w()/3,"center",0,3,3)
 end
 
 

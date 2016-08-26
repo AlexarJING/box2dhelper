@@ -114,9 +114,9 @@ end
 
 function test:dragForce()
 	local selection=editor.selector.selection
-	if not selection then return end
-	if not self.dragForcing then
-		if not self:mouseTest() then return end	
+	if not selection then self.dragForcing = false;return end
+	if not self.dragForcing and not not self:mouseTest() then
+		return
 	end
 	local mouseX,mouseY=editor.mouseX,editor.mouseY
 	if love.mouse.isDown(1) and not self.dragForcing then
@@ -127,7 +127,7 @@ function test:dragForce()
 		self.dragOX,self.dragOY=selection[1]:getPosition()
 		self.dragTX,self.dragTY=mouseX,mouseY
 		local dx,dy=self.dragTX-self.dragOX,self.dragTY-self.dragOY
-		self:applyForce(dx*20,dy*20)
+		self:applyForce(dx*200,dy*200)
 	elseif not love.mouse.isDown(1) and self.dragForcing then
 		self.dragForcing=false
 	end
