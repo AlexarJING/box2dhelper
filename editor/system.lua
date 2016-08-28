@@ -190,6 +190,7 @@ function system:loadProject()
 	editor.currentScene=data.currentScene
 	system:loadScene(editor.currentScene..".scene")
 	editor.keyconf=data.keyconf
+	editor:keyBound()
 	editor.createTime=data.createTime
 	editor.lastEditTime=data.lastEditTime
 	editor.groupIndex=data.groupIndex or 1
@@ -198,7 +199,6 @@ function system:loadProject()
 	
 	editor.interface.layout=data.layout
 	editor.interface.visible=data.visible
-	editor:resize()
 	editor.interface:reset()
 	editor.loadProject=nil
 

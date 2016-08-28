@@ -25,8 +25,9 @@ function file:create()
 		end)
 	menu:AddDivider()
 
-	menu:AddOption("Option", false, function() end)
+	menu:AddOption("Key Config", false, function() interface.keyconfig:create() end)
 	menu:AddOption("Help", false, function() interface.help:create() end)
+	menu:AddOption("Tutorial", false, function() interface.tutorial:create() end)
 	menu:AddOption("About", false, function() interface.about:create() end)
 	menu:AddDivider()
 

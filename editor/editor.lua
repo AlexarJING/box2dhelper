@@ -13,7 +13,8 @@ editor.LoveFrames= require "libs.loveframes"
 editor.helper = require "editor/box2dhelper"
 editor.Delaunay=require "libs/delaunay"
 editor.bloom=require "libs/bloom"(w()/2,h()/2)
-
+editor.trace = require "libs/trace".new(0.005)
+editor.grid = require "libs/grid".new(editor)
 --------------------------------------------------
 editor.log = require "editor/log"(editor)
 editor.bg = require "editor/bg"(editor)
@@ -31,7 +32,7 @@ editor.jointMode= require "modes/jointMode"(editor)
 editor.fixtureMode= require "modes/fixtureMode"(editor)
 --------------------------------------------------------
 editor.renderCanvas = love.graphics.newCanvas()
-editor.accumCanvas = love.graphics.newCanvas()
+
 
 
 function editor:init()
@@ -111,6 +112,8 @@ function editor:draw()
 		love.graphics.line(-editor.W/2,0,editor.W/2,0)
 		love.graphics.line(0, -editor.H/2, 0,editor.H/2)
 		love.graphics.setLineWidth(3)
+		
+
 		self.helper.draw(self.world)
 		
 		if self.state=="create" then
@@ -132,21 +135,30 @@ function editor:draw()
 	end)
 	love.graphics.setCanvas()
 	love.graphics.setColor(255, 255, 255, 255)
+
+	if self.helper.visible.trace then
+		self.trace:predraw()
+		love.graphics.draw(self.renderCanvas)
+		self.trace:postdraw()
+	end
 	
-	if self.interface.visible.bloom then
+	love.graphics.setColor(255, 255, 255, 255)
+	if self.helper.visible.bloom then
 		editor.bloom:predraw()
 	    editor.bloom:enabledrawtobloom()
 	    love.graphics.draw(self.renderCanvas)
 		editor.bloom:postdraw()
 	end
-	if self.bg.visible then
-		love.graphics.setShader(self.bg.gridShader)
-		love.graphics.draw(self.renderCanvas)
-		love.graphics.setShader()
-	else
-		love.graphics.draw(self.renderCanvas)
+
+	
+	love.graphics.setColor(255, 255, 255, 255)
+	if self.interface.visible.grid then
+		editor.grid:predraw()
+	    love.graphics.draw(self.renderCanvas)
+		editor.grid:postdraw()
 	end
 
+	love.graphics.draw(self.renderCanvas)
 	self.LoveFrames.draw()
 	self.units:draw()
 	self.log:draw()
@@ -298,10 +310,12 @@ function editor:resize()
 	editor.W=w()
 	editor.H=h()
 	editor.renderCanvas = love.graphics.newCanvas()
-	editor.accumCanvas = love.graphics.newCanvas()
+	
 	editor.interface:resetLayout()
 	editor.cam:resize()
 	editor.bloom=require "libs/bloom"(w()/2,h()/2)
+	editor.trace.new()
+	editor.grid.new(editor)
 end
 
 function editor:beforeQuit()
@@ -423,10 +437,16 @@ function editor:keyBound()
 		toggleHistroy=function()
 			editor.interface:setVisible("history", not editor.interface.visible.history)		
 		end,
+		openSaveFolder=function()
+			local proj = editor.currentProject
+			local path = love.filesystem.getAppdataDirectory( )
+			if proj then path = path.."/LOVE/ABE/"..proj end
+			love.system.openURL(path)
+		end
 	}
 
 	local keys ={}
-	self.keyconf=require "editor/keyconf"
+	self.keyconf=self.keyconf or require "editor/keyconf"
 	for commadName,key in pairs(self.keyconf) do
 		table.insert(keys, {key=key,commad=bound[commadName],name=commadName})
 	end

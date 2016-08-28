@@ -6,7 +6,7 @@ test.mouseMode="std" --or ball
 
 test.pause=false
 test.modeIndex=1
-local mouseModes={"std","power","ball","key"}
+local mouseModes={"std","power","ball","key","create"}
 local mouseType={
 	love.mouse.getSystemCursor("arrow"),
 	love.mouse.getSystemCursor("sizeall"),
@@ -31,6 +31,8 @@ function test:update(dt)
 		self.mouseBall.joint:setTarget(editor.mouseX,editor.mouseY)
 	elseif self.mouseMode=="key" then
 		self:downForce()
+	elseif self.moseMode=="create" then
+		editor.createMode:update()
 	end	
 end
 

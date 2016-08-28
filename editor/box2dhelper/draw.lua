@@ -6,6 +6,8 @@ drawMode.visible={
 	contact=false,
 	joint=true,
 	texture=true,
+	bloom=false,
+	trace=false,
 }
 
 drawMode.defaultStyle= {

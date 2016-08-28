@@ -8,15 +8,19 @@ interface.visible={
 	unit=true,
 	history=true,
 	property=true,
-	bg=true,
 	log=true,
 	info=true,
 	scene=true,
-	bloom=true
+	grid=true,
 }
 
 interface.layout={
-	
+	build={10,100},
+	joint={10,400},
+	unit={100,100},
+	history={100,400},
+	property={1000,200},
+	scene={300,100},
 }
 
 
@@ -33,6 +37,9 @@ function interface:init()
 	interface.joint=require "ui/joint"(editor)
 	interface.info= require "ui/info"(editor)
 	interface.scene= require "ui/scene"(editor)
+	interface.tutorial = require "ui/tutorial"(editor)
+	interface.keyconfig = require "ui/keyconfig"(editor)
+	interface.donate = require "ui/donate"(editor)
 
 	interface.fileMenu= require "ui/fileMenu"(editor)
 	interface.editMenu= require "ui/editMenu"(editor)
@@ -74,7 +81,9 @@ function interface:isHover()
 	return self.hover
 end
 
+
 function interface:getLayout()
+
 	return {
 	build={interface.build.frame:GetPos()},
 	joint={interface.joint.frame:GetPos()},
@@ -92,18 +101,14 @@ function interface:resetLayout()
 	interface.info.panel:SetPos(0, editor.H-30)
 	interface.info.panel:SetSize(editor.W, 30)
 
-	interface.build.frame:SetPos(unpack(self.layout.build))
-	interface.joint.frame:SetPos(unpack(self.layout.joint))
-	interface.unit.frame:SetPos(unpack(self.layout.unit))
-	interface.history.frame:SetPos(unpack(self.layout.history))
-	interface.scene.frame:SetPos(unpack(self.layout.scene))
-	interface.property.frame:SetPos(unpack(self.layout.scene))
+
+	for name,layout in pairs(self.layout) do
+		interface[name].frame:SetPos(layout[1],layout[2])
+	end
 end
 
 function interface:resetVisible()
-	editor.bg:init()
- 	editor.bg.visible=interface.visible.bg
-	editor.log.visible=interface.visible.log
+	editor:resize()
 	editor.interface.info.panel:SetVisible(interface.visible.info)
 	editor.interface.build.frame:SetVisible(interface.visible.build)
 	editor.interface.joint.frame:SetVisible(interface.visible.joint)
@@ -115,9 +120,7 @@ function interface:resetVisible()
 	end
 	editor.interface.system.list:SetVisible(interface.visible.system)
 	for k,v in pairs(interface.visible) do
-		if k=="bloom" then
-			interface.viewMenu.options[k].toggle=v
-		elseif k~="system" then
+		if k~="system" then
 			interface.layoutMenu.options[k].toggle=v
 		end
 	end
@@ -126,18 +129,13 @@ end
 function interface:setVisible(tag,toggle)
 	interface.visible[tag]=toggle
 	
-	if tag~="system" then
-		interface.layoutMenu.options[tag].toggle=toggle
-	end
 	editor.interface:resetVisible()
-
 end
 
 function interface:resetView()
 	for k,v in pairs(editor.helper.visible) do
 		interface.viewMenu.options[k].toggle=v
 	end
-	--interface.viewMenu.options.bloom.toggle=interface.visible.bloom
 end
 
 function interface:reset()
@@ -151,11 +149,8 @@ end
 
 function interface:setView(tag,toggle)
 	interface.viewMenu.options[tag].toggle=toggle
-	if tag=="bloom" then
-		interface.visible.bloom=toggle
-	else
-		editor.helper.visible[tag]=toggle
-	end
+	editor.helper.visible[tag]=toggle
+
 end
 
 return function(parent) 

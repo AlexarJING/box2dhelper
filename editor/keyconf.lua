@@ -1,6 +1,5 @@
 local conf={
 	cancel="escape",
-
 	createCircle="c",
 	createBox="b",
 	createLine="l",
@@ -13,7 +12,6 @@ local conf={
 	createSoftBox="shift+b",
 	createWater="e",
 	createBoom="q",
-
 	createDistance="d",
 	createRope="r",
 	createWeld="w",
@@ -21,14 +19,11 @@ local conf={
 	createPrismatic="m",
 	createWheel="i",
 	createPully="u",
-	--createGear="g",
-
+	createGear="g",
 	selectAll="ctrl+a",
 	selectNone="ctrl+d",
-
 	alineHorizontal="h",
 	alineVerticle="v",
-
 	clear="home",
 	removeBody="delete",
 	removeJoint="end",
@@ -39,30 +34,26 @@ local conf={
 	undo="ctrl+z",
 	redo="ctrl+y",
 	toggleBodyType="`",
-
 	nextPropTab="tab",
 	bodyMode="1",
 	fixtureMode="2",
 	shapeMode="3",
 	jointMode="4",
-
 	test="f1",
 	pause="f3",
 	toggleMouse="f2",
 	reset="f4",
-
 	toggleSystem="ctrl+h",
 	toggleGrid="f8",
 	toggleBuild="f9",
 	toggleProperty="f10",
 	toggleUnit="f11",
-	toggleHistroy="f12",
-	
+	toggleHistroy="f12",	
 	saveScene="ctrl+s",
 	saveUnit="shift+s",
 	saveProject="alt+s",
 	loadProject="alt+l",
-
+	openSaveFolder="ctrl+home"
 }
 
 return conf

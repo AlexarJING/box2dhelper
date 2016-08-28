@@ -15,7 +15,7 @@ function system:create()
 
 	
 	local b= ui.Create("button")
-	b:SetText("FILE")
+	b:SetText("SYSTEM")
 	b.OnClick=function(button)
 		local x,y = button:GetPos()
 		interface.fileMenu.menu:SetPos(x,y+30)
@@ -62,7 +62,7 @@ function system:create()
 	local b= ui.Create("button")
 	b:SetText("Donate Me")
 	b.OnClick=function(button)
-		print("yeeeeaaaah!")
+		interface.donate:create()
 	end
 	list:AddItem(b)
 

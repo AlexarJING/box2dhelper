@@ -1,16 +1,16 @@
 local editor
 local ui
 local interface
-local help={}
+local tutorial={}
 
-local helpText= require "editor/helpText"
+local tutorialText= require "editor/tutorialText"
 local font = love.graphics.newFont("font/cn.ttf", 20)
 
-function help:create()
+function tutorial:create()
 	if self.frame then self.frame:Remove() end
 	local frame =ui.Create("frame")
 	self.frame=frame
-	frame:SetName("help")
+	frame:SetName("tutorial")
 	frame:SetSize(1000,700)
 	frame:CenterWithinArea(0,0,w(),h())
 
@@ -23,7 +23,7 @@ function help:create()
 	local text = ui.Create("text",frame)
 	text:SetFont(font)
 	text:SetPos(10,30)
-	text:SetText(helpText)
+	text:SetText(tutorialText)
 
 	list:AddItem(text)
 end
@@ -33,5 +33,5 @@ return function(parent)
 	editor=parent
 	interface=editor.interface
 	ui=editor.LoveFrames
-	return help
+	return tutorial
 end

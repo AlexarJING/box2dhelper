@@ -44,7 +44,13 @@ function bg:init()
 	return self
 end
 
+function bg.predraw()
 
+end
+
+function bg.postdraw()
+
+end
 
 function bg:update()
 	gridShader:send("offx",editor.cam.x*editor.cam.scale)

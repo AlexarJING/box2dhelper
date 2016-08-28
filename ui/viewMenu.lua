@@ -11,25 +11,28 @@ function view:create()
 	self.options={}
 	menu:AddDivider()
 	self.options.body=menu:AddOption("body", false, 
-		function(obj) editor.helper.visible.body=obj.toggle end,true)
+		function(obj) interface:setView("body",obj.toggle) end,true)
 	menu:AddDivider()
 	self.options.texture=menu:AddOption("texture", false, 
-		function(obj) editor.helper.visible.texture=obj.toggle end,true)
+		function(obj) interface:setView("texture",obj.toggle) end,true)
 	menu:AddDivider()
 	self.options.fixture=menu:AddOption("fixture", false, 
-		function(obj) editor.helper.visible.fixture=obj.toggle end,true)
+		function(obj) interface:setView("fixture",obj.toggle) end,true)
 	menu:AddDivider()
 	self.options.joint=menu:AddOption("joint", false,
-		function(obj) editor.helper.visible.joint=obj.toggle end,true)
+		function(obj) interface:setView("joint",obj.toggle) end,true)
 	menu:AddDivider()
 	self.options.contact=menu:AddOption("contact", false, function(obj)
-		editor.helper.visible.contact=obj.toggle
+		interface:setView("contact",obj.toggle)
 	end,true)
 	menu:AddDivider()
 	self.options.bloom=menu:AddOption("global bloom", false, 
 		function(obj)
 			interface:setView("bloom",obj.toggle)
-			--interface.visible.bloom=obj.toggle
+		end,true)
+	self.options.trace=menu:AddOption("global trace", false, 
+		function(obj)
+			interface:setView("trace",obj.toggle)
 		end,true)
 	menu:AddDivider()
 	menu:AddOption("texture only", false, 
