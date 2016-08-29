@@ -131,7 +131,7 @@ function editor:draw()
 			self.bodyMode:draw()
 			self.selector:draw()
 		end	
-		if convex then love.graphics.polygon("line", convex) end
+
 	end)
 	love.graphics.setCanvas()
 	love.graphics.setColor(255, 255, 255, 255)
@@ -184,11 +184,28 @@ function editor:mousereleased(x, y, button)
 	elseif button==2 then button="r" end
 	
 	if self.interface:isHover() then
-		self.LoveFrames.mousereleased(x, y, button)
+		self.LoveFrames.mousereleased(x, y, button)	
+		
 	else
+		local target 
+		if self.selector.rightselection then
+			target = self.selector.rightselection
+		end
+		
+		local hover = self.LoveFrames.util.GetHoverObject()
+
+		if button== "r" and  hover and hover:GetType() == "textinput" then
+			
+			local key = hover.keyObj
+			local name = key:GetText()
+			local obj= self.interface.property.target
+			self.helper.setProperty(obj,name,target)
+			self.interface.property:create()
+		end
+
 		if self.state=="body" then
 			editor.selector:click(button)
-		elseif self.state=="test" and self.testMode.mouseMode=="power" then
+		elseif self.state=="test" and (self.testMode.mouseMode=="power" or self.testMode.mouseMode=="key")then
 			editor.selector:click(button)
 		elseif self.state=="fixture" then
 			editor.fixtureMode:click(button)
@@ -384,7 +401,13 @@ function editor:keyBound()
 		alineHorizontal=function() self.bodyMode:aline(true) end,
 		alineVerticle=function() self.bodyMode:aline(false) end,
 		
-		removeBody=function() self.bodyMode:removeBody() end,
+		removeBody=function()
+			if self.state == "body" then
+				self.bodyMode:removeBody()
+			elseif self.state == "joint" then
+				self.jointMode:removeJoint()
+			end 
+		end,
 		removeJoint=function() self.bodyMode:removeJoint() end,
 		copy=function() self.bodyMode:copy() end,
 		paste=function() self.bodyMode:paste() end,

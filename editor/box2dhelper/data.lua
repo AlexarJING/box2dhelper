@@ -350,6 +350,7 @@ function dataMode.getWorldData(world,offx,offy,arg) --存储时
 	
 	for i,body in ipairs(bodyList) do	
 		for i,joint in ipairs(body:getJointList()) do	
+			
 			if joint:getType()=="gear" then ---齿轮关节
 				local status=dataMode.getStatus(joint,"joint")
 				status.Joints={getJointIndex(jointList,status.Joints[1]),
@@ -443,8 +444,6 @@ dataMode.properties={
 	"Length",
 	"MaxForce",
 	"MaxTorque",
-	"Joints",
-	"Ratio",
 	"AngularOffset",
 	"LinearOffset",
 	"Target",

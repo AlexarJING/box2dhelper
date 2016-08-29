@@ -40,9 +40,8 @@ function edit:removeJoint()
 	local body2=selection[2]
 	for i,joint in ipairs(body:getJointList()) do
 		local bodyA,bodyB=joint:getBodies( )
-		if bodyA==body and bodyB==body2 or bodyA==body2 and bodyB==body then
-			joint:destroy()
-			break
+		if joint:getType()=="gear" or bodyA==body and bodyB==body2 or bodyA==body2 and bodyB==body then
+			editor.jointMode:removeJoint(joint)
 		end
 	end
 end

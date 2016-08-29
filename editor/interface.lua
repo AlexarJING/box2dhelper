@@ -26,7 +26,7 @@ interface.layout={
 
 function interface:init()
 	ui=editor.LoveFrames
-	--ui.config["DEBUG"]=true
+	ui.config["DEBUG"]=true
 	interface.system=require "ui/system"(editor)
 	interface.build= require "ui/build"(editor)
 	interface.help=require "ui/help"(editor)

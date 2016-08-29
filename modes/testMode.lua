@@ -6,7 +6,7 @@ test.mouseMode="std" --or ball
 
 test.pause=false
 test.modeIndex=1
-local mouseModes={"std","power","ball","key","create"}
+local mouseModes={"std","power","ball","key"}
 local mouseType={
 	love.mouse.getSystemCursor("arrow"),
 	love.mouse.getSystemCursor("sizeall"),
@@ -31,8 +31,6 @@ function test:update(dt)
 		self.mouseBall.joint:setTarget(editor.mouseX,editor.mouseY)
 	elseif self.mouseMode=="key" then
 		self:downForce()
-	elseif self.moseMode=="create" then
-		editor.createMode:update()
 	end	
 end
 
@@ -60,12 +58,12 @@ function test:toggleMouse()
 
 	if self.mouseMode=="ball" then
 		if not self.mouseball or self.mouseBall.world~=editor.world  then
-			local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
+			local body = love.physics.newBody(editor.world, editor.mouseX,editor.mouseY, "dynamic")
 			body:setUserData({})
 			local shape = love.physics.newCircleShape(0, 0, 10)
 			local fixture = love.physics.newFixture(body, shape, 100)
 			fixture:setUserData({})
-			local joint= love.physics.newMouseJoint(body, 0, 0)
+			local joint= love.physics.newMouseJoint(body, editor.mouseX,editor.mouseY)
 			self.mouseBall={body=body,shape=shape,fixture=fixture,joint=joint,world=self.world,isDestroy=false}
 		end
 	elseif self.mouseBall then
@@ -92,11 +90,11 @@ function test:downForce()
 	end
 
 	if love.keyboard.isDown("q") then
-		self:applyTorque(-50000)
+		self:applyTorque(-100000)
 	end
 
 	if love.keyboard.isDown("e") then
-		self:applyTorque(50000)
+		self:applyTorque(100000)
 	end
 end
 

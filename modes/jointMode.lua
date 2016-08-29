@@ -43,20 +43,30 @@ end
 function jMode:getAnchors()
 	self.anchors={}
 	for i,joint in ipairs(editor.world:getJointList()) do
-		if not testExist(self.anchors,joint) and joint:getType()~="gear" then
-			local x1,y1,x2,y2=joint:getAnchors()
-			if joint:getType()=="pulley" then
+		if not testExist(self.anchors,joint) then
+			local x1,y1,x2,y2
+			if joint:getType()~="gear" then
+				x1,y1,x2,y2=joint:getAnchors()
+			end
+			local jointType = joint:getType()
+			if jointType=="pulley" then
 				local gx1,gy1,gx2,gy2 = joint:getGroundAnchors()
 				table.insert(self.anchors,{joint=joint,x=x1,y=y1,index=1})
 				table.insert(self.anchors,{joint=joint,x=x2,y=y2,index=2})
 				table.insert(self.anchors,{joint=joint,x=gx1,y=gy1,index=3})
 				table.insert(self.anchors,{joint=joint,x=gx2,y=gy2,index=4})
+			elseif jointType == "gear" then
+				local j1,j2=joint:getJoints()
+				local x1,y1=j1:getAnchors()
+				local x2,y2=j2:getAnchors()
+				table.insert(self.anchors,{joint=joint,x=(x1+x2)/2,y=(y1+y2)/2,index=1})
 			else
 				table.insert(self.anchors,{joint=joint,x=x1,y=y1,index=1})
 				if x1~=x2 or y1~=y2 then
 					table.insert(self.anchors,{joint=joint,x=x2,y=y2,index=2})
 				end
 			end
+		
 		end	
 	end
 end
@@ -70,11 +80,13 @@ end
 
 
 function jMode:update() --左键可调整节点，右键可建立齿轮关节
-	
+	self:getAnchors()
 	local down=love.mouse.isDown(1) and 1 
 	down=down or (love.mouse.isDown(2) and 2)
-	if down then self.dragTX,self.dragTY=editor.mouseX,editor.mouseY end
-	if down and not self.selectedAnchor then
+	if down then 
+		self.dragTX,self.dragTY=editor.mouseX,editor.mouseY
+	end
+	if down==1 and not self.selectedAnchor then
 		for i,v in ipairs(self.anchors) do
 			if jMode:inRect(v.x,v.y) then
 				self.selectedAnchor=v
@@ -82,7 +94,7 @@ function jMode:update() --左键可调整节点，右键可建立齿轮关节
 			end
 		end	
 		self.downType=down
-	elseif down==2 and self.selectedAnchor then --齿轮连接
+	elseif down==2 and not self.selectedAnchor then --齿轮连接
 		self.selectedAnchor2=nil
 		for i,v in ipairs(self.anchors) do
 			if jMode:inRect(v.x,v.y) then
@@ -90,22 +102,35 @@ function jMode:update() --左键可调整节点，右键可建立齿轮关节
 				break
 			end
 		end
+	elseif down and self.selectedAnchor then
+		for i,v in ipairs(self.anchors) do
+			if jMode:inRect(v.x,v.y) then
+				self.selectedAnchor2=v
+				self.downType=down
+			end
+		end
+
 	elseif not down and self.selectedAnchor then
 		if self.downType==1 then
 			self:moveAnchor()
 		elseif self.selectedAnchor2 then
 			self:createGear()
 		end
-		self.selectedAnchor=nil
-		self.selectedAnchor2=nil
 		self:getAnchors()
 		self.downType=nil
+		self.selectedAnchor2=nil
 	end
+	
+	if love.keyboard.isDown("escape") then
+		self.selectedAnchor=nil
+	end
+	
 	return true
 end
 
 function jMode:moveAnchor()
 	local joint=self.selectedAnchor.joint
+	if joint:getType()=="gear" then return end
 	local body1,body2=joint:getBodies()
 	local x1,y1 = body1:getPosition()
 	local x2,y2 = body2:getPosition()
@@ -123,7 +148,7 @@ function jMode:moveAnchor()
 	local toChange = self.selectedAnchor.index
 	if getDist(jx[toChange],jy[toChange],tx,ty)<5 then return end
 	jx[toChange]=tx;jy[toChange]=ty
-	local jointData=editor.helper.getStatus(joint,"joint")
+	
 	local j
 	if jType=="rope" then
 		j=love.physics.newRopeJoint(body1, body2, jx[1], jy[1], jx[2], jy[2], 
@@ -132,7 +157,7 @@ function jMode:moveAnchor()
 		j=love.physics.newDistanceJoint(body1, body2, jx[1], jy[1], jx[2], jy[2],
 			joint:getCollideConnected())
 		
-	elseif jType=="prismatic" then  ---错误！！需要重新搭建gear!!
+	elseif jType=="prismatic" then 
 		local angle= getRot(x1,y1,jx[1],jy[1])
 		j = love.physics.newPrismaticJoint(body1,body2,jx[1],jy[1],math.sin(angle), -math.cos(angle),
 			joint:getCollideConnected())
@@ -140,7 +165,7 @@ function jMode:moveAnchor()
 	elseif jType=="pulley" then
 		j = love.physics.newPulleyJoint(body1, body2, jx[3], jy[3], jx[4], jy[4],jx[1], jy[1], jx[2], jy[2],
 			joint:getRatio(),joint:getCollideConnected())
-	elseif jType=="revolute" then ---错误！！需要重新搭建gear!!
+	elseif jType=="revolute" then 
 		j = love.physics.newRevoluteJoint(body1, body2, jx[1], jy[1], joint:getCollideConnected())
 		
 	elseif jType=="weld" then
@@ -154,22 +179,94 @@ function jMode:moveAnchor()
 	end
 	local jointData=editor.helper.getStatus(joint,"joint")
 	editor.helper.setStatus(j,"joint",jointData)
+	
+
+
+	local b1,b2=joint:getBodies()
+	for i,v in ipairs(b1:getJointList()) do
+		if v:getType()=="gear" then
+			local j1,j2 = v:getJoints()
+			if j1==joint then
+				local newGear = love.physics.newGearJoint(j, j2, v:getRatio(), v:getCollideConnected())
+				local gearData = editor.helper.getStatus(v,"joint")
+				editor.helper.setStatus(newGear,"joint",gearData)
+			elseif j2==joint then
+				local newGear = love.physics.newGearJoint(j1, j, v:getRatio(), v:getCollideConnected())
+				local gearData = editor.helper.getStatus(v,"joint")
+				editor.helper.setStatus(newGear,"joint",gearData)
+			end
+		end
+	end
+	for i,v in ipairs(b2:getJointList()) do
+		if v:getType()=="gear" then
+			local j1,j2 = v:getJoints()
+			if j1==joint then
+				local newGear = love.physics.newGearJoint(j, j2, v:getRatio(), v:getCollideConnected())
+				local gearData = editor.helper.getStatus(v,"joint")
+				editor.helper.setStatus(newGear,"joint",gearData)
+			elseif j2==joint then
+				local newGear = love.physics.newGearJoint(j1, j, v:getRatio(), v:getCollideConnected())
+				local gearData = editor.helper.getStatus(v,"joint")
+				editor.helper.setStatus(newGear,"joint",gearData)
+			end
+		end
+	end
+	
+
+	self.selectedAnchor=nil
 	self.selection=j
 	editor.selector.selection={j}
-	joint:destroy()
+	self:removeJoint(joint)
+	self:getAnchors()
 end
 
-function jMode:createGear()
+function jMode:createGear(j1,j2)
 	local j1=self.selectedAnchor.joint
 	local j2=self.selectedAnchor2.joint
 	if j1==j2 then return end
 	if j1:getType()~="revolute" and j1:getType()~="prismatic" then return end
 	if j2:getType()~="revolute" and j2:getType()~="prismatic" then return end
 	local joint = love.physics.newGearJoint(j1, j2, 1, false)
+	self.selectedAnchor2=nil
+	self.selectedAnchor = nil
+	self.selection=joint
+	editor.selector.selection={joint}
+	self:getAnchors()
 	editor.action="create Gearjoint"
 end
 
+function jMode:rebuildGear()
 
+
+end
+
+
+function jMode:removeJoint(j)
+	if not self.selectedAnchor and not j then return end
+	local joint = j or self.selectedAnchor.joint
+	if joint:getType()~="gear" then
+		local b1,b2=joint:getBodies()
+		for i,v in ipairs(b1:getJointList()) do
+			if v:getType()=="gear" then
+				local j1,j2 = v:getJoints()
+				if j1==joint or j2== joint then
+					v:destroy()
+				end
+			end
+		end
+		for i,v in ipairs(b2:getJointList()) do
+			if v:getType()=="gear" then
+				local j1,j2 = v:getJoints()
+				if j1==joint or j2== joint then
+					v:destroy()
+				end
+			end
+		end
+	end
+	joint:destroy()
+	self.selectedAnchor=nil
+	self:getAnchors()
+end
 
 
 
@@ -237,25 +334,32 @@ function jMode:draw()
 	if self.selectedAnchor then
 		love.graphics.setColor(0, 255, 0, 255)
 		love.graphics.rectangle("fill", self.selectedAnchor.x-3,self.selectedAnchor.y-3, 6, 6)
-		local joint=self.selectedAnchor.joint
-		local tx,ty=self.dragTX,self.dragTY
-		local jx={}
-		local jy={}
-		jx[1],jy[1],jx[2],jy[2] = joint:getAnchors()
-		if joint:getType()=="pulley" then jx[3],jy[3],jx[4],jy[4] = joint:getGroundAnchors() end
-		local toChange = self.selectedAnchor.index
-		jx[toChange]=tx;jy[toChange]=ty
 		
-		if joint:getType()=="pulley" then 
-			love.graphics.line(jx[1],jy[1],jx[3],jy[3])
-			love.graphics.line(jx[3],jy[3],jx[4],jy[4])
-			love.graphics.line(jx[2],jy[2],jx[4],jy[4])
-		else
-			love.graphics.line(jx[1],jy[1],jx[2],jy[2])
+		local joint=self.selectedAnchor.joint
+		
+		if joint:getType()=="gear" then return end
+
+		if self.downType==1 then
+
+			local tx,ty=self.dragTX,self.dragTY
+			local jx={}
+			local jy={}
+			jx[1],jy[1],jx[2],jy[2] = joint:getAnchors()
+			if joint:getType()=="pulley" then jx[3],jy[3],jx[4],jy[4] = joint:getGroundAnchors() end
+			local toChange = self.selectedAnchor.index
+			jx[toChange]=tx;jy[toChange]=ty
+			
+			if joint:getType()=="pulley" then 
+				love.graphics.line(jx[1],jy[1],jx[3],jy[3])
+				love.graphics.line(jx[3],jy[3],jx[4],jy[4])
+				love.graphics.line(jx[2],jy[2],jx[4],jy[4])
+			else
+				love.graphics.line(jx[1],jy[1],jx[2],jy[2])
+			end
 		end
 	end
 	
-	if self.downType==2 then
+	if  self.selectedAnchor and self.downType==2 then
 		local x1,y1,x2,y2=self.selectedAnchor.x,self.selectedAnchor.y,self.dragTX,self.dragTY
 		love.graphics.line(x1, y1, ((x1+x2)/2)-5,((y1+y2)/2)-5)
 		love.graphics.line(x2, y2, ((x1+x2)/2)+5,((y1+y2)/2)+5)

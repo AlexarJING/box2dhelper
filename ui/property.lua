@@ -67,7 +67,7 @@ function property:reset()  --update all data
 end
 
 function property:hide()
-	
+	self.tabIndex = 1
 	if self.frame then
 		if self.tabs then
 			self.tabIndex=self.tabs.tab
@@ -176,7 +176,8 @@ function property:setListItems(parent,pos,target,data,itemCanRemove)
 		value:SetEditable(false)
 	end
 
-
+	key.valueObj = value
+	value.keyObj = key
 	parent:AddItem(key,pos,1)
 	parent:AddItem(value,pos,2)
 
@@ -196,7 +197,7 @@ end
 
 
 
-function property:create(target)
+function property:create(target,tab)
 	target = target or (editor.selector.selection and editor.selector.selection[1])
 	if not target then
 		self.frame= ui.Create("frame")

@@ -170,7 +170,17 @@ function selector:bodyPointTest(key)
 		end
 
 	elseif key=="r" then
-		
+		local selectTest={}
+		for i,body in ipairs(editor.world:getBodyList()) do
+			for i,fix in ipairs(body:getFixtureList()) do
+				if fix:testPoint( editor.mouseX, editor.mouseY ) then
+					if not table.getIndex(selectTest,body) then --避免重复加入同一个body
+						table.insert(selectTest, body)
+					end
+				end
+			end
+		end
+		if selectTest[1] then self.rightselection = selectTest[1] end
 		if not self.selection then return end
 
 		if not self.selectToggle then return end
