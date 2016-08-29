@@ -67,7 +67,6 @@ function property:reset()  --update all data
 end
 
 function property:hide()
-	self.tabIndex = 1
 	if self.frame then
 		if self.tabs then
 			self.tabIndex=self.tabs.tab
@@ -197,8 +196,15 @@ end
 
 
 
-function property:create(target,tab)
+function property:create(target)
 	target = target or (editor.selector.selection and editor.selector.selection[1])
+	if self.frame then
+		if self.tabs then
+			self.tabIndex=self.tabs.tab
+		end
+		self.frame:Remove()
+	end
+
 	if not target then
 		self.frame= ui.Create("frame")
 		self.frame:SetVisible(false)
