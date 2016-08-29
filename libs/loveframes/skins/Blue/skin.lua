@@ -1049,7 +1049,7 @@ function skin.DrawTextInput(object)
 	local textselectedcolor = skin.controls.textinput_text_selected_color
 	local highlightbarcolor = skin.controls.textinput_highlight_bar_color
 	local indicatorcolor = skin.controls.textinput_indicator_color
-	
+	local color = object.color
 	love.graphics.setColor(bodycolor)
 	love.graphics.rectangle("fill", x, y, width, height)
 	
@@ -1147,6 +1147,9 @@ function skin.DrawTextInput(object)
 		love.graphics.setColor(textnormalcolor)
 	end
 	
+	if color then love.graphics.setColor(color) end
+
+
 	local str = ""
 	if multiline then
 		for i=1, #lines do

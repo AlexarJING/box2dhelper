@@ -143,7 +143,8 @@ function system:saveProject()
 		windowMode={love.window.getMode( )},
 		createTime=editor.createTime,
 		lastEditTime=os.date("%c"),
-		groupIndex=editor.groupIndex
+		groupIndex=editor.groupIndex,
+		colorstyle = editor.helper.drawMode.defaultStyle
 	}
 	project:write(table.save(data))
 	project:close()	
@@ -194,7 +195,7 @@ function system:loadProject()
 	editor.createTime=data.createTime
 	editor.lastEditTime=data.lastEditTime
 	editor.groupIndex=data.groupIndex or 1
-	
+	editor.helper.drawMode.defaultStyle = data.colorstyle or editor.helper.drawMode.defaultStyle
 	love.window.setMode(unpack(data.windowMode))
 	
 	editor.interface.layout=data.layout

@@ -5,9 +5,9 @@ local donate={}
 
 local font = love.graphics.newFont(15)
 local donateText=[[
-
 	YOUR KINDNESS IS PRECIATED
-								 
+		QQ: 1643386616
+	Email:alexar@foxmail.com						 
 ]]
 
 function donate:create()

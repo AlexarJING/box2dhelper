@@ -145,7 +145,7 @@ function creator:importFromImage(file)
 
 	local rate=imageW/32 > 1 and math.ceil(imageW/32) or 1
 	local threshold= imageW/10
-	function sample( x, y, r, g, b, a )
+	local function sample( x, y, r, g, b, a )
 	   if x%rate==0 and y%rate==0 then
 	   		if a~=0 then table.insert(points,Point(x,y)) end
 	   end
@@ -426,6 +426,8 @@ function creator:explosion()
 	local shape = love.physics.newCircleShape(self.createR)
 	local fixture = love.physics.newFixture(body, shape)
 	self:setMaterial(fixture,"wood")
+	editor.helper.setProperty(fixture,"explosion",self.createR*1000)
+
 end
 
 

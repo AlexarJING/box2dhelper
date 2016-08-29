@@ -45,12 +45,12 @@ function jMode:getAnchors()
 	for i,joint in ipairs(editor.world:getJointList()) do
 		if not testExist(self.anchors,joint) and joint:getType()~="gear" then
 			local x1,y1,x2,y2=joint:getAnchors()
-			if joint:getType()=="pully" then
+			if joint:getType()=="pulley" then
 				local gx1,gy1,gx2,gy2 = joint:getGroundAnchors()
 				table.insert(self.anchors,{joint=joint,x=x1,y=y1,index=1})
-				table.insert(self.anchors,{joint=joint,x=x1,y=y1,index=2})
+				table.insert(self.anchors,{joint=joint,x=x2,y=y2,index=2})
 				table.insert(self.anchors,{joint=joint,x=gx1,y=gy1,index=3})
-				table.insert(self.anchors,{joint=joint,x=gx1,y=gy1,index=4})
+				table.insert(self.anchors,{joint=joint,x=gx2,y=gy2,index=4})
 			else
 				table.insert(self.anchors,{joint=joint,x=x1,y=y1,index=1})
 				if x1~=x2 or y1~=y2 then
@@ -114,6 +114,11 @@ function jMode:moveAnchor()
 	local jy={}
 	jx[1],jy[1],jx[2],jy[2] = joint:getAnchors()
 	local jType=joint:getType()
+
+	if jType == "pulley" then
+		jx[3],jy[3],jx[4],jy[4] = joint:getGroundAnchors()
+	end
+
 	local tx,ty=self.dragTX,self.dragTY
 	local toChange = self.selectedAnchor.index
 	if getDist(jx[toChange],jy[toChange],tx,ty)<5 then return end
@@ -127,25 +132,21 @@ function jMode:moveAnchor()
 		j=love.physics.newDistanceJoint(body1, body2, jx[1], jy[1], jx[2], jy[2],
 			joint:getCollideConnected())
 		
-	elseif jType=="prismatic" then
+	elseif jType=="prismatic" then  ---错误！！需要重新搭建gear!!
 		local angle= getRot(x1,y1,jx[1],jy[1])
 		j = love.physics.newPrismaticJoint(body1,body2,jx[1],jy[1],math.sin(angle), -math.cos(angle),
 			joint:getCollideConnected())
 		
 	elseif jType=="pulley" then
-		local gx1,gy1,gx2,gy2 = joint:getGroundAnchors()
-		j = love.physics.newPulleyJoint(body1, body2, jx[1], jy[1], jx[2], jy[2],gx1,gy1,gx2,gy2,
-			joint:getRatio(),joint:CollideConnected())
-	elseif jType=="revolute" then
+		j = love.physics.newPulleyJoint(body1, body2, jx[3], jy[3], jx[4], jy[4],jx[1], jy[1], jx[2], jy[2],
+			joint:getRatio(),joint:getCollideConnected())
+	elseif jType=="revolute" then ---错误！！需要重新搭建gear!!
 		j = love.physics.newRevoluteJoint(body1, body2, jx[1], jy[1], joint:getCollideConnected())
 		
 	elseif jType=="weld" then
 		j = love.physics.newWeldJoint(body1, body2, jx[1], jy[1], joint:getCollideConnected())
 		
 	elseif jType=="wheel" then	
-		local angle= getRot(x1, y1,jx[1], jy[1])
-		j = love.physics.newWheelJoint(body1, body2, jx[1], jy[1],math.sin(angle), -math.cos(angle), joint:getCollideConnected())
-	elseif jType=="prismatic" then
 		local angle= getRot(x1, y1,jx[1], jy[1])
 		j = love.physics.newWheelJoint(body1, body2, jx[1], jy[1],math.sin(angle), -math.cos(angle), joint:getCollideConnected())
 	else
@@ -241,9 +242,17 @@ function jMode:draw()
 		local jx={}
 		local jy={}
 		jx[1],jy[1],jx[2],jy[2] = joint:getAnchors()
+		if joint:getType()=="pulley" then jx[3],jy[3],jx[4],jy[4] = joint:getGroundAnchors() end
 		local toChange = self.selectedAnchor.index
 		jx[toChange]=tx;jy[toChange]=ty
-		love.graphics.line(jx[1],jy[1],jx[2],jy[2])
+		
+		if joint:getType()=="pulley" then 
+			love.graphics.line(jx[1],jy[1],jx[3],jy[3])
+			love.graphics.line(jx[3],jy[3],jx[4],jy[4])
+			love.graphics.line(jx[2],jy[2],jx[4],jy[4])
+		else
+			love.graphics.line(jx[1],jy[1],jx[2],jy[2])
+		end
 	end
 	
 	if self.downType==2 then

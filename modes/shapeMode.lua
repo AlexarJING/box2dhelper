@@ -163,9 +163,10 @@ function vertex:rotate()
 				local obj=editor.helper.getWorldData({body})
 				editor.helper.createWorld(editor.world,obj)
 			end
+
 			local rotation=getRot(x,y,self.dragTX,self.dragTY)
-			local angle=rotation-Pi/2
-			body:setAngle(angle)
+			local angle = body:getAngle()
+			body:setAngle(angle+rotation)
 		else
 			if ifCopy then
 				local obj=editor.helper.getWorldData({body})
@@ -234,13 +235,15 @@ function vertex:draw()
 				love.graphics.line(self.dragTX,self.dragTY,cx,cy)
 				love.graphics.push()
 				love.graphics.translate(cx, cy)
-				love.graphics.rotate(rotation)
+				love.graphics.rotate(rotation+Pi/2)
 				editor.helper.draw({body},nil,-cx,-cy,0)
 				love.graphics.pop()
 			else
 				rotation=getRot(0,0,self.dragTX,self.dragTY)
 				bodyR= getRot(0,0,cx,cy)
 				editor.helper.draw({body},nil,0,0,rotation-bodyR)
+				love.graphics.setColor(255, 0, 0, 100)
+				love.graphics.circle("line", 0, 0, getDist(0,0,cx,cy))
 			end
 		else
 			local shapeVerts=vert.verts

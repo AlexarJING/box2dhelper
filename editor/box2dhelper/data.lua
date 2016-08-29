@@ -2,6 +2,33 @@ local helper
 local dataMode={}
 dataMode.propBuffer={}
 
+local getDist = function(x1,y1,x2,y2) return math.sqrt((x1-x2)^2+(y1-y2)^2) end
+local getRot  = function (x1,y1,x2,y2) 
+	if x1==x2 and y1==y2 then return 0 end 
+	local angle=math.atan((x1-x2)/(y1-y2))
+	if y1-y2<0 then angle=angle-math.pi end
+	if angle>0 then angle=angle-2*math.pi end
+	if angle==0 then return 0 end
+	return -angle
+end
+local axisRot = function(x,y,rot) return math.cos(rot)*x-math.sin(rot)*y,math.cos(rot)*y+math.sin(rot)*x  end
+local polygonTrans= function(x,y,rot,size,v)
+	local tab={}
+	for i=1,#v/2 do
+		tab[2*i-1],tab[2*i]=axisRot(v[2*i-1],v[2*i],rot)
+		tab[2*i-1]=tab[2*i-1]*size+x
+		tab[2*i]=tab[2*i]*size+y
+	end
+	return tab
+end
+local clamp= function (a,low,high)
+	if low>high then 
+		return math.max(high,math.min(a,low))
+	else
+		return math.max(low,math.min(a,high))
+	end
+end
+
 local function getUserData(obj)
 	local raw=obj:getUserData()
 	if raw==nil then return end

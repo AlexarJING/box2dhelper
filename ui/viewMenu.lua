@@ -63,6 +63,7 @@ function view:create()
 			interface:setView("contact",true)
 		end)
 	menu:AddDivider()
+	menu:AddOption("color edit", false, function() editor.interface.colorPick:create()end)
 	menu:SetVisible(false)
 end
 

@@ -20,6 +20,8 @@ drawMode.defaultStyle= {
 		contact={0,255,255,255}
 	}
 
+local gearAngle= {}
+
 local function CreateGear(segments)
 	segments = segments or 40
 	local vertices = {}
@@ -265,6 +267,7 @@ function drawMode.drawJoint(joint,color)
 		love.graphics.line(polygonTrans(aX,aY,abDirection,1,{10,0 ,10,realDist}))
 		love.graphics.line(polygonTrans(aX,aY,abDirection,1,{10,0 ,-10,0}))
 	elseif jointType=="gear" then
+		if not joint.getJoints then return end
 		local j1,j2=joint:getJoints()
 		local x1,y1=j1:getAnchors()
 		local x2,y2=j2:getAnchors()

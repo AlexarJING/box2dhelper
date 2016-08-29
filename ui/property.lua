@@ -39,6 +39,7 @@ local function updateData(obj,value)
 		for i,v in ipairs(value) do
 			str=str..tostring(v)..","
 		end
+		str = string.sub(str,1,-2)
 		obj:SetText(str)
 	elseif type(value)=="boolean" then
 		obj:SetChecked(value)
@@ -141,6 +142,7 @@ function property:setListItems(parent,pos,target,data,itemCanRemove)
 		for i,v in ipairs(data.value) do
 			str=str..tostring(v)..","
 		end
+		str = string.sub(str,1,-2)
 		value:SetText(str)
 		value.OnEnter=function(obj)
 			local text=value:GetText()

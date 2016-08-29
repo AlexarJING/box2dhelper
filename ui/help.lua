@@ -5,7 +5,18 @@ local help={}
 
 local helpText= require "editor/helpText"
 local font = love.graphics.newFont("font/cn.ttf", 20)
+local text
 
+function help:create()
+	local file = love.filesystem.newFile("help.txt","w")
+	string.gsub(helpText, "\n", "\n\r")
+	file:write(helpText)
+	file:close()
+	local path = love.filesystem.getSaveDirectory().."/help.txt"
+	love.system.openURL(path)
+end
+
+--[[
 function help:create()
 	if self.frame then self.frame:Remove() end
 	local frame =ui.Create("frame")
@@ -20,14 +31,15 @@ function help:create()
 	list:SetPadding(5)
 	list:SetSpacing(5)
 
-	local text = ui.Create("text",frame)
-	text:SetFont(font)
-	text:SetPos(10,30)
-	text:SetText(helpText)
-
+	if not text then
+		text = ui.Create("text")
+		text:SetFont(font)
+		text:SetPos(10,30)
+		text:SetText(helpText)
+	end
 	list:AddItem(text)
 end
-
+]]
 
 return function(parent) 
 	editor=parent

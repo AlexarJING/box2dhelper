@@ -40,12 +40,14 @@ function interface:init()
 	interface.tutorial = require "ui/tutorial"(editor)
 	interface.keyconfig = require "ui/keyconfig"(editor)
 	interface.donate = require "ui/donate"(editor)
+	interface.colorPick = require "ui/pickColor"(editor)
 
 	interface.fileMenu= require "ui/fileMenu"(editor)
 	interface.editMenu= require "ui/editMenu"(editor)
 	interface.modeMenu= require "ui/modeMenu"(editor)
 	interface.layoutMenu= require "ui/layoutMenu"(editor)
 	interface.viewMenu= require "ui/viewMenu"(editor)
+
 
 	interface.system:create()
 	interface.build:create()

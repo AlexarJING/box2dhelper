@@ -44,7 +44,7 @@ function editor:init()
 	editor:beforeStart()
 	self.bg:init()
 	self.state="body"
-	self.keys= self:keyBound()	
+	self:keyBound()	
 	
 	self.action="system start"
 
@@ -162,8 +162,10 @@ function editor:draw()
 	self.LoveFrames.draw()
 	self.units:draw()
 	self.log:draw()
-	love.graphics.setColor(255, 255, 255, 100)
-	love.graphics.printf(self.state.. " mode",0,200,w()/3,"center",0,3,3)
+	love.graphics.setColor(155, 155, 155, 255)
+	local str = self.state.. " mode"
+	if self.testMode.pause then str=str.."\npause" end
+	love.graphics.printf(str,0,100,w()/3,"center",0,3,3)
 end
 
 
@@ -275,6 +277,7 @@ function editor:changeMode(which)
 		return
 	elseif self.state=="test" and which~="test" then
 		self.testMode:release()
+		self.testMode.pause = false
 	end
 	if which then 
 		self.state=which
@@ -452,7 +455,7 @@ function editor:keyBound()
 	end
 	self.commmadBounds=bound
 	
-	return keys
+	self.keys= keys
 end
 --[[
 local data  = love.image.newImageData("1.png")

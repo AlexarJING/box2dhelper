@@ -8,7 +8,7 @@ end
 
 
 function fMode:click(key)
-	if key=="l" then
+	if key=="l" then --左键点击选取
 		local selectFixtures={}
 		for i,body in ipairs(editor.world:getBodyList()) do
 			for i,fix in ipairs(body:getFixtureList()) do
@@ -21,7 +21,7 @@ function fMode:click(key)
 		self.selectedIndex=1
 		self.selectedFixture=self.selection and self.selection[self.selectedIndex] or nil
 		editor.selector.selection= self.selectedFixture and {self.selectedFixture} or nil
-	else
+	else --如果点击区域内有重叠则选取下方的
 		if self.selection then
 			self.selectedIndex=self.selectedIndex+1
 			if not self.selection[self.selectedIndex] then self.selectedIndex=1 end

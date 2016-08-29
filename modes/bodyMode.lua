@@ -173,7 +173,9 @@ function edit:dragMove()
 		local dx,dy=mouseX-self.dragTX,mouseY-self.dragTY
 		
 		if self.dragCopy then
-			editor.helper.createWorld(editor.world,self.dragCopyObj)
+			if self.dragOX~=self.dragTX or self.dragOY~=self.dragTY then
+				editor.helper.createWorld(editor.world,self.dragCopyObj)
+			end
 			self.dragCopy=false 
 			self.dragCopyObj=nil
 		end
