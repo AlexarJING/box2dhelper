@@ -82,8 +82,10 @@ function editor:update(dt)
 	end
 
 	if self.state=="test" and not self.testMode.pause then 
-		self.world:update(dt) 
+		self.world:update(dt)
+		self.helper.update(self.world)
 	end
+
 
 end
 

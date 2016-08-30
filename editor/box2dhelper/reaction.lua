@@ -176,12 +176,27 @@ function func.jet(body)
 end
 
 function func.anticount(body,data)
-	data.value=data.value-love.timer.getDelta()
-	if data.value<0 then
-		if not body:isDestroyed() then
-			body:destroy()
+	if data then
+		data.value=data.value-love.timer.getDelta()
+		if data.value<0 then
+			if not body:isDestroyed() then
+				body:destroy()
+			end
+		end
+	else
+		local timer=helper.getProperty(body,"anticount") or 3
+		timer=timer-love.timer.getDelta()
+		
+		if timer<0 then
+			if not body:isDestroyed() then
+				body:destroy()
+			end
+		else
+			helper.setProperty(body,"anticount",timer)
 		end
 	end
+	
+	
 end
 
 
@@ -214,6 +229,7 @@ reactMode.reactType={
 		rollback=func.rollback,
 	},
 	keyPress={
+		fire=func.fire,
 		jump=func.jump,
 	},
 	always={
@@ -263,7 +279,10 @@ reactMode.reactions={
 	},
 	balancer={
 		{prop="balancer",value=true}
-	}
+	},
+	anitCount = {
+		{prop="anticount",value = 3}
+	}	
 }
 
 

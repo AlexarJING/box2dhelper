@@ -28,6 +28,7 @@ local polygonTrans= function(x,y,rot,size,v)
 end
 
 function jMode:new()
+	self.selectedAnchor=nil
 	self:getAnchors()
 end
 
@@ -213,11 +214,12 @@ function jMode:moveAnchor()
 	end
 	
 
-	self.selectedAnchor=nil
 	self.selection=j
 	editor.selector.selection={j}
 	self:removeJoint(joint)
 	self:getAnchors()
+	self.selectedAnchor=nil
+	editor.action="move joint anchor"
 end
 
 function jMode:createGear(j1,j2)
@@ -232,13 +234,11 @@ function jMode:createGear(j1,j2)
 	self.selection=joint
 	editor.selector.selection={joint}
 	self:getAnchors()
+	self.selectedAnchor=nil
 	editor.action="create Gearjoint"
 end
 
-function jMode:rebuildGear()
 
-
-end
 
 
 function jMode:removeJoint(j)
@@ -266,6 +266,7 @@ function jMode:removeJoint(j)
 	joint:destroy()
 	self.selectedAnchor=nil
 	self:getAnchors()
+	editor.action="remove joint"
 end
 
 

@@ -11,7 +11,8 @@ helper.world=nil
 helper.visible=helper.drawMode.visible
 helper.properties=helper.dataMode.properties
 
-helper.draw=helper.system.update
+helper.update=helper.system.update
+helper.draw=helper.drawMode.draw
 helper.drawBody=helper.drawMode.drawBody
 helper.drawTexture=helper.drawMode.drawTexture
 helper.drawFixture=helper.drawMode.drawFixture

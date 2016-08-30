@@ -30,16 +30,12 @@ function system.updateTodo()
 end
 
 
-function system.update(...)
-	local data={...}
-	local world=data[1]
+function system.update(world)
 	if world==helper.world then
 		helper.reactMode.update()
 		system.updateTodo()
 		system.updateDelay()
 	end
-	
-	helper.drawMode.draw(...)
 end
 
 

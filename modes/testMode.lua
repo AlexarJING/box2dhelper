@@ -16,6 +16,7 @@ local mouseType={
 
 function test:new()
 	editor.action="start testing"
+	self.modeIndex = 1
 end
 
 function test:release()
@@ -46,7 +47,7 @@ end
 
 
 function test:toggleMouse()
-	
+	if editor.state ~= "test" then return end
 	if mouseModes[self.modeIndex+1] then
 		self.modeIndex=self.modeIndex+1
 		

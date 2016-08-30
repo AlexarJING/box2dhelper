@@ -505,7 +505,7 @@ collMode.collisions={
 	},
 	crashable={
 		{prop="crashable",value=100},
-		{prop="crashcombo",value=true}
+		{prop="crashcombo",value=false}
 	},
 	embed={
 		{prop="embed",value=500},
