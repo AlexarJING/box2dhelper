@@ -23,7 +23,6 @@ end
 
 
 function system:pushUndo()
-	
 	self.undoIndex=self.undoIndex+1
 	self.undoStack[self.undoIndex]={event=editor.action,world=editor.helper.getWorldData(editor.world,0,0,editor)}
 	if #self.undoStack>self.maxUndo then

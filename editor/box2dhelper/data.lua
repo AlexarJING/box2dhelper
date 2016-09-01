@@ -119,12 +119,11 @@ function dataMode.createWorld(world,data,offx,offy,editor)
 		dataMode.setStatus(world,"world",data.world)
 		love.physics.setMeter(data.world.meter)
 	end
-
 	local group={}
 	for i,v in ipairs(data.obj) do
 		local obj={}
 		table.insert(group, obj)
-		obj.body = love.physics.newBody(world)
+		obj.body = love.physics.newBody(world,0,0,"dynamic")
 		---set prop
 		dataMode.setStatus(obj.body,"body",v.body)
 		
@@ -315,7 +314,6 @@ function dataMode.getWorldData(world,offx,offy,arg) --存储时
 	for i,body in ipairs(bodyList) do
 		local obj={}
 		local data={}
-		
 		table.insert(group.obj, obj)
 		local status=dataMode.getStatus(body,"body")
 		status.X=status.X-offx
@@ -370,14 +368,7 @@ function dataMode.setStatus(obj,objType,data)
 
 		if func and value then
 			if type(value)=="table" then
-				if prop=="LinearVelocity" then
-					print(func,obj,unpack(data[prop]))
-				end
-				print(func(obj,unpack(data[prop])))
-				if prop=="LinearVelocity" then
-					print(obj:getLinearVelocity())
-				end
-							
+				func(obj,unpack(data[prop]))					
 			else
 				func(obj,data[prop])
 			end

@@ -261,7 +261,7 @@ end
 
 function edit:toggleBodyType()
 	local selection=editor.selector.selection
-	if not selection then 
+	if not selection or selection[1]:type()~="Body" then 
 		editor.log:push("error:need at least 1 body")
 		return 
 	end
