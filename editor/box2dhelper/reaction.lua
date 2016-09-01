@@ -282,7 +282,8 @@ reactMode.reactions={
 	},
 	anitCount = {
 		{prop="anticount",value = 3}
-	}	
+	},
+	
 }
 
 

@@ -190,8 +190,9 @@ function system:loadProject()
 	editor.currentProject=data.projectName
 	editor.currentScene=data.currentScene
 	system:loadScene(editor.currentScene..".scene")
-	editor.keyconf=data.keyconf
-	editor:keyBound()
+
+	--editor.keyconf=data.keyconf
+	--editor:keyBound()
 	editor.createTime=data.createTime
 	editor.lastEditTime=data.lastEditTime
 	editor.groupIndex=data.groupIndex or 1
@@ -240,9 +241,11 @@ function system:saveScene()
 	editor.log:push("scene saved")
 end
 
-function system:loadScene(name)
+function system:loadScene(name,remainMode)
+	if string.sub(name,-6,-1)~=".scene" then name=name..".scene" end
 	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..name,"r")
 	if not file then return end
+
 	local data = loadstring(file:read())()
 	local world = love.physics.newWorld(0, 0, false)
 	editor.world=world
@@ -252,7 +255,7 @@ function system:loadScene(name)
 	editor.selector.selection=nil
 	editor.currentScene=string.sub(name,1,-7)
 	editor.interface.system:updateProj()
-	editor:changeMode("body")
+	if not remainMode then editor:changeMode("body") end
 	editor.log:push("scene loaded")
 	
 end

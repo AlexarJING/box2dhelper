@@ -367,9 +367,17 @@ function dataMode.setStatus(obj,objType,data)
 	for i,prop in ipairs(dataMode.properties[objType]) do
 		local func=obj["set"..prop]
 		local value=data[prop]
+
 		if func and value then
 			if type(value)=="table" then
-				func(obj,unpack(data[prop]))
+				if prop=="LinearVelocity" then
+					print(func,obj,unpack(data[prop]))
+				end
+				print(func(obj,unpack(data[prop])))
+				if prop=="LinearVelocity" then
+					print(obj:getLinearVelocity())
+				end
+							
 			else
 				func(obj,data[prop])
 			end
@@ -406,6 +414,7 @@ dataMode.properties={
 	},
 		body={
 	"X","Y","Angle",
+	"LinearVelocity","AngularVelocity",
 	"AngularDamping",
 	"LinearDamping",
 	"GravityScale",

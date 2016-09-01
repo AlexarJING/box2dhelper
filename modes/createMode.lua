@@ -253,6 +253,43 @@ function creator:importFromImage(file)
 	editor.action="importFromImage"
 end
 
+local cat = require "libs/matcat".new("libs/matrix.txt")
+
+function creator:text(str)
+	if not str then creator:popupTextInput();return end
+	local rt = string.split(str,",")
+	local content = rt[1]
+	local size =rt[2] and tonumber(rt[2]) or 5
+	local pos = cat.getPos(content,editor.mouseX,editor.mouseY,size)
+	
+	for i,v in ipairs(pos) do
+		local x,y,w,h = unpack(v)		
+		local body = love.physics.newBody(editor.world, x, y,"dynamic")
+		local shape = love.physics.newRectangleShape(w,h)
+		local fixture = love.physics.newFixture(body, shape)
+		self:setMaterial(fixture,"wood")		
+	end
+	editor.action="create text"
+end
+
+function creator:popupTextInput()
+	local ui=editor.LoveFrames
+	local frame =ui.Create("frame")
+	frame:SetName("input text,size")
+	frame:SetSize(300,80)
+	frame:CenterWithinArea(0,0,w(),h())
+	local input = ui.Create("textinput",frame)
+	input:SetSize(280,30)
+	input:SetPos(10,40)
+	input:SetFocus(true)
+	input.OnEnter=function()
+		creator:text(input:GetText())
+		input:Remove()
+		frame:Remove()
+	end
+end
+
+
 function creator:water()
 	local body = love.physics.newBody(editor.world, self.createTX, self.createTY,"dynamic")
 	local shape = love.physics.newCircleShape(5)

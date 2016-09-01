@@ -6,7 +6,7 @@ test.mouseMode="std" --or ball
 
 test.pause=false
 test.modeIndex=1
-local mouseModes={"std","power","ball","key"}
+local mouseModes={"std","power","ball","key","scissor"}
 local mouseType={
 	love.mouse.getSystemCursor("arrow"),
 	love.mouse.getSystemCursor("sizeall"),
@@ -17,6 +17,8 @@ local mouseType={
 function test:new()
 	editor.action="start testing"
 	self.modeIndex = 1
+	self.mouseMode = "std"
+
 end
 
 function test:release()
@@ -32,6 +34,8 @@ function test:update(dt)
 		self.mouseBall.joint:setTarget(editor.mouseX,editor.mouseY)
 	elseif self.mouseMode=="key" then
 		self:downForce()
+	elseif self.mouseMode == "scissor" then
+		self:cutTest()
 	end	
 end
 
@@ -44,7 +48,36 @@ function test:reset()
 	editor.system:redo()
 end
 
+local lastX,lastY
+function test:cutTest()
+	if not love.mouse.isDown(1) then
+	 	lastX,lastY=nil,nil
+	elseif love.mouse.isDown(1) and not lastX then
+		lastX,lastY=editor.mouseX,editor.mouseY
+	end
 
+	if lastX then 
+		local joints = editor.world:getJointList()
+		local toTest = {}
+		for i,v in ipairs(joints) do
+			if v:getType() == "rope" then
+				table.insert(toTest,v)
+			end
+		end
+
+		for i,v in ipairs(toTest) do
+			local x1,y1,x2,y2 = v:getAnchors()
+			local source={x=x1,y=y1,tx=x2,ty=y2}
+			local mouseLine = {x=lastX,y=lastY,tx=editor.mouseX,ty=editor.mouseY}
+			local test = math.lineCross(source,mouseLine)
+			if test then v:destroy() end
+		end
+	end
+
+	
+	
+
+end
 
 function test:toggleMouse()
 	if editor.state ~= "test" then return end
@@ -68,7 +101,7 @@ function test:toggleMouse()
 			self.mouseBall={body=body,shape=shape,fixture=fixture,joint=joint,world=self.world,isDestroy=false}
 		end
 	elseif self.mouseBall then
-		self.mouseBall.body:destroy()
+		if not self.mouseBall.body:isDestroyed() then self.mouseBall.body:destroy() end
 		self.mouseBall=nil
 	end
 
@@ -152,6 +185,10 @@ function test:draw()
 	love.graphics.setColor(255, 255, 255, 255)
 	if self.dragForcing then
 		love.graphics.line(self.dragOX,self.dragOY,self.dragTX,self.dragTY)
+	end
+
+	if lastX then
+		love.graphics.line(editor.mouseX,editor.mouseY, lastX,lastY)
 	end
 	love.graphics.print(self.mouseMode.." mode",editor.mouseX+10,editor.mouseY+10,0,2,2)
 end

@@ -3,6 +3,7 @@ require "libs.util"
 
 local editor=require "editor/editor"
 
+
 function love.filedropped( file )
 	editor.createMode:importFromImage(file)
 end
@@ -23,6 +24,8 @@ end
 function love.update(dt)
 	editor:update(dt)
 end
+
+
 
 function love.draw()
 	editor:draw()

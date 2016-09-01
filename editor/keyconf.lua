@@ -6,6 +6,7 @@ local conf={
 	createEdge="z",
 	createPolygon="p",
 	createFreeline="f",
+	createText="ctrl+t",
 	createSoftRope="shift+l",
 	createSoftCircle="shift+c",
 	createSoftPolygon="shift+p",
@@ -29,8 +30,8 @@ local conf={
 	removeJoint="end",
 	copy="ctrl+c",
 	paste="ctrl+v",
-	combine="ctrl+b",
-	divide="ctrl+d",
+	combine="ctrl+=",
+	divide="ctrl+-",
 	undo="ctrl+z",
 	redo="ctrl+y",
 	toggleBodyType="`",
@@ -53,7 +54,8 @@ local conf={
 	saveUnit="shift+s",
 	saveProject="alt+s",
 	loadProject="alt+l",
-	openSaveFolder="ctrl+home"
+	openSaveFolder="ctrl+home",
+	comboSet = "ctrl+u"
 }
 
 return conf

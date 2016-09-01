@@ -124,6 +124,7 @@ function jMode:update() --左键可调整节点，右键可建立齿轮关节
 	
 	if love.keyboard.isDown("escape") then
 		self.selectedAnchor=nil
+		self.combo = nil
 	end
 	
 	return true
@@ -294,22 +295,28 @@ function jMode:click()
 end
 
 
-function jMode:comboSet()
-	local t=editor.interface.property.targetType
-	local target=editor.interface.property.target
-	if not t=="joint" then return end
-	local data=editor.helper.getStatus(target,"joint")
+function jMode:comboFind()
+	if not self.selectedAnchor then return end
+	local target=self.selectedAnchor.joint
 	local targetType=target:getType()
 	local tested={}
 	tested[target]=true
 	local toTest={target}
+	self.combo={}
 	repeat
 		local tmp={}
 		for i,joint in ipairs(toTest) do
 			local body1,body2=joint:getBodies()
 			for i,j in ipairs(body1:getJointList()) do
 				if not tested[j] and j:getType()==targetType then
-					editor.helper.setStatus(j,"joint",data)
+					table.insert(self.combo,j)
+					table.insert(tmp, j)
+					tested[j]=true
+				end
+			end
+			for i,j in ipairs(body2:getJointList()) do
+				if not tested[j] and j:getType()==targetType then
+					table.insert(self.combo,j)
 					table.insert(tmp, j)
 					tested[j]=true
 				end
@@ -319,6 +326,20 @@ function jMode:comboSet()
 	until #toTest==0
 end
 
+function jMode:comboSet()
+	local target=self.selectedAnchor.joint
+	if not target or not self.combo or #self.combo==0 then return end
+	local data=editor.helper.getStatus(target,"joint")
+
+	data.Bodies=nil
+	data.Anchors=nil
+	data.Joints=nil	
+	data.Length =nil
+	for i,v in ipairs(self.combo) do
+		editor.helper.setStatus(v,"joint",data)
+	end
+	self.combo=nil
+end
 
 
 local gearShape = CreateGear(20)
@@ -372,7 +393,17 @@ function jMode:draw()
 	if self.selectedAnchor2 then
 		love.graphics.setColor(0, 255, 0, 255)
 		love.graphics.rectangle("fill", self.selectedAnchor2.x-3,self.selectedAnchor2.y-3, 6, 6)
-	end	
+	end
+
+	if self.combo then
+		love.graphics.setColor(0, 255, 0, 255)
+		for i,v in ipairs(self.combo) do
+			local x1,y1,x2,y2=v:getAnchors()
+			love.graphics.rectangle("fill", x1-3,y1-3, 6, 6)
+			love.graphics.rectangle("fill", x2-3,y2-3, 6, 6)
+		end
+		
+	end
 end
 
 

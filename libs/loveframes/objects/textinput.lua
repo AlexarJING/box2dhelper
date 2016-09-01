@@ -753,6 +753,7 @@ function newobject:RunKey(key, istext)
 			-- call onenter if it exists
 			if onenter then
 				onenter(self, text)
+				loveframes.inputobject=nil
 			end
 			-- newline calculations for multiline mode
 			if multiline then

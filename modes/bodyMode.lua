@@ -3,11 +3,38 @@ local editor
 local mouseX,mouseY
 local selection
 
-function edit:new()
-	
+local clamp= function (a,low,high)
+	if low>high then 
+		return math.max(high,math.min(a,low))
+	else
+		return math.max(low,math.min(a,high))
+	end
+end
+local getDist = function(x1,y1,x2,y2) return math.sqrt((x1-x2)^2+(y1-y2)^2) end
+local getRot  = function (x1,y1,x2,y2) 
+	if x1==x2 and y1==y2 then return 0 end 
+	local angle=math.atan((x1-x2)/(y1-y2))
+	if y1-y2<0 then angle=angle-math.pi end
+	if angle>0 then angle=angle-2*math.pi end
+	if angle==0 then return 0 end
+	return -angle
+end
+local axisRot = function(x,y,rot) return math.cos(rot)*x-math.sin(rot)*y,math.cos(rot)*y+math.sin(rot)*x  end
+local polygonTrans= function(x,y,rot,size,v)
+	local tab={}
+	for i=1,#v/2 do
+		tab[2*i-1],tab[2*i]=axisRot(v[2*i-1],v[2*i],rot)
+		tab[2*i-1]=tab[2*i-1]*size+x
+		tab[2*i]=tab[2*i]*size+y
+	end
+	return tab
 end
 
 
+
+function edit:new()
+	
+end
 
 function edit:update()
 	selection=editor.selector.selection
@@ -116,6 +143,7 @@ function edit:combine()
 end
 
 function edit:divide()
+
 	local selection=editor.selector.selection
 	if not selection or #selection~=1 then 
 		editor.log:push("error:need 1 body")
@@ -124,6 +152,7 @@ function edit:divide()
 
 	local tBody=selection[1]
 	local x,y = tBody:getPosition()
+	editor.selector.selection={}
 	for i,fixture in ipairs(tBody:getFixtureList()) do
 		local cx,cy = fixture:getMassData()
 		local offx,offy= cx+x,cy+y
@@ -136,13 +165,17 @@ function edit:divide()
 		elseif shapeType =="chain" then
 			shape = love.physics.newChainShape("false", polygonTrans(offx,offy,0,1,{shape:getPoints()}))
 		elseif shapeType=="polygon" then
-			shape = love.physics.newPolygonShape(polygonTrans(offx,offy,0,1,{shape:getPoints()}))
+			shape = love.physics.newPolygonShape(polygonTrans(-cx,-cy,0,1,{shape:getPoints()}))
 		elseif shapeType=="edge" then
 			shape = love.physics.newEdgeShape(polygonTrans(offx,offy,0,1,{shape:getPoints()}))
 		end
-		love.physics.newFixture(body, shape)
+		local fix = love.physics.newFixture(body, shape)
+		editor.createMode:setMaterial(fix,"wood")
+		table.insert(editor.selector.selection,body)
 	end
-	editor.selector.selection=nil
+	
+	editor.action = "divide body fixtures"
+
 	tBody:destroy()
 end
 
@@ -205,8 +238,8 @@ function edit:move(dx,dy,throw)
 			local dt = love.timer.getDelta()
 			body:setLinearVelocity( dx/dt, dy/dt )
 		else
-			body:setLinearVelocity(0,0)
-			body:setAngularVelocity(0,0)
+			--body:setLinearVelocity(0,0)
+			--body:setAngularVelocity(0,0)
 		end
 		body:setPosition(x+dx,y+dy)
 	end

@@ -456,6 +456,10 @@ function func.destroyOnHit(p,a,b,c)
 	table.insert(helper.system.todo,{func,a})
 end
 
+function func.scene(name)
+	if not helper.editor then return end
+	helper.editor.system:loadScene(name or "",true)
+end
 
 collMode.collisionType={
 	begin={
@@ -463,6 +467,7 @@ collMode.collisionType={
 		reverse=collMode.collisionFunc.reverse,
 		explosion=collMode.collisionFunc.explosion,
 		destroyOnHit=collMode.collisionFunc.destroyOnHit,
+		scenejumper=collMode.collisionFunc.scene,
 		},
 	over={
 		oneWay=collMode.collisionFunc.oneWayEnd,
@@ -510,7 +515,9 @@ collMode.collisions={
 	embed={
 		{prop="embed",value=500},
 	},
-
+	sceneJumper={
+		{prop="scenejumper",value="edit!"}
+	}
 }
 
 return function(parent) 

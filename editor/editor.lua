@@ -50,6 +50,7 @@ function editor:init()
 
 	editor.log:push("welcome to LoveBox2D editor !")
 
+
 end
 
 
@@ -83,7 +84,7 @@ function editor:update(dt)
 
 	if self.state=="test" and not self.testMode.pause then 
 		self.world:update(dt)
-		self.helper.update(self.world)
+		self.helper.update(self.world,self)
 	end
 
 
@@ -326,6 +327,7 @@ function editor:beforeStart()
 	local data=loadstring(file:read())()
 	editor.loadProject=data.project
 	editor.system:loadProject()
+	
 end
 
 function editor:resize()
@@ -378,7 +380,7 @@ function editor:keyBound()
 		createEdge=function() self.createMode:new("edge") end,
 		createPolygon=function()  self.createMode:new("polygon") end,
 		createFreeline=function()  self.createMode:new("freeline") end,
-		
+		createText = function() self.createMode:text() end,		
 
 		createSoftRope=function()  self.createMode:new("softrope") end,
 		createSoftCircle=function() self.createMode:new("softcircle") end,
@@ -397,7 +399,24 @@ function editor:keyBound()
 		createPully=function() self.createMode:pully() end,
 
 		cancel=function() self:cancel() end,
-		selectAll=function() self.selector:selectAll() end,
+		selectAll=function()
+			if self.state == "body" then
+				self.selector:selectAll()
+			elseif self.state == "fixture" then
+				--self.jointMode:comboFind()
+			elseif self.state == "joint" then
+				self.jointMode:comboFind()
+			end
+		end,
+		comboSet=function()
+			if self.state == "body" then
+
+			elseif self.state == "fixture" then
+
+			elseif self.state == "joint" then
+				self.jointMode:comboSet()
+			end
+		end,
 		selectNone=function() self.selector:clearSelection() end,
 
 		alineHorizontal=function() self.bodyMode:aline(true) end,

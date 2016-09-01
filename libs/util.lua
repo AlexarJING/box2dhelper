@@ -168,8 +168,12 @@ function math.round(num, n)
 	end
 end
 function math.clamp(a,low,high) --取三者中间的
-	--if a>math.pi then a=a-2*math.pi; end
-	return math.max(low,math.min(a,high))
+	if low<high then
+		return math.max(low,math.min(a,high))
+	else
+		return math.max(high,math.min(a,low))
+	end
+	
 end
 
 function math.getLoopDist(p1,p2,loop)
@@ -506,14 +510,14 @@ function math.pointToLine(a,b,c,x,y)
 end
 
 
---source 必须包含.x,.y作为起始坐标，.rot为发射角
+--source 必须包含.x,.y作为起始坐标，.rot为发射角,tx,ty为终点坐标
 --toTest为待检测table 必须包含 .x,.y,.r作为碰撞球
 function math.raycast(source,toTest) 
   local x1,y1=source.x,source.y
   local x2,y2
   local dist
-  local dir=source.rot
-  local tan=math.tan(dir)
+  local dir=source.rot or math.atan((source.tx-x1)/(source.ty-y1))-math.pi/2
+  local tan=math.tan(dir) 
   local a=tan
   local b=-1
   local c=-x1*tan+y1
@@ -527,10 +531,40 @@ function math.raycast(source,toTest)
 	  if dist<= v.r then
 		local a2,b2,c2=math.vertToLine(a,b,c,x2,y2)
 		local cx,cy=math.crossPoint(a,b,c,a2,b2,c2)
-		table.insert(rt, {v,cx,cy})
+		
+		if source.tx then
+			if math.abs(cx - math.clamp(cx,source.x,source.tx))<2
+			 and math.abs(cy - math.clamp(cy,source.y,source.ty))<2 then
+				table.insert(rt, {v,cx,cy})
+			end
+		else
+			if cx == math.clamp(cx,source.x,(1/0)*math.sin(dir)) and cy == math.clamp(cy,source.y,(1/0)*math.cos(dir)) then
+				table.insert(rt, {v,cx,cy})
+			end
+		end
+		
 	  end
   end
   return rt
+end
+
+function math.getLineABC(x,y,tx,ty)
+	local a = (ty-y)/(tx-x)
+	local b = -1
+	local c = -x*a+y
+	return a,b,c
+end
+
+function math.lineCross(line1,line2)
+	local a1,b1,c1 = math.getLineABC(line1.x,line1.y,line1.tx,line1.ty)
+	local a2,b2,c2 = math.getLineABC(line2.x,line2.y,line2.tx,line2.ty)
+	local cx,cy=math.crossPoint(a1,b1,c1,a2,b2,c2)
+	if 	math.abs(cx - math.clamp(cx,line1.x,line1.tx))<2
+	 and math.abs(cy - math.clamp(cy,line1.y,line1.ty))<2
+	 and math.abs(cx - math.clamp(cx,line2.x,line2.tx))<2
+	 and math.abs(cy - math.clamp(cy,line2.y,line2.ty))<2 then
+		return cx,cy
+	end
 end
 
 

@@ -294,7 +294,7 @@ end
 
 function drawMode.draw(world,colorStyle,offx,offy,offr)
 	
-	
+	--collectgarbage("stop")
 	love.graphics.push( )
 	if offx then
 		love.graphics.translate(offx, offy)
@@ -400,6 +400,7 @@ function drawMode.draw(world,colorStyle,offx,offy,offr)
 	end
 
 	love.graphics.pop( )
+	--collectgarbage("collect")
 end
 
 return function(parent) helper=parent;helper.drawMode=drawMode end
