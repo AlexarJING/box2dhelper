@@ -249,7 +249,7 @@ function editor:keypressed(key, isrepeat)
 			local down=love.keyboard.isDown("lctrl") or love.keyboard.isDown("lshift") or love.keyboard.isDown("lalt")
 			if not down then
 				if  key==v.key then
-					if self.state=="test" then
+					if self.state=="test" and self.testMode.mouseMode == "key" then
 						if key=="q" or key=="w" or key=="e" or key=="a" or key=="s" or key=="d" then
 							return
 						else

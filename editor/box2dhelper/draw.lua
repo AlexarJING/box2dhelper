@@ -274,7 +274,7 @@ function drawMode.drawJoint(joint,color)
 		local reactF=joint:getReactionForce(1)
 		local reactT=joint:getReactionTorque(1)
 		if not gearAngle[joint] then gearAngle[joint]=0 end
-		gearAngle[joint]=gearAngle[joint]+reactF/100+reactT/100
+		gearAngle[joint]=gearAngle[joint]+reactF/10000+reactT/10000
 		love.graphics.line(x1, y1, ((x1+x2)/2)-5,((y1+y2)/2)-5)
 		love.graphics.line(x2, y2, ((x1+x2)/2)+5,((y1+y2)/2)+5)
 		love.graphics.draw(gearShape, ((x1+x2)/2)-5,((y1+y2)/2)-5,gearAngle[joint],5,5)

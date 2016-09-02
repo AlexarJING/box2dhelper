@@ -739,7 +739,7 @@ end
 
 
 function creator:setMaterial(fixture,material,arg)
-	editor.action="set material:"..material
+	--editor.action="set material:"..material
 	local body=fixture:getBody()
 	body:setLinearDamping(editor.linearDamping)
 	body:setAngularDamping(editor.angularDamping)

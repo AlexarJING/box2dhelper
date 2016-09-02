@@ -461,6 +461,16 @@ function func.scene(name)
 	helper.editor.system:loadScene(name or "",true)
 end
 
+function func.creator(toggle,a,b,c)
+	if not toggle then return end
+	local x = helper.getProperty(a,"creatorX") or 0
+	local y = helper.getProperty(a,"creatorY") or 0
+	local body = helper.getProperty(a,"creatorBody")
+	local data = body and helper.getStatus(body) or collMode.defaultObject()
+	table.insert(helper.system.todo,{helper.createWorld,helper.world,data,x,y} )
+end
+
+
 collMode.collisionType={
 	begin={
 		makeFrag=collMode.collisionFunc.spark,
@@ -468,6 +478,7 @@ collMode.collisionType={
 		explosion=collMode.collisionFunc.explosion,
 		destroyOnHit=collMode.collisionFunc.destroyOnHit,
 		scenejumper=collMode.collisionFunc.scene,
+		creator=collMode.collisionFunc.creator,
 		},
 	over={
 		oneWay=collMode.collisionFunc.oneWayEnd,
@@ -485,6 +496,17 @@ collMode.collisionType={
 
 	}	
 }
+
+collMode.defaultObject=function() 
+	local world = love.physics.newWorld(0,0)
+	local body = love.physics.newBody(world,0,0,"dynamic")
+	local shape = love.physics.newCircleShape(30)
+	local fixture = love.physics.newFixture(body, shape)
+	body:setUserData({prop="anticount",value=10})
+	body:setLinearVelocity(love.math.random()*100,love.math.random()*100)
+	fixture:setUserData({{prop="explosion",value=5000}})
+	return helper.getWorldData({body})
+end
 
 collMode.collisions={
 	makeFrag={
@@ -517,6 +539,12 @@ collMode.collisions={
 	},
 	sceneJumper={
 		{prop="scenejumper",value="edit!"}
+	},
+	creator = {
+		{prop="creator",value = true},
+		{prop="creatorX",value = 0},
+		{prop="creatorY",value = 0},
+		{prop="creatorBody",value = false}
 	}
 }
 

@@ -222,6 +222,7 @@ end
 
 
 function system:saveScene()
+	if editor.state == "test" then return end
 	if editor.currentProject=="default" then
 		editor.log:push("need to create a project")
 		return
@@ -246,6 +247,12 @@ function system:loadScene(name,remainMode)
 	if not file then return end
 
 	local data = loadstring(file:read())()
+	if not data then 
+		editor.log:push("data broken")
+		editor.currentScene="default"
+		system:newScene()
+		return
+	end
 	local world = love.physics.newWorld(0, 0, false)
 	editor.world=world
 	editor.helper.createWorld(editor.world,data)

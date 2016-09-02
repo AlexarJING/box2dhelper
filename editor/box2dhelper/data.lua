@@ -114,7 +114,7 @@ end
 function dataMode.createWorld(world,data,offx,offy,editor)
 	offx=offx or 0
 	offy=offy or 0
-	
+	if not data  then return end
 	if data.world then
 		dataMode.setStatus(world,"world",data.world)
 		love.physics.setMeter(data.world.meter)

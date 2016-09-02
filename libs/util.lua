@@ -409,7 +409,7 @@ function math.cartesian(r,phi)
 end
 
 
-function math:RGBtoHSV(r,g,b)
+function math.RGBtoHSV(r,g,b)
   local max=math.max(r,g,b)
   local min=math.min(r,g,b)
   local d=max-min
