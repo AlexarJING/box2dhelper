@@ -19,7 +19,7 @@ end
 
 
 function log:draw(x,y)
-	if not self.visible then return end
+	if not editor.interface.visible.log then return end
 	love.graphics.setColor(255, 255, 255, 255)
 	for i=log.currentLine,log.currentLine+log.showLine do
 		if log.lines[i] then

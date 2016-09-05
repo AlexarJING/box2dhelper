@@ -183,13 +183,13 @@ function drawMode.drawJoint(joint,color)
 		local jX,jY = joint:getAnchors()
 		local abDirection = getRot (bX,bY,aX,aY)
 		local lower, upper = joint:getLimits( )
-		lower= lower<-100 and 100 or lower
-		upper= upper>100 and 100 or upper
-		if lower~=-100 then
+		lower= lower<-200 and -200 or lower
+		upper= upper>200 and 200 or upper
+		if lower~=-200 then
 			love.graphics.line(polygonTrans(jX,jY,abDirection,1,{-10,lower-10,10,lower-10}))
 		end
 
-		if upper~=100 then
+		if upper~=200 then
 			love.graphics.line(polygonTrans(jX,jY,abDirection,1,{-10,upper+10,10,upper+10}))
 		end
 		love.graphics.circle("line", bX,bY,8)

@@ -349,7 +349,7 @@ function dataMode.getWorldData(world,offx,offy,arg) --存储时
 	for i,body in ipairs(bodyList) do	
 		for i,joint in ipairs(body:getJointList()) do	
 			
-			if joint:getType()=="gear" then ---齿轮关节
+			if joint:getType()=="gear" and joint:getBodies()==body then ---齿轮关节
 				local status=dataMode.getStatus(joint,"joint")
 				status.Joints={getJointIndex(jointList,status.Joints[1]),
 								getJointIndex(jointList,status.Joints[2])}
@@ -452,14 +452,11 @@ dataMode.properties={
 	"Constant",
 	"MaxLengths",
 	"MaxMotorTorque",
-	"MotorSpeed",
 	"LimitsEnabled", --has
 	"MotorEnabled",
 	"MaxLength",
 	"SpringDampingRatio",
 	"SpringFrequency",
-	"AngularOffset",
-	"LinearOffset",
 	"Ratio"
 	}
 }

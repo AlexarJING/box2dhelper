@@ -38,7 +38,7 @@ function creator:update()
 end
 
 function creator:new(cType)
-	self.oState=editor.state
+	self.oState=editor.state == "create" and self.oState or editor.state
 	editor:cancel()
 	if not editor.state then return end
 	editor.state="create"
@@ -321,11 +321,11 @@ function creator:getVerts()
 		self.createVerts={self.createOX,self.createOY}
 	elseif self.createOX and love.mouse.isDown(1) then
 		if love.keyboard.isDown("lalt") then
-			self.createTX=self.createVerts[self.createVerts-1]
+			self.createTX=self.createVerts[#self.createVerts-1]
 			self.createTY=editor.mouseY
 		elseif love.keyboard.isDown("lshift") then
 			self.createTX=editor.mouseX
-			self.createTY=self.createVerts[self.createVerts]
+			self.createTY=self.createVerts[#self.createVerts]
 		else
 
 		end
@@ -542,7 +542,43 @@ function creator:polygon()
 	if not self.createVerts then return end
 	if #self.createVerts<6 then return end
 	editor.action="create polygon"
-	if #self.createVerts>16 or not love.math.isConvex(self.createVerts) then
+	if love.keyboard.isDown("lalt") then
+		local x,y=math.getPolygonArea(self.createVerts)
+		local body = love.physics.newBody(editor.world, x, y,"dynamic")
+		local points = {}
+		local Point    = editor.Delaunay.Point
+		local l,t,r,b
+		local lv,tv,rv,bv = 1/0,1/0,-1/0,-1/0
+		local tPoints={}
+		for i= 1, #self.createVerts-1,2 do
+			table.insert(points, {x=self.createVerts[i],y=self.createVerts[i+1]})
+			table.insert(tPoints,Point(self.createVerts[i],self.createVerts[i+1]))
+		end
+
+		for i,p in ipairs(points) do
+			if p.x<lv then l=i;lv=p.x end
+			if p.x>rv then r=i;rv=p.x end
+			if p.y<tv then t=i;tv=p.y end
+			if p.y>bv then t=i;bv=p.y end 
+		end
+
+		
+		for xx = lv,rv,10 do
+			for yy = tv,bv,10 do
+				if math.pointTest(xx,yy,self.createVerts) then
+					table.insert(tPoints,Point(xx,yy))
+				end
+			end
+		end
+
+		local triangles = editor.Delaunay.triangulate(tPoints)
+		for i,t in ipairs(triangles) do
+			local shape = love.physics.newPolygonShape(polygonTrans(-x, -y,0,1,
+				{t.p1.x,t.p1.y,t.p2.x,t.p2.y,t.p3.x,t.p3.y}))
+	 		local fixture = love.physics.newFixture(body, shape)
+			self:setMaterial(fixture,"wood")
+		end
+	elseif #self.createVerts>16 or not love.math.isConvex(self.createVerts) then
 		local x,y=math.getPolygonArea(self.createVerts)
 		local body = love.physics.newBody(editor.world, x, y,"dynamic")
 		local test ,triangles =pcall(love.math.triangulate,self.createVerts )
@@ -574,6 +610,8 @@ function creator:polygon()
 	end
 
 end
+
+
 
 function creator:getBodies()
 	local selection=editor.selector.selection

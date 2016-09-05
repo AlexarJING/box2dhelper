@@ -158,7 +158,6 @@ function newobject:mousereleased(x, y, button)
 	
 	local state = loveframes.state
 	local selfstate = self.state
-	
 	if state ~= selfstate then
 		return
 	end

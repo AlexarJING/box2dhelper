@@ -1,5 +1,8 @@
+
+------------------------------------
 local helper={}
 local path=...
+require(path.."/patch")
 require(path.."/system")(helper)
 require(path.."/draw")(helper)
 require(path.."/data")(helper)

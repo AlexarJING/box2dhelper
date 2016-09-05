@@ -917,7 +917,8 @@ local function intersection(cp1x,cp1y,cp2x, cp2y, sx,sy, ex,ey)
   return x,y
 end
  
-function math.polygonClip(subjectPolygon, clipPolygon)
+function math.polygonClip(subjectPolygon, clipPolygon,method)--method minus both cross diff
+  method = mathod or "minus" 
   local outputList = subjectPolygon
   local cp1x = clipPolygon[#clipPolygon-1]
   local cp1y = clipPolygon[#clipPolygon]

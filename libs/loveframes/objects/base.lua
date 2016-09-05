@@ -825,7 +825,7 @@ function newobject:CheckHover()
 			end
 		end
 	end
-	
+
 	-- check if the object is being hovered
 	if hoverobject == self and type ~= "base" then
 		self.hover = true

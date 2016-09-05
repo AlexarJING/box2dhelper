@@ -85,14 +85,16 @@ function loveframes.update(dt)
 	loveframes.hoverobject = false
 	
 	local downobject = loveframes.downobject
+
 	if #loveframes.collisions > 0 then
 		local top = loveframes.collisions[#loveframes.collisions]
-		if not downobject then
+		if not downobject then			
 			loveframes.hoverobject = top
 		else
-			if downobject == top then
+			--print(downobject,top)
+			--if downobject == top then
 				loveframes.hoverobject = top
-			end
+			--end
 		end
 	end
 	

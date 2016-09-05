@@ -29,6 +29,8 @@ end
 
 function jMode:new()
 	self.selectedAnchor=nil
+	self.selectedAnchor2=nil
+	self.combo=nil
 	self:getAnchors()
 end
 
@@ -79,6 +81,14 @@ function jMode:inRect(tx,ty)
 	end
 end
 
+function jMode:checkAnchors()
+	for i,v in ipairs(self.anchors) do
+		if jMode:inRect(v.x,v.y) then
+			return v
+		end
+	end	
+end
+
 
 function jMode:update() --左键可调整节点，右键可建立齿轮关节
 	self:getAnchors()
@@ -87,15 +97,30 @@ function jMode:update() --左键可调整节点，右键可建立齿轮关节
 	if down then 
 		self.dragTX,self.dragTY=editor.mouseX,editor.mouseY
 	end
-	if down==1 and not self.selectedAnchor then
-		for i,v in ipairs(self.anchors) do
-			if jMode:inRect(v.x,v.y) then
-				self.selectedAnchor=v
-				break
-			end
-		end	
-		self.downType=down
-	elseif down==2 and not self.selectedAnchor then --齿轮连接
+	
+	local hover = down and self:checkAnchors()
+
+	if down==1 and not self.downType then
+		self.selectedAnchor = hover
+		self.downType = down
+	end
+
+	if not down and self.downType==1 and self.selectedAnchor then
+		self:moveAnchor()
+	end
+
+	if down==2 and self.selectedAnchor and hover~=self.selectedAnchor then
+		self.selectedAnchor2 = hover
+	end
+
+	if not down and self.downType==2 and self.selectedAnchor2 then
+		self:createGear()
+		self.selectedAnchor2= nil
+	end
+	self.downType = down
+--[[
+
+	if down==2 and not self.selectedAnchor then --齿轮连接
 		self.selectedAnchor2=nil
 		for i,v in ipairs(self.anchors) do
 			if jMode:inRect(v.x,v.y) then
@@ -103,25 +128,27 @@ function jMode:update() --左键可调整节点，右键可建立齿轮关节
 				break
 			end
 		end
-	elseif down and self.selectedAnchor then
+		self.downType =down
+	elseif down == 2 and self.selectedAnchor and self.downType then
 		for i,v in ipairs(self.anchors) do
 			if jMode:inRect(v.x,v.y) then
 				self.selectedAnchor2=v
-				self.downType=down
 			end
 		end
 
-	elseif not down and self.selectedAnchor then
+	elseif not down and self.selectedAnchor and self.downType then
 		if self.downType==1 then
 			self:moveAnchor()
 		elseif self.selectedAnchor2 then
 			self:createGear()
 		end
-		self:getAnchors()
-		self.downType=nil
+		self:getAnchors()		
 		self.selectedAnchor2=nil
+	else
+		self.downType = nil
 	end
 	
+]]
 	if love.keyboard.isDown("escape") then
 		self.selectedAnchor=nil
 		self.combo = nil
@@ -355,7 +382,8 @@ function jMode:draw()
 	
 	if self.selectedAnchor then
 		love.graphics.setColor(0, 255, 0, 255)
-		love.graphics.rectangle("fill", self.selectedAnchor.x-3,self.selectedAnchor.y-3, 6, 6)
+		love.graphics.rectangle("line", self.selectedAnchor.x-4,self.selectedAnchor.y-4, 8, 8)
+
 		
 		local joint=self.selectedAnchor.joint
 		
@@ -383,10 +411,10 @@ function jMode:draw()
 	
 	if  self.selectedAnchor and self.downType==2 then
 		local x1,y1,x2,y2=self.selectedAnchor.x,self.selectedAnchor.y,self.dragTX,self.dragTY
-		love.graphics.line(x1, y1, ((x1+x2)/2)-5,((y1+y2)/2)-5)
-		love.graphics.line(x2, y2, ((x1+x2)/2)+5,((y1+y2)/2)+5)
-		love.graphics.draw(gearShape, ((x1+x2)/2)-5,((y1+y2)/2)-5,1,5,5)
-		love.graphics.draw(gearShape, ((x1+x2)/2)+5,((y1+y2)/2)+5,-1,5,5)
+		love.graphics.line(x1, y1, ((x1+x2)/2)-8,((y1+y2)/2)-8)
+		love.graphics.line(x2, y2, ((x1+x2)/2)+8,((y1+y2)/2)+8)
+		love.graphics.draw(gearShape, ((x1+x2)/2)-8,((y1+y2)/2)-5,1,8,8)
+		love.graphics.draw(gearShape, ((x1+x2)/2)+8,((y1+y2)/2)+5,-1,8,8)
 	end
 
 
@@ -396,7 +424,7 @@ function jMode:draw()
 	end
 
 	if self.combo then
-		love.graphics.setColor(0, 255, 0, 255)
+		love.graphics.setColor(0, 255, 255, 255)
 		for i,v in ipairs(self.combo) do
 			local x1,y1,x2,y2=v:getAnchors()
 			love.graphics.rectangle("fill", x1-3,y1-3, 6, 6)
