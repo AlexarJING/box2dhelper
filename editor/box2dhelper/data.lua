@@ -340,6 +340,8 @@ function dataMode.getWorldData(world,offx,offy,arg) --存储时
 				local status=dataMode.getStatus(joint,"joint")
 				status.Bodies={getBodyIndex(bodyList,status.Bodies[1]),
 								getBodyIndex(bodyList,status.Bodies[2])}
+				local ax,ay,bx,by = joint:getAnchors()
+				status.Anchors={ax-offx,ay-offy,bx-offx,by-offy}
 				table.insert(group.joint, status)
 				table.insert(jointList, joint)	
 			end

@@ -361,11 +361,12 @@ function jMode:comboSet()
 	data.Bodies=nil
 	data.Anchors=nil
 	data.Joints=nil	
-	data.Length =nil
+	--data.Length =nil
 	for i,v in ipairs(self.combo) do
 		editor.helper.setStatus(v,"joint",data)
 	end
 	self.combo=nil
+	editor.action="combo set joint"
 end
 
 

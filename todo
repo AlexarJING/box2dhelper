@@ -1,7 +1,6 @@
 todo list
-
-
-
-4. trigger binded to fixture to switch scene
-
+1. 模拟可破坏地形 目前问题是不会如何做差集
+2. 增加一个body属性，当某部件毁灭时，自身毁灭。
+3. 增加一个延迟属性，用来对反映或碰撞做延迟反馈
 5. scription to the body. for example hp controls or behavior controls
+左右键盘反映的 可以设置为自动
