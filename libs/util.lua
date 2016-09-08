@@ -1018,3 +1018,97 @@ love.graphics.origin=function()
 		}}
 	_origin()
 end
+
+function math.polygonBoolean(p1,pc) --求的叉积
+	
+	local chain={}
+	if #pc == 0 then return {} end
+	local chainCross ={}
+	local lastNode = nil
+
+	for i = 1, #pc-1 ,2 do
+		local x,y = pc[i],pc[i+1]
+		chain[x] = chain[x] or {}
+		chain[x][y] = {
+			x = x,
+			y = y,
+			prev = lastNode,
+			between = true,
+		}
+		lastNode =chain[x][y]
+		table.insert(chainCross,lastNode)
+
+		if chainCross[#chainCross-1] then
+			chainCross[#chainCross-1].next= lastNode
+		end
+	end
+
+	chainCross[1].prev = chainCross[#chainCross]
+	chainCross[#chainCross].next = chainCross[1]
+
+	local chainP1 = {}
+	local lastNode = nil
+	local detour = nil
+	for i = 1,#p1-1,2 do
+		local x,y = p1[i],p1[i+1]
+		local current = chain[x] and chain[x][y]
+		if current then
+			if current.between == true and current.prev.btween ~= true then
+				lastNode.next = current.prev
+				detour = current.prev				
+			elseif current.between == false then
+				current.next = nil
+				break
+			end
+			lastNode = current
+		else
+			if lastNode and lastNode.between==true then
+				local test = detour
+
+				while test ~= lastNode do
+					test.next = test.prev
+					table.insert(chainP1,test)
+					--print("detour",test.x,test.y)
+					test = test.prev
+				end
+				
+
+				chain[x] = chain[x] or {}
+				chain[x][y] = {
+					x = x,
+					y = y,
+					prev = lastNode,
+					between = false,
+				}
+				local current = chain[x][y]
+
+				test.next = current
+				lastNode = current
+				table.insert(chainP1,current)
+				--print("back",current.x,current.y)
+				--break
+			else
+				chain[x] = chain[x] or {}
+				chain[x][y] = {
+					x = x,
+					y = y,
+					prev = lastNode,
+					between = false,
+				}
+				
+				lastNode =chain[x][y]
+				table.insert(chainP1,lastNode)
+				--print("create",lastNode.x,lastNode.y)
+			end
+		end
+	end
+	local result = {}
+	
+	for i,v in ipairs(chainP1) do
+		table.insert(result, v.x)
+		table.insert(result, v.y)
+	end
+
+	return result
+	
+end

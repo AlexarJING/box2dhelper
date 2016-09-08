@@ -158,7 +158,23 @@ func.embed=function(threshold,a,b,coll,np,tp)
 	end
 	table.insert(helper.system.todo,{func,a,b,coll})
 end
-	
+
+local function circle2polygon(a,rate)
+	rate = rate  or 8
+	local x,y=a:getShape():getPoint()
+	local r = a:getShape():getRadius()
+	local verts={}
+	for i=1,rate do
+		table.insert(verts, x+r*math.sin(i*2*math.pi/rate))
+		table.insert(verts, y+r*math.cos(i*2*math.pi/rate))
+	end
+	local shape = love.physics.newPolygonShape(verts)
+	local body=a:getBody()
+	a:destroy()
+	return love.physics.newFixture(body, shape)
+end
+
+
 func.crash=function(threshold,a,b,coll,np,tp)
 	local func=function(a,b,coll,npA,tpA)
 		if a:isDestroyed() or b:isDestroyed() or coll:isDestroyed() then return end
@@ -181,19 +197,7 @@ func.crash=function(threshold,a,b,coll,np,tp)
 		local rayAnlges={}
 		local shapeType=a:getShape():getType()
 		local body=a:getBody()
-		local function circle2polygon(a)
-			local x,y=a:getShape():getPoint()
-			local r = a:getShape():getRadius()
-			local verts={}
-			for i=1,8 do
-				table.insert(verts, x+r*math.sin(i*math.pi/4))
-				table.insert(verts, y+r*math.cos(i*math.pi/4))
-			end
-			local shape = love.physics.newPolygonShape(verts)
-			local body=a:getBody()
-			a:destroy()
-			return love.physics.newFixture(body, shape)
-		end
+		
 		if shapeType=="circle" then
 			a=circle2polygon(a)
 		end
@@ -470,6 +474,53 @@ function func.creator(toggle,a,b,c)
 	table.insert(helper.system.todo,{helper.createWorld,helper.world,data,x,y} )
 end
 
+function func.destructor(toggle,a,b)
+	if not toggle then return end
+	if not helper.getProperty(b,"destruct") then return end
+
+	local ball = {}
+	local x,y=a:getShape():getPoint()
+	local r = a:getShape():getRadius()
+	for i=1,8 do
+		table.insert(ball, a:getBody():getX()+x+r*math.sin(i*math.pi/4))
+		table.insert(ball, a:getBody():getY()+y+r*math.cos(i*math.pi/4))
+	end
+
+	local target
+	if b:getShape():getType()=="circle" then
+		---
+	else
+		target={b:getBody():getWorldPoints( b:getShape():getPoints() )}
+	end
+	local cross = math.polygonClip(ball,target)
+
+	if not cross[1] then return end
+	
+	local rest = math.polygonBoolean(target,cross)
+	global1 = ball
+	global2 = target
+	global3 = cross
+	global4 = rest
+	local test, res = pcall(love.math.triangulate,rest)
+	if not test then return end
+	local desBody = b:getBody()
+	local function create()
+		for i,v in ipairs(res) do				
+			local body = love.physics.newBody(helper.world, v[1], v[2], "static")
+			local shape
+			local test,re =pcall(love.physics.newPolygonShape,math.polygonTrans(-v[1],-v[2],0,1,v))
+			if test then
+				shape=re
+				local fixture = love.physics.newFixture(body, shape)			
+				helper.setProperty(fixture,"meterial","wood")
+				helper.setProperty(fixture,"destruct",true)			
+			end
+		end
+
+		if not desBody:isDestroyed() then desBody:destroy() end
+	end
+	table.insert(helper.system.todo,{create})
+end
 
 collMode.collisionType={
 	begin={
@@ -479,6 +530,7 @@ collMode.collisionType={
 		destroyOnHit=collMode.collisionFunc.destroyOnHit,
 		scenejumper=collMode.collisionFunc.scene,
 		creator=collMode.collisionFunc.creator,
+		--destructor = collMode.collisionFunc.destructor
 		},
 	over={
 		oneWay=collMode.collisionFunc.oneWayEnd,
@@ -489,6 +541,7 @@ collMode.collisionType={
 		bullet=collMode.collisionFunc.bulletPre,
 		buoyancy=collMode.collisionFunc.buoyancy,
 		magnetField=collMode.collisionFunc.magnet,
+		destructor = collMode.collisionFunc.destructor
 	},
 	post={
 		crashable=collMode.collisionFunc.crash,
@@ -545,6 +598,9 @@ collMode.collisions={
 		{prop="creatorX",value = 0},
 		{prop="creatorY",value = 0},
 		{prop="creatorBody",value = false}
+	},
+	destructor = {
+		{prop="destructor",value = true},
 	}
 }
 

@@ -481,12 +481,31 @@ end
 
 function creator:box()
 	editor.action="create box"
-	local body = love.physics.newBody(editor.world, (self.createOX+self.createTX)/2, 
+	if  love.keyboard.isDown("lalt") then
+		local body  
+		
+		local shape = love.physics.newRectangleShape(30,30)
+		local fixture
+		for i = 1,math.abs(self.createOX-self.createTX)/30 do
+			for j = 1,math.abs(self.createTY-self.createOY)/30 do
+				local body = love.physics.newBody(editor.world, self.createOX+(i-1)*30,self.createOY+(j-1)*30,"static")
+				fixture = love.physics.newFixture(body, shape)
+				self:setMaterial(fixture,"wood")
+				helper.setProperty(fixture,"destruct",true)
+			end
+		end
+		
+		return {body=body}
+	else
+		local body = love.physics.newBody(editor.world, (self.createOX+self.createTX)/2, 
 		(self.createTY+self.createOY)/2,"dynamic")
-	local shape = love.physics.newRectangleShape(math.abs(self.createOX-self.createTX),math.abs(self.createTY-self.createOY))
-	local fixture = love.physics.newFixture(body, shape)
-	self:setMaterial(fixture,"wood")
-	return {body=body}
+		local shape = love.physics.newRectangleShape(math.abs(self.createOX-self.createTX),math.abs(self.createTY-self.createOY))
+		local fixture = love.physics.newFixture(body, shape)
+		self:setMaterial(fixture,"wood")
+		return {body=body}
+
+	end
+
 end
 
 function creator:line()

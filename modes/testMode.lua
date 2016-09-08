@@ -31,6 +31,11 @@ function test:update(dt)
 	if self.mouseMode=="power" then
 		self:dragForce()
 	elseif self.mouseMode=="ball" then
+		if love.mouse.isDown(1) then
+			self.mouseBall.fixture:setSensor(true)
+		else
+			self.mouseBall.fixture:setSensor(false)
+		end
 		self.mouseBall.joint:setTarget(editor.mouseX,editor.mouseY)
 	elseif self.mouseMode=="key" then
 		self:downForce()
@@ -96,7 +101,8 @@ function test:toggleMouse()
 			body:setUserData({})
 			local shape = love.physics.newCircleShape(0, 0, 10)
 			local fixture = love.physics.newFixture(body, shape, 100)
-			fixture:setUserData({})
+			editor.helper.setProperty(fixture,"destructor",true)
+			--fixture:setUserData({})
 			local joint= love.physics.newMouseJoint(body, editor.mouseX,editor.mouseY)
 			self.mouseBall={body=body,shape=shape,fixture=fixture,joint=joint,world=self.world,isDestroy=false}
 		end
