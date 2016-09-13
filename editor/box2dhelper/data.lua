@@ -32,14 +32,29 @@ end
 local function getUserData(obj)
 	local raw=obj:getUserData()
 	if raw==nil then return end
-	if type(raw)=="table" then
-		return table.save(raw,_,true)
+	if obj:type()=="Body" then
+		local env = helper.getProperty(obj,"scription")	
+		helper.setProperty(obj,"scription",nil)	
+		local save = table.save(raw,_,true)
+		helper.setProperty(obj,"scription",env)
+		return save
+	else
+		if type(raw)=="table" then
+			return table.save(raw,_,true)
+		end
 	end
+
+	
+
+	
 end
 
 local function setUserData(obj,raw)
 	if raw==nil then return end
-	obj:setUserData(loadstring(raw)())
+	local data = loadstring(raw)()
+	for i,v in ipairs(data) do
+		helper.setProperty(obj,v.prop,v.value)
+	end
 end
 
 function dataMode.setProperty(obj,key,value)
@@ -51,23 +66,24 @@ function dataMode.setProperty(obj,key,value)
 	end
 
 	if not key then return end
-	if not dataMode.propBuffer[obj][key] then
+	if dataMode.propBuffer[obj][key]==nil then
 		local data=obj:getUserData()
-		
-		for i,v in ipairs(data) do
-			if v.prop==key then
-				v.value=value
-				dataMode.propBuffer[obj][key]=v
-				return
-			end
-		end
-
-
 		local prop={prop=key,value=value}
 		table.insert(data, prop)
 		dataMode.propBuffer[obj][key]=prop
 	else
-		dataMode.propBuffer[obj][key].value=value
+		if value == nil then
+			local data=obj:getUserData()
+			for i,v in ipairs(data) do
+				if v.prop==key then
+					table.remove(data,i)
+					dataMode.propBuffer[obj][key] = nil
+					return
+				end
+			end
+		else
+			dataMode.propBuffer[obj][key].value=value
+		end		
 	end
 end
 
@@ -79,10 +95,11 @@ function dataMode.getProperty(obj,key)
 
 	if not dataMode.propBuffer[obj][key] then
 		local data=obj:getUserData()
-		if not data then obj:setUserData({});return end
+		if not data then return end
 		for i,v in ipairs(data) do
 			if v.prop==key then
-				dataMode.propBuffer[obj][key]={prop=key,value=v.value}
+				local tab = {prop=key,value=v.value}				
+				dataMode.propBuffer[obj][key]=tab
 				return v.value
 			end
 		end
@@ -115,6 +132,7 @@ function dataMode.createWorld(world,data,offx,offy,editor)
 	offx=offx or 0
 	offy=offy or 0
 	if not data  then return end
+	--helper.world = helper.world or world
 	if data.world then
 		dataMode.setStatus(world,"world",data.world)
 		love.physics.setMeter(data.world.meter)
@@ -132,17 +150,11 @@ function dataMode.createWorld(world,data,offx,offy,editor)
 
 		setUserData(obj.body,v.body.userdata)
 
-
-		for i,v in ipairs(obj.body:getUserData()) do
-			if v.prop=="texturePath" then 
-				local image = love.graphics.newImage(v.value)
-				for i,data in ipairs(obj.body:getUserData()) do
-					if data.prop=="texture" then data.value=image end
-					break
-				end
-				break
-			end
+		local path = helper.getProperty(obj.body,"texturePath")
+		if path then 
+			helper.setProperty(obj.body,"texture",love.graphics.newImage(path))
 		end
+		
 
 		obj.fixtures={}
 		for i,param in ipairs(v.fixtures) do
@@ -247,10 +259,12 @@ function dataMode.createWorld(world,data,offx,offy,editor)
 	end
 
 	if world~=helper.world then
+		helper.world = world
 		local beginContact = world:getCallbacks()
 		if not beginContact then
 			helper.collMode.setCallbacks(world)
 		end
+		helper.script.load()
 		helper.reactMode.reg(world)
 	end
 	return group
@@ -312,6 +326,7 @@ function dataMode.getWorldData(world,offx,offy,arg) --存储时
 
 
 	for i,body in ipairs(bodyList) do
+		
 		local obj={}
 		local data={}
 		table.insert(group.obj, obj)

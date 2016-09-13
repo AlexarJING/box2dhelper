@@ -324,42 +324,6 @@ function string.generateName(num,seed)
 
    return name
 end
-function table.save(tab,name)
-	name=name or "test"
-	local output="local "..name.."=\n"
-	local function ergodic(target,time)
-		time=time+1
-		output=output.."{\n"
-		for k,v in pairs(target) do
-			output=output .. string.rep("\t",time)
-			if type(v)=="table" then
-				if type(k)=="number" then
-					output=output.."["..k.."]".."="
-				elseif type(k)=="string" then
-					output=output.."[\""..k.."\"]="
-				end 
-				ergodic(v,time)
-				output=output .. string.rep("\t",time)
-				output=output.."},\n"
-			elseif type(v)=="string" then
-				if type(k)=="number" then
-					output=output.."["..k.."]".."=\""..v.."\",\n"
-				elseif type(k)=="string" then
-					output=output.."[\""..k.."\"]=\""..v.."\",\n"
-				end 
-			elseif type(v)=="number" or type(v)=="boolean" then
-				if type(k)=="number" then
-					output=output.."["..k.."]".."="..tostring(v)..",\n"
-				elseif type(k)=="string" then
-					output=output.."[\""..k.."\"]="..tostring(v)..",\n"
-				end 
-			end
-		end
-	end
-	ergodic(tab,0)
-	output=output.."}"
-	return output 
-end
 
 function math.pointTest(x,y,verts)
 	local pX={}
@@ -699,6 +663,7 @@ function table.save(tab,name,ifCopyFunction)
 			elseif type(k)=="string" then
 				name="[\""..k.."\"]"
 			end 
+			
 			if type(v)=="table" then
 				output=output .. name .."="
 				local checkRepeat
@@ -708,7 +673,7 @@ function table.save(tab,name,ifCopyFunction)
 					end
 				end
 				if checkRepeat then
-					output=output.. name .."=table^"..p.name..",\n"
+					output=output.. name .."=table^"..name..",\n"
 				else
 					table.insert(tableList,{name=name,tab=v})
 					ergodic(v,time)
@@ -717,7 +682,9 @@ function table.save(tab,name,ifCopyFunction)
 				end
 			elseif type(v)=="string" then
 				if string.find(v,"\n") then
-					output=output.. name .."=[["..v.."]],\n"
+					local startp, endp = string.find(v, "%[=*%[")
+					local count = startp  and endp-startp or 0
+					output=output.. name .."=["..string.rep("=",count).."["..v.."]"..string.rep("=",count).."],\n"
 				else
 					output=output.. name .."=\""..v.."\",\n"
 				end

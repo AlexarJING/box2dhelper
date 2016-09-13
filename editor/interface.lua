@@ -85,8 +85,7 @@ end
 
 
 function interface:getLayout()
-
-	return {
+	self.layout = {
 	build={interface.build.frame:GetPos()},
 	joint={interface.joint.frame:GetPos()},
 	unit={interface.unit.frame:GetPos()},
@@ -94,6 +93,7 @@ function interface:getLayout()
 	scene={interface.scene.frame:GetPos()},
 	property={interface.property.frame:GetPos()}
 	}	
+	return self.layout
 end
 
 function interface:resetLayout()

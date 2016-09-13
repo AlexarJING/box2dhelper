@@ -178,13 +178,15 @@ function editor:draw()
 	end
 
 	love.graphics.draw(self.renderCanvas)
-	self.LoveFrames.draw()
+	
 	self.units:draw()
 	self.log:draw()
 	love.graphics.setColor(155, 155, 155, 255)
 	local str = self.state.. " mode"
 	if self.testMode.pause then str=str.."\npause" end
 	love.graphics.printf(str,0,100,w()/3,"center",0,3,3)
+
+	self.LoveFrames.draw()
 end
 
 
@@ -237,6 +239,7 @@ function editor:mousereleased(x, y, button)
 end
 
 function editor:keypressed(key, isrepeat)
+
 	if self.state=="test" then self.helper.press(key) end
 	self.LoveFrames.keypressed(key, isrepeat)
 	if isrepeat then return end

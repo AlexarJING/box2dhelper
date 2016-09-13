@@ -63,6 +63,7 @@ end
 
 
 function drawMode.drawBody(body,color)
+	if helper.getProperty(body,"unvisible") then return end
 	local bodyX=body:getX()
 	local bodyY=body:getY()
 	love.graphics.setColor(color)
@@ -70,15 +71,10 @@ function drawMode.drawBody(body,color)
 end
 
 function drawMode.drawTexture(body,color)
+	if helper.getProperty(body,"texture_unvisible") then return end
 	if not color then color={255,255,255,255} end
 	love.graphics.setColor(color)
-	local data=body:getUserData()
-	local texture
-	if data then
-		for i,v in ipairs(data) do
-			if v.prop=="texture" then texture = v.value end
-		end
-	end
+	local texture = helper.getProperty(body,"texture")
 	if texture then
 		love.graphics.setColor(255, 255, 255, 255)
 		love.graphics.draw(texture, body:getX(), body:getY(), body:getAngle(),
@@ -87,6 +83,7 @@ function drawMode.drawTexture(body,color)
 end
 
 function drawMode.drawFixture(fixture,color)
+	if helper.getProperty(fixture,"unvisible") then return end
 	local body = fixture:getBody()
 	local bodyX=body:getX()
 	local bodyY=body:getY()
@@ -145,6 +142,7 @@ end
 
 
 function drawMode.drawJoint(joint,color)
+	if helper.getProperty(joint,"unvisible") then return end
 	love.graphics.setColor(color)
 	local jointType=joint:getType()
 	if jointType=="distance" then
@@ -399,6 +397,7 @@ function drawMode.draw(world,colorStyle,offx,offy,offr)
 		end	
 	end
 
+	helper.script.draw()
 	love.graphics.pop( )
 	--collectgarbage("collect")
 end

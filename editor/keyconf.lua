@@ -20,7 +20,6 @@ local conf={
 	createPrismatic="m",
 	createWheel="i",
 	createPully="u",
-	createGear="g",
 	selectAll="ctrl+a",
 	selectNone="ctrl+d",
 	alineHorizontal="h",

@@ -9,6 +9,7 @@ require(path.."/data")(helper)
 require(path.."/collision")(helper)
 require(path.."/reaction")(helper)
 require(path.."/materials")(helper)
+require(path.."/script")(helper)
 
 helper.world=nil
 helper.visible=helper.drawMode.visible

@@ -245,9 +245,11 @@ function system:loadScene(name,remainMode)
 	if string.sub(name,-6,-1)~=".scene" then name=name..".scene" end
 	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..name,"r")
 	if not file then return end
-
-	local data = loadstring(file:read())()
-	if not data then 
+	local func = loadstring(file:read())
+	local data
+	if func then 
+		data = func()
+	else
 		editor.log:push("data broken")
 		editor.currentScene="default"
 		system:newScene()

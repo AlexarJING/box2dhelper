@@ -48,7 +48,7 @@ function reactMode.reg(world)
 	}
 	
 	for i,body in ipairs(world:getBodyList()) do
-		local data=body:getUserData()
+		local data=body:getUserData() or {}
 		for i,v in ipairs(data) do
 			for t,react in pairs(reactMode.reactType) do
 				if react[v.prop] then

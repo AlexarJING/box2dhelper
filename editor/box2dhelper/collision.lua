@@ -11,11 +11,13 @@ local function findReaction(callbackType,a,b,...)
 	local data=a:getUserData()
 
 	if data then
+		local script
 		for i,v in ipairs(data) do
 			if collMode.collisionType[callbackType][v.prop]  then
 				collMode.collisionType[callbackType][v.prop](v.value,a,b,...)
 			end
 		end
+
 	end
 	local data=b:getUserData()
 	if data then
@@ -27,24 +29,69 @@ local function findReaction(callbackType,a,b,...)
 	end
 end
 
+local script_callbacks = {
+	beginC = {},
+	endC = {},
+	preC = {},
+	postC = {}
+}
+
+
+local function findScript(ctype,a, b, contact, normal_impulse1, tangent_impulse1, normal_impulse2, tangent_impulse2)
+	local body = a:getBody()
+	if script_callbacks[ctype][body] then
+		script_callbacks[ctype][body](
+			a,b,contact, normal_impulse1, tangent_impulse1, normal_impulse2, tangent_impulse2)
+	end
+
+	local body = b:getBody()
+	if script_callbacks[ctype][body] then
+		script_callbacks[ctype][body](
+			b,a,contact, normal_impulse2, tangent_impulse2, normal_impulse1, tangent_impulse1)
+	end
+end
+
 
 local function beginC(...)
+	findScript("beginC",...)
 	findReaction("begin",...)
+	
 end
 
 local function endC(...)
-	findReaction("over",...)
+	findScript("endC",...)
+	findReaction("over",...)	
 end
 
 local function preC(...)
+	findScript("preC",...)
 	findReaction("pre",...)
 end
 
 local function postC(...)
+	findScript("postC",...)
 	findReaction("post",...)
+	
 end
 
-function collMode.setCallbacks(world)
+
+
+local function setScriptCallbacks(world)
+	for i,body in ipairs(world:getBodyList()) do
+		local scription = helper.getProperty(body,"scription")
+		if scription then
+			if scription.beginC then script_callbacks.beginC[body]=scription.beginC end
+			if scription.endC then script_callbacks.endC[body] = scription.endC end
+			if scription.preC then script_callbacks.preC[body]=scription.preC end
+			if scription.postC then script_callbacks.postC[body]=scription.postC end
+		end
+	end
+
+end
+
+function collMode.setCallbacks()
+	local world = helper.world
+	setScriptCallbacks(world)
 	world:setCallbacks(beginC,endC,preC,postC)
 end
 

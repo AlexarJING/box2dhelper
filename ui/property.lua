@@ -239,6 +239,7 @@ function property:create(target)
 	
 	if self.targetType=="body" then 
 		self:createWorldTab()
+
 	end
 	self.tabs:SwitchToTab(self.tabIndex or 1)
 	self.tabIndex=self.tabs.tab
@@ -285,8 +286,8 @@ function property:createFrame()
 	
 	local count
 	if self.targetType=="body" then
-		count=#self.targetData+1>#self.targetProp+1 and  
-		#self.targetData+1 or #self.targetProp+1
+		count=#self.targetData+2>#self.targetProp+2 and  
+		#self.targetData+2 or #self.targetProp+2
 	elseif self.targetType=="fixture" then
 		count=#self.targetData+1>#self.targetProp+2 and  
 		#self.targetData+1 or #self.targetProp+2
@@ -334,6 +335,7 @@ function property:createPropertyTab()
 
 	if self.targetType=="body" then
 		self:createReactRow()
+		self:createScriptRow()
 	end
 
 	self.propList:update()
@@ -407,10 +409,7 @@ function property:createAddRow(pos)
 	
 end
 
-local interacts={
-	a={key=1,key2=2,key3=3},
-	b={key=1,key2=2,key3=3},
-}
+
 
 function property:createReactRow()
 	local name = ui.Create("button")
@@ -435,6 +434,66 @@ function property:createReactRow()
 	self.propList:AddItem(value,#self.propGrid+1,2)
 end
 
+function property:createScriptEditFrame(target,new)
+	
+	local frame = ui.Create("frame")
+	frame:SetName("Text Input")
+	frame:SetSize(800, 700)
+	frame:CenterWithinArea(0,0,w(),h())
+	
+	local textinput = ui.Create("textinput", frame)
+	textinput:SetPos(5, 30)
+	textinput:SetWidth(790)
+	textinput:SetHeight(650)
+	textinput:SetMultiline(true)
+
+	
+	if new then
+		local text = love.filesystem.read("editor/script_file.lua")
+		textinput:SetText(text)
+	else
+		local text = editor.helper.getProperty(target,"script_file")
+		textinput:SetText(text)
+	end
+
+
+	local button = ui.Create("button", frame)
+	button:SetPos(5, 670)
+	button:SetWidth(790)
+	button:SetText("save&exit")
+
+	button.OnClick = function(object)
+		editor.helper.setProperty(target,"script_file",textinput:GetText())
+		helper.script.load()
+		frame:Remove()
+		editor.action="set script"
+		self:create()
+	end
+end
+
+
+function property:createScriptRow()
+	local name = ui.Create("button")
+	name:SetText("script")
+
+	local value = ui.Create("button")
+
+
+	if editor.helper.getProperty(self.target,"script_file") then
+		value:SetText("edit")
+		value.OnClick = function(obj)
+			self:createScriptEditFrame(self.target)
+		end
+	else
+		value:SetText("add")
+		value.OnClick = function(obj)
+			self:createScriptEditFrame(self.target,true)
+		end
+	end
+	
+	self.propList:AddItem(name,#self.propGrid+2,1)
+	self.propList:AddItem(value,#self.propGrid+2,2)
+end
 
 function property:createMaterialRow()
 	local name = ui.Create("button")
