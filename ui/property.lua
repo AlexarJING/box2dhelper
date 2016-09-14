@@ -262,7 +262,7 @@ function property:prepairData(target)
 
 
 	
-	local data=target.getUserData and target:getUserData()
+	local data=target.getUserData and target:getUserData() or {}
 	
 	local prop={}
 	local tmp=editor.helper.getStatus(target,tType)

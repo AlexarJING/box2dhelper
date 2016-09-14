@@ -30,7 +30,6 @@ function script.draw()
 end
 
 function script.set(body)
-	print("test")
 	local file = helper.getProperty(body,"script_file")
 	
 	if not file then return end

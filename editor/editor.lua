@@ -134,23 +134,6 @@ function editor:draw()
 			self.bodyMode:draw()
 			self.selector:draw()
 		end	
-
-		if global1 then
-			love.graphics.setPointSize(3)
-			love.graphics.setColor(255, 255, 0, 255)
-
-			--love.graphics.polygon("line", global1)
-
-			love.graphics.setColor(255, 0, 255, 255)
-			--love.graphics.polygon("line", global2)
-
-			love.graphics.setColor(0, 0, 255, 255)
-			love.graphics.polygon("fill", global3)
-
-			love.graphics.setColor(255, 0, 0, 255)
-			love.graphics.line(global4)
-			
-		end
 	end)
 	love.graphics.setCanvas()
 	love.graphics.setColor(255, 255, 255, 255)

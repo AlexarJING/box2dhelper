@@ -521,13 +521,15 @@ function func.creator(toggle,a,b,c)
 	table.insert(helper.system.todo,{helper.createWorld,helper.world,data,x,y} )
 end
 
+local polygonClip = require "libs/polybool"
+
 function func.destructor(toggle,a,b)
 	if not toggle then return end
 	if not helper.getProperty(b,"destruct") then return end
 
 	local ball = {}
 	local x,y=a:getShape():getPoint()
-	local r = a:getShape():getRadius()
+	local r = a:getShape():getRadius()*2
 	for i=1,8 do
 		table.insert(ball, a:getBody():getX()+x+r*math.sin(i*math.pi/4))
 		table.insert(ball, a:getBody():getY()+y+r*math.cos(i*math.pi/4))
@@ -539,32 +541,37 @@ function func.destructor(toggle,a,b)
 	else
 		target={b:getBody():getWorldPoints( b:getShape():getPoints() )}
 	end
-	local cross = math.polygonClip(ball,target)
+	local rest = polygonClip(target,ball,"not")
+	local tri = {}
+	for i,v in ipairs(rest) do
+		local test, res = pcall(love.math.triangulate,v)
+		if test then
+			for i,t in ipairs(res) do
+				table.insert(tri,t)
+			end		
+		else
+			b:getBody():destroy()
+		end
+	end
 
-	if not cross[1] then return end
-	
-	local rest = math.polygonBoolean(target,cross)
-	global1 = ball
-	global2 = target
-	global3 = cross
-	global4 = rest
-	local test, res = pcall(love.math.triangulate,rest)
-	if not test then return end
 	local desBody = b:getBody()
 	local function create()
-		for i,v in ipairs(res) do				
-			local body = love.physics.newBody(helper.world, v[1], v[2], "static")
-			local shape
+		local destruct
+		for i,v in ipairs(tri) do				
+			destruct = true
+			
 			local test,re =pcall(love.physics.newPolygonShape,math.polygonTrans(-v[1],-v[2],0,1,v))
 			if test then
-				shape=re
+				local body = love.physics.newBody(helper.world, v[1], v[2], "static")
+				local shape=re
 				local fixture = love.physics.newFixture(body, shape)			
 				helper.setProperty(fixture,"meterial","wood")
-				helper.setProperty(fixture,"destruct",true)			
+				helper.setProperty(fixture,"destruct",true)				
 			end
 		end
-
-		if not desBody:isDestroyed() then desBody:destroy() end
+		if destruct then 
+			if not desBody:isDestroyed() then desBody:destroy() end 
+		end
 	end
 	table.insert(helper.system.todo,{create})
 end
@@ -577,7 +584,7 @@ collMode.collisionType={
 		destroyOnHit=collMode.collisionFunc.destroyOnHit,
 		scenejumper=collMode.collisionFunc.scene,
 		creator=collMode.collisionFunc.creator,
-		--destructor = collMode.collisionFunc.destructor
+		destructor = collMode.collisionFunc.destructor
 		},
 	over={
 		oneWay=collMode.collisionFunc.oneWayEnd,
@@ -588,7 +595,7 @@ collMode.collisionType={
 		bullet=collMode.collisionFunc.bulletPre,
 		buoyancy=collMode.collisionFunc.buoyancy,
 		magnetField=collMode.collisionFunc.magnet,
-		destructor = collMode.collisionFunc.destructor
+		--destructor = collMode.collisionFunc.destructor
 	},
 	post={
 		crashable=collMode.collisionFunc.crash,
