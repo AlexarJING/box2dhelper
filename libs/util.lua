@@ -7,6 +7,16 @@ function w() return lg.getWidth() end
 function h() return lg.getHeight() end
 
 
+if __TESTING then
+	local old_print = print
+	print = function(...)
+		local info = debug.getinfo(2, "Sl")
+		local source = info.source
+		local msg = ("%s:%i-->"):format(source, info.currentline)
+		old_print(msg, ...)
+	end
+end
+
 function love.graphics.hexagon(mode, x,y,l)
 	local i=(l/2)*3^0.5
 	love.graphics.polygon(mode, x,y,x+l,y,x+1.5*l,y+i,x+l,y+2*i,x,y+2*i,x-l*0.5,y+i)

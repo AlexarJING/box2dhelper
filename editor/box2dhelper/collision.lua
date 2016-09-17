@@ -246,7 +246,7 @@ func.crash=function(threshold,a,b,coll,np,tp)
 		local body=a:getBody()
 		
 		if shapeType=="circle" then
-			a=circle2polygon(a)
+			a=circle2polygon(a,16)
 		end
 		local verts={}
 		local hitPoints={}
@@ -498,8 +498,9 @@ function func.magnet(power,a,b,coll)
 	end
 end
 
-function func.destroyOnHit(p,a,b,c)
-	if not p then return end
+function func.destroyOnHit(threshold,a,b,c,np)
+	if not threshold then return end
+	if np<threshold then return end
 	local func=function(a) 
 		if a:isDestroyed() then return end
 		a:getBody():destroy() 
@@ -530,9 +531,9 @@ function func.destructor(toggle,a,b)
 	local ball = {}
 	local x,y=a:getShape():getPoint()
 	local r = a:getShape():getRadius()*2
-	for i=1,8 do
-		table.insert(ball, a:getBody():getX()+x+r*math.sin(i*math.pi/4))
-		table.insert(ball, a:getBody():getY()+y+r*math.cos(i*math.pi/4))
+	for i=1,16 do
+		table.insert(ball, a:getBody():getX()+x+r*math.sin(i*math.pi/8))
+		table.insert(ball, a:getBody():getY()+y+r*math.cos(i*math.pi/8))
 	end
 
 	local target
@@ -576,12 +577,35 @@ function func.destructor(toggle,a,b)
 	table.insert(helper.system.todo,{create})
 end
 
+function func.toPixel(toggle,a,b,c,np)
+	if not toggle then return end
+	local threshold = helper.getProperty(a,"toPixel_threshold") or 1
+	if np<threshold then return end
+	local scale = helper.getProperty(a,"toPixel_scale") or 5
+	local shape = a:getShape()
+	local l,t,r,b = shape:computeAABB()
+	local pixelShape = love.physics.newPolygonShape(0,0,scale,0,scale,scale,scale,0)
+	local func=function()
+		for x = l,r,scale do
+			for y = t,b,scale do
+
+			end
+		end
+
+		if not a:isDestroyed() then 
+			a:getBody():destroy()
+		end	 
+	end
+	table.insert(helper.system.todo,{func})
+end
+
+
 collMode.collisionType={
 	begin={
 		makeFrag=collMode.collisionFunc.spark,
 		reverse=collMode.collisionFunc.reverse,
 		explosion=collMode.collisionFunc.explosion,
-		destroyOnHit=collMode.collisionFunc.destroyOnHit,
+		
 		scenejumper=collMode.collisionFunc.scene,
 		creator=collMode.collisionFunc.creator,
 		destructor = collMode.collisionFunc.destructor
@@ -595,7 +619,9 @@ collMode.collisionType={
 		bullet=collMode.collisionFunc.bulletPre,
 		buoyancy=collMode.collisionFunc.buoyancy,
 		magnetField=collMode.collisionFunc.magnet,
+		destroyOnHit=collMode.collisionFunc.destroyOnHit,
 		--destructor = collMode.collisionFunc.destructor
+		toPixel = collMode.collisionFunc.toPixel
 	},
 	post={
 		crashable=collMode.collisionFunc.crash,
@@ -626,7 +652,7 @@ collMode.collisions={
 		{prop="explosion",value=1000},
 	},
 	destroyOnHit={
-		{prop="destroyOnHit",value=true}
+		{prop="destroyOnHit",value=1}
 	},
 	oneWay={
 		{prop="oneWay",value=true},
@@ -655,6 +681,10 @@ collMode.collisions={
 	},
 	destructor = {
 		{prop="destructor",value = true},
+	},
+	toPixel = {
+		{prop="toPixel",value = true},
+		{prop="toPixel_threshold",value = 1}
 	}
 }
 

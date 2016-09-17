@@ -53,15 +53,27 @@ function test:reset()
 	editor.system:redo()
 end
 
+
+local polyCut = require "libs/polygonCut"
 local lastX,lastY
+local function getLocalPoints(body,vert)
+	local rt={}
+	for i=1,#vert-1,2 do
+		local x,y=body:getLocalPoint(vert[i],vert[i+1])
+		table.insert(rt,x)
+		table.insert(rt,y)
+	end
+	return rt
+end
+
 function test:cutTest()
-	if not love.mouse.isDown(1) then
-	 	lastX,lastY=nil,nil
-	elseif love.mouse.isDown(1) and not lastX then
+	if love.mouse.isDown(1) and not lastX then
 		lastX,lastY=editor.mouseX,editor.mouseY
 	end
 
-	if lastX then 
+	if not love.mouse.isDown(1) and lastX then 
+
+		----for joints
 		local joints = editor.world:getJointList()
 		local toTest = {}
 		for i,v in ipairs(joints) do
@@ -77,6 +89,46 @@ function test:cutTest()
 			local test = math.lineCross(source,mouseLine)
 			if test then v:destroy() end
 		end
+
+		---------for fixtures-----
+		for i,body in ipairs(editor.world:getBodyList()) do
+			if not body:isDestroyed() then
+				for i,fixture in ipairs(body:getFixtureList()) do
+					if not fixture:isDestroyed() and fixture:getShape():getType() == "polygon" then
+						local verts = {body:getWorldPoints( fixture:getShape():getPoints() )}
+						local v1,v2 = polyCut(verts,lastX,lastY,editor.mouseX,editor.mouseY)		
+						if v1 then
+							for i,v in pairs({v1,v2}) do
+								local x,y=v[1],v[2]
+								local body = love.physics.newBody(editor.world, x, y,"dynamic")
+								local test ,triangles =pcall(love.math.triangulate,v)
+								if not test then print(triangles);break end
+								local mainFixture
+								for i,triangle in ipairs(triangles) do
+									local verts=math.polygonTrans(-x, -y,0,1,triangle)
+									local shape = love.physics.newPolygonShape(verts)
+									local fixture = love.physics.newFixture(body, shape)
+									editor.createMode:setMaterial(fixture,"wood")
+									
+									if i==1 then
+										editor.helper.setProperty(fixture,"mainFixture",true)
+										editor.helper.setProperty(fixture,"fixturesOutline",
+											getLocalPoints(body,v))
+										mainFixture=fixture
+									else
+										editor.helper.setProperty(fixture,"subFixture",mainFixture)
+									end
+									
+								end
+							end
+							body:destroy()
+						end
+					end
+				end
+			end
+		end
+
+		lastX,lastY=nil,nil
 	end
 
 	

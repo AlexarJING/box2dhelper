@@ -1,8 +1,7 @@
-
-
-
 if arg[#arg] == "-debug" then require("mobdebug").start() end 
+__TESTING = true
 require "libs.util"
+
 
 local editor=require "editor/editor"
 
