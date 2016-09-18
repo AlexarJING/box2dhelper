@@ -8,7 +8,7 @@ local advanced = {"softcircle","softbox","softpolygon","softrope","explosion","w
 function build:create()
 	self.frame= ui.Create("frame")
 	local frame = self.frame
-	frame:SetName("形状")
+	frame:SetName("建造")
 	frame:SetSize(50, 250)
 	frame:SetPos(10, 40)
 	frame:ShowCloseButton(false)

@@ -18,7 +18,7 @@ function unit:create()
 	self.unitCount=count
 	local max=9
 	frame:SetVisible(interface.visible.unit)
-	frame:SetName("units")
+	frame:SetName("单位")
 	frame:SetSize(100,30*max+28)
 	frame:ShowCloseButton(false)
 	frame:SetPos(interface.layout.unit and interface.layout.unit[1] or 70 ,

@@ -319,7 +319,7 @@ end
 function property:createPropertyTab()
 	
 	self.propList=makeList(self.rowCount)
-	self.tabs:AddTab("Property", self.propList)
+	self.tabs:AddTab("属性", self.propList)
 	self.propGrid={}
 
 	
@@ -345,7 +345,7 @@ end
 
 function property:createUserDataTab()
 	self.dataList=makeList(self.rowCount)
-	self.tabs:AddTab("UserData", self.dataList)
+	self.tabs:AddTab("数据", self.dataList)
 	self.dataGrid={}
 
 	for i,v in ipairs(self.targetData) do
@@ -358,7 +358,7 @@ end
 
 function property:createWorldTab()
 	self.worldList=makeList(self.rowCount)
-	self.tabs:AddTab("  world  ", self.worldList)
+	self.tabs:AddTab("世界", self.worldList)
 	self.worldGrid={}
 	self.worldData={
 		{prop="meter",value= love.physics.getMeter()},

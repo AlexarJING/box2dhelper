@@ -1910,14 +1910,14 @@ function skin.DrawMenuOption(object)
 			love.graphics.setColor(body_hover_color)
 			love.graphics.rectangle("fill", x + 2, y + 2, width - 4, height - 4)
 			love.graphics.setColor(text_hover_color)
-			if toggle or icon then
+			if toggle~=nil or icon then
 				love.graphics.print(text, x + 26, y + 5)
 			else
 				love.graphics.print(text, x + 15, y + 5)
 			end
 		else
 			love.graphics.setColor(text_color)
-			if toggle or icon then
+			if toggle~=nil or icon then
 				love.graphics.print(text, x + 26, y + 5)
 			else
 				love.graphics.print(text, x + 15, y + 5)

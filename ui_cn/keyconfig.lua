@@ -8,7 +8,7 @@ function keyconf:create()
 	if self.frame then self.frame:Remove() end
 	local frame =ui.Create("frame")
 	self.frame=frame
-	frame:SetName("keyconf")
+	frame:SetName("按键设定")
 	frame:SetSize(740,640)
 	frame:CenterWithinArea(0,0,w(),h())
 

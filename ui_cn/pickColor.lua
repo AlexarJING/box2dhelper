@@ -18,7 +18,7 @@ function colorPicker:create()
 	if self.frame then self.frame:Remove() end
 	local frame =ui.Create("frame")
 	self.frame=frame
-	frame:SetName("colorPicker")
+	frame:SetName("颜色设定")
 	frame:SetSize(330,350)
 	frame:CenterWithinArea(0,0,w(),h())
 

@@ -42,7 +42,7 @@ loveframes.input_cursor_set = false
 loveframes.prevcursor = nil
 if loveframes.fontPath then
 	loveframes.basicfont = love.graphics.newFont(loveframes.fontPath,13)
-	loveframes.basicfontsmall = love.graphics.newFont(loveframes.fontPath,15)
+	loveframes.basicfontsmall = love.graphics.newFont(loveframes.fontPath,12)
 	loveframes.basicfontbig = love.graphics.newFont(loveframes.fontPath,15)
 else
 	loveframes.basicfont = love.graphics.newFont(12)

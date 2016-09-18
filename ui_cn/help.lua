@@ -5,41 +5,56 @@ local help={}
 
 local helpText= require "editor/helpText"
 local font = love.graphics.newFont("font/cn.ttf", 20)
-local text
 
 function help:create()
-	local file = love.filesystem.newFile("help.txt","w")
-	string.gsub(helpText, "\n", "\n\r")
-	file:write(helpText)
-	file:close()
-	local path = love.filesystem.getSaveDirectory().."/help.txt"
-	love.system.openURL(path)
-end
 
---[[
-function help:create()
-	if self.frame then self.frame:Remove() end
 	local frame =ui.Create("frame")
 	self.frame=frame
-	frame:SetName("help")
+
+	local count=#helpText
+	frame:SetName("帮助文档")
 	frame:SetSize(1000,700)
 	frame:CenterWithinArea(0,0,w(),h())
-
-	local list = ui.Create("list", frame)
+	local list = ui.Create("list",frame)
+	list:SetDisplayType("vertical")
 	list:SetPos(5, 30)
-	list:SetSize(990, 660)
+	list:SetSize(190, 665)
+	list:SetSpacing(3)
+	list:SetPadding(3)
+	for i,v in ipairs(helpText) do
+		local b= ui.Create("button")
+		b:SetText(v.title)
+		list:AddItem(b)
+		b.OnClick=function() --copy to editor.selector.copied	
+			self:setText(i)
+		end
+	end
+	self:createRead(0)
+
+end
+
+
+function help:createRead()
+	
+	local frame = self.frame
+	local list = ui.Create("list", frame)
+	list:SetPos(200, 30)
+	list:SetSize(790, 665)
 	list:SetPadding(5)
 	list:SetSpacing(5)
 
-	if not text then
-		text = ui.Create("text")
-		text:SetFont(font)
-		text:SetPos(10,30)
-		text:SetText(helpText)
-	end
+	
+	local text = ui.Create("text")
+	text:SetPos(10,30)
+	text:SetText(helpText[0].content)
+	self.content = text
 	list:AddItem(text)
 end
-]]
+
+function help:setText(paragragh)
+	self.content:SetText(helpText[paragragh].content)
+end
+
 
 return function(parent) 
 	editor=parent

@@ -7,7 +7,7 @@ local createJoint={"distance","rope","revolute","prismatic","weld","wheel","pull
 function joint:create()
 	self.frame= ui.Create("frame")
 	local frame = self.frame
-	frame:SetName("Joint")
+	frame:SetName("连接")
 	frame:SetSize(50, 290)
 	frame:SetPos(10, 315)
 	frame:ShowCloseButton(false)

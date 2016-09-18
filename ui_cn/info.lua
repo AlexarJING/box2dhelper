@@ -35,9 +35,9 @@ function info:update()
 	local gx , gy = editor.world:getGravity()
 	local bodyCount = #editor.world:getBodyList()
 	local fps  = love.timer.getFPS()
-	local str = "|action| %-10s |mode| %-5s |selection| %-10s |screenX| %-5d |screenY| %-5d "..
-				"|worldX| %-5d |worldY| %-5d |Scale| %-5.2f |gravtiyX| %-5.2f |gravityY| %-5.2f "..
-				"|bodyCount| %-5d |FPS| %-5d"
+	local str = "|操作| %-10s |模式| %-5s |选中| %-10s |屏幕坐标X| %-5d |屏幕坐标Y| %-5d "..
+				"|场景坐标X| %-5d |场景坐标Y| %-5d |屏幕缩放| %-5.2f |重力X| %-5.2f |重力Y| %-5.2f "..
+				"|刚体计数| %-5d |当前帧率| %-5d"
 	self.text:SetText(string.format(str, action,mode,selection,
 		screenX,screenY,worldX,worldY,scale,gx,gy,bodyCount,fps))
 end

@@ -3,11 +3,10 @@ local ui
 local interface
 local donate={}
 
-local font = love.graphics.newFont(15)
 local donateText=[[
-		感谢您的支持！
-		QQ: 1643386616
-	Email:alexar@foxmail.com						 
+					感谢您的支持！
+					QQ: 1643386616
+				Email:alexar@foxmail.com						 
 ]]
 
 function donate:create()
@@ -19,7 +18,7 @@ function donate:create()
 	frame:CenterWithinArea(0,0,w(),h())
 	local text = ui.Create("text",frame)
 	text:SetPos(10,30)
-	text:SetFont(font)
+	text:SetSize(290,80)
 	text:SetText(donateText)
 	love.system.openURL("http://pay.qq.com/")
 end

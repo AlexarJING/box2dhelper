@@ -27,7 +27,7 @@ function history:create()
 
 	self.count=count
 	local max=9
-	frame:SetName("history")
+	frame:SetName("历史")
 	frame:SetSize(100,30*max+28)
 	frame:ShowCloseButton(false)
 	frame:SetPos(interface.layout.history and interface.layout.history[1] or 180 ,

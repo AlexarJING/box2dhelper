@@ -19,7 +19,7 @@ function scene:create()
 	local max=9
 	frame:SetVisible(interface.visible.scene)
 	frame:ShowCloseButton(false)
-	frame:SetName("scenes")
+	frame:SetName("场景")
 	frame:SetSize(100,30*max+28)
 	frame:SetPos(interface.layout.scene and interface.layout.scene[1] or 290 ,
 				interface.layout.scene and interface.layout.scene[2] or  40)
