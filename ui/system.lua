@@ -15,7 +15,7 @@ function system:create()
 
 	
 	local b= ui.Create("button")
-	b:SetText("SYSTEM")
+	b:SetText("System")
 	b.OnClick=function(button)
 		local x,y = button:GetPos()
 		interface.fileMenu.menu:SetPos(x,y+30)

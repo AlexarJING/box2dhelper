@@ -579,24 +579,98 @@ end
 
 function func.toPixel(toggle,a,b,c,np)
 	if not toggle then return end
+	
 	local threshold = helper.getProperty(a,"toPixel_threshold") or 1
 	if np<threshold then return end
-	local scale = helper.getProperty(a,"toPixel_scale") or 5
+	a = helper.getProperty(a,"subFixture") or a
+	local scale = helper.getProperty(a,"toPixel_scale") or 10
 	local shape = a:getShape()
-	local l,t,r,b = shape:computeAABB()
-	local pixelShape = love.physics.newPolygonShape(0,0,scale,0,scale,scale,scale,0)
+	local body = a:getBody()
+	local l,t,r,b = shape:computeAABB(body:getX(),body:getY(),body:getAngle())
+	local pixelShape = love.physics.newPolygonShape(0,0,scale,0,scale,scale,0,scale)
+	local outLine =  helper.getProperty(a,"fixturesOutline")
+	local verts = outLine and {body:getWorldPoints(unpack(outLine))} or
+		{body:getWorldPoints( shape:getPoints() )}
+
+
 	local func=function()
 		for x = l,r,scale do
 			for y = t,b,scale do
-
+				if math.pointTest(x,y,verts) then
+					local body = love.physics.newBody(helper.world, x, y,"dynamic")
+					local fixture = love.physics.newFixture(body, pixelShape)
+					helper.setProperty(fixture,"meterial","wood")
+				end
 			end
 		end
 
-		if not a:isDestroyed() then 
-			a:getBody():destroy()
+		if not body:isDestroyed() then 
+			body:destroy()
 		end	 
 	end
 	table.insert(helper.system.todo,{func})
+end
+
+
+local polyCut = require "libs/polygonCut"
+function func.breakup(toggle,a,b,c,np)
+	if not toggle then return end
+	local threshold = helper.getProperty(a,"breakup_threshold") or 1
+	if np<threshold then return end	
+	a = helper.getProperty(a,"subFixture") or a
+	local scale = helper.getProperty(a,"break_scale") or 100
+	local shape = a:getShape()
+	local body = a:getBody()
+	local outLine =  helper.getProperty(a,"fixturesOutline")
+	local verts = outLine and {body:getWorldPoints(unpack(outLine))} or
+		{body:getWorldPoints( shape:getPoints() )}
+	local r = 100
+
+	local cx,cy = body:getPosition()
+	local subshapes = {verts}
+	local target
+	for i = 1, np/scale do
+		target = {}
+		for i,v in ipairs(subshapes) do
+			local angle = love.math.random()*2*math.pi
+			local offx = love.math.random(-r,r)/2
+			local offy = love.math.random(-r,r)/2
+			local sx = cx + offx +2*r*math.sin(angle)
+			local sy = cy + offy +2*r*math.cos(angle)
+			local tx = cx + offx -2*r*math.sin(angle)
+			local ty = cy + offy -2*r*math.cos(angle)
+			local v1,v2 = polyCut(v,sx,sy,tx,ty)
+			if v1 and v2 then
+				table.insert(target,v1)
+				table.insert(target,v2)
+			else
+				table.insert(target,v)
+			end
+		end
+		subshapes = target
+	end
+	helper.setProperty(a,"breakup",false)
+
+	if not target then return end
+
+	local function create()
+		for i,v in ipairs(target) do
+			local cx,cy = math.getPolygonArea(v)
+			if cx then
+				local test , pshape = pcall(love.physics.newPolygonShape,math.polygonTrans(-cx,-cy,0,1,v))
+				if test then
+					local pbody = love.physics.newBody(helper.world, cx, cy, "dynamic")
+					local pfixture = love.physics.newFixture(pbody, pshape)
+					helper.setProperty(pfixture,"meterial","wood")
+				end
+			end
+		end
+		if not body:isDestroyed() then 
+			body:destroy()
+		end	 
+	end
+
+	table.insert(helper.system.todo,{create})
 end
 
 
@@ -621,12 +695,13 @@ collMode.collisionType={
 		magnetField=collMode.collisionFunc.magnet,
 		destroyOnHit=collMode.collisionFunc.destroyOnHit,
 		--destructor = collMode.collisionFunc.destructor
-		toPixel = collMode.collisionFunc.toPixel
+		
 	},
 	post={
 		crashable=collMode.collisionFunc.crash,
 		embed=collMode.collisionFunc.embed,
-
+		toPixel = collMode.collisionFunc.toPixel,
+		breakup = collMode.collisionFunc.breakup
 	}	
 }
 
@@ -685,6 +760,10 @@ collMode.collisions={
 	toPixel = {
 		{prop="toPixel",value = true},
 		{prop="toPixel_threshold",value = 1}
+	},
+	breakup = {
+		{prop="breakup",value = true},
+		{prop="breakup_threshold",value = 1}
 	}
 }
 

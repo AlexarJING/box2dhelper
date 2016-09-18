@@ -115,10 +115,8 @@ function editor:draw()
 		love.graphics.line(-editor.W/2,0,editor.W/2,0)
 		love.graphics.line(0, -editor.H/2, 0,editor.H/2)
 		love.graphics.setLineWidth(3)
-		
-
 		self.helper.draw(self.world)
-		
+
 		if self.state=="create" then
 			self.createMode:draw()
 		elseif self.state=="shape" then

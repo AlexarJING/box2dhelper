@@ -1,5 +1,6 @@
 if arg[#arg] == "-debug" then require("mobdebug").start() end 
 __TESTING = true
+__LANGUAGE = "cn"
 require "libs.util"
 
 

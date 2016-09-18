@@ -417,7 +417,7 @@ function skin.DrawButton(object)
 			-- button text
 			love.graphics.setFont(font)
 			love.graphics.setColor(textnohovercolor)
-			love.graphics.print(text, x + width/2 - twidth/2, y + height/2 - theight/2)
+			love.graphics.print(text, math.floor(x + width/2 - twidth/2), math.floor(y + height/2 - theight/2))
 			-- button border
 			love.graphics.setColor(bordercolor)
 			skin.OutlinedRectangle(x, y, width, height)
@@ -1910,10 +1910,18 @@ function skin.DrawMenuOption(object)
 			love.graphics.setColor(body_hover_color)
 			love.graphics.rectangle("fill", x + 2, y + 2, width - 4, height - 4)
 			love.graphics.setColor(text_hover_color)
-			love.graphics.print(text, x + 26, y + 5)
+			if toggle or icon then
+				love.graphics.print(text, x + 26, y + 5)
+			else
+				love.graphics.print(text, x + 15, y + 5)
+			end
 		else
 			love.graphics.setColor(text_color)
-			love.graphics.print(text, x + 26, y + 5)
+			if toggle or icon then
+				love.graphics.print(text, x + 26, y + 5)
+			else
+				love.graphics.print(text, x + 15, y + 5)
+			end
 		end
 		
 

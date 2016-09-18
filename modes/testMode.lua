@@ -94,8 +94,11 @@ function test:cutTest()
 		for i,body in ipairs(editor.world:getBodyList()) do
 			if not body:isDestroyed() then
 				for i,fixture in ipairs(body:getFixtureList()) do
-					if not fixture:isDestroyed() and fixture:getShape():getType() == "polygon" then
-						local verts = {body:getWorldPoints( fixture:getShape():getPoints() )}
+					if not fixture:isDestroyed() and fixture:getShape():getType() == "polygon"
+						and not editor.helper.getProperty(fixture,"subFixture") then
+						local outLine =  editor.helper.getProperty(fixture,"fixturesOutline")
+						local verts = outLine and {body:getWorldPoints(unpack(outLine))} or
+							{body:getWorldPoints( fixture:getShape():getPoints() )}
 						local v1,v2 = polyCut(verts,lastX,lastY,editor.mouseX,editor.mouseY)		
 						if v1 then
 							for i,v in pairs({v1,v2}) do
@@ -130,9 +133,6 @@ function test:cutTest()
 
 		lastX,lastY=nil,nil
 	end
-
-	
-	
 
 end
 

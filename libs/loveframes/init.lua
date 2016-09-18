@@ -26,7 +26,7 @@ loveframes.config["ENABLE_SYSTEM_CURSORS"] = true
 loveframes.config["ENABLE_UTF8_SUPPORT"] = true
 
 -- misc library vars
-loveframes.fontPath="font/en.ttf"
+loveframes.fontPath="font/cn.ttf"
 loveframes.state = "none"
 loveframes.drawcount = 0
 loveframes.collisioncount = 0
@@ -41,8 +41,8 @@ loveframes.hover = false
 loveframes.input_cursor_set = false
 loveframes.prevcursor = nil
 if loveframes.fontPath then
-	loveframes.basicfont = love.graphics.newFont(loveframes.fontPath,12)
-	loveframes.basicfontsmall = love.graphics.newFont(loveframes.fontPath,10)
+	loveframes.basicfont = love.graphics.newFont(loveframes.fontPath,13)
+	loveframes.basicfontsmall = love.graphics.newFont(loveframes.fontPath,15)
 	loveframes.basicfontbig = love.graphics.newFont(loveframes.fontPath,15)
 else
 	loveframes.basicfont = love.graphics.newFont(12)

@@ -27,26 +27,54 @@ interface.layout={
 function interface:init()
 	ui=editor.LoveFrames
 	--ui.config["DEBUG"]=true
-	interface.system=require "ui/system"(editor)
-	interface.build= require "ui/build"(editor)
-	interface.help=require "ui/help"(editor)
-	interface.about=require "ui/about"(editor)
-	interface.history=require "ui/history"(editor)
-	interface.property= require "ui/property"(editor)
-	interface.unit = require "ui/unit"(editor)
-	interface.joint=require "ui/joint"(editor)
-	interface.info= require "ui/info"(editor)
-	interface.scene= require "ui/scene"(editor)
-	interface.tutorial = require "ui/tutorial"(editor)
-	interface.keyconfig = require "ui/keyconfig"(editor)
-	interface.donate = require "ui/donate"(editor)
-	interface.colorPick = require "ui/pickColor"(editor)
+	
+	if __LANGUAGE == "cn" then
+		interface.system=require "ui_cn/system"(editor)
+		interface.build= require "ui_cn/build"(editor)
+		interface.help=require "ui_cn/help"(editor)
+		interface.about=require "ui_cn/about"(editor)
+		interface.history=require "ui_cn/history"(editor)
+		interface.property= require "ui_cn/property"(editor)
+		interface.unit = require "ui_cn/unit"(editor)
+		interface.joint=require "ui_cn/joint"(editor)
+		interface.info= require "ui_cn/info"(editor)
+		interface.scene= require "ui_cn/scene"(editor)
+		interface.tutorial = require "ui_cn/tutorial"(editor)
+		interface.keyconfig = require "ui_cn/keyconfig"(editor)
+		interface.donate = require "ui_cn/donate"(editor)
+		interface.colorPick = require "ui_cn/pickColor"(editor)
 
-	interface.fileMenu= require "ui/fileMenu"(editor)
-	interface.editMenu= require "ui/editMenu"(editor)
-	interface.modeMenu= require "ui/modeMenu"(editor)
-	interface.layoutMenu= require "ui/layoutMenu"(editor)
-	interface.viewMenu= require "ui/viewMenu"(editor)
+		interface.fileMenu= require "ui_cn/fileMenu"(editor)
+		interface.editMenu= require "ui_cn/editMenu"(editor)
+		interface.modeMenu= require "ui_cn/modeMenu"(editor)
+		interface.layoutMenu= require "ui_cn/layoutMenu"(editor)
+		interface.viewMenu= require "ui_cn/viewMenu"(editor)
+	else
+		interface.system=require "ui/system"(editor)
+		interface.build= require "ui/build"(editor)
+		interface.help=require "ui/help"(editor)
+		interface.about=require "ui/about"(editor)
+		interface.history=require "ui/history"(editor)
+		interface.property= require "ui/property"(editor)
+		interface.unit = require "ui/unit"(editor)
+		interface.joint=require "ui/joint"(editor)
+		interface.info= require "ui/info"(editor)
+		interface.scene= require "ui/scene"(editor)
+		interface.tutorial = require "ui/tutorial"(editor)
+		interface.keyconfig = require "ui/keyconfig"(editor)
+		interface.donate = require "ui/donate"(editor)
+		interface.colorPick = require "ui/pickColor"(editor)
+
+		interface.fileMenu= require "ui/fileMenu"(editor)
+		interface.editMenu= require "ui/editMenu"(editor)
+		interface.modeMenu= require "ui/modeMenu"(editor)
+		interface.layoutMenu= require "ui/layoutMenu"(editor)
+		interface.viewMenu= require "ui/viewMenu"(editor)
+	end
+
+	
+
+	
 
 
 	interface.system:create()
