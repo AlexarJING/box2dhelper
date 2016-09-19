@@ -173,6 +173,7 @@ function property:setListItems(parent,pos,target,data,itemCanRemove)
 		value = ui.Create("checkbox")
 		value:SetChecked(data.value)
 		value.OnChanged=function()
+			if editor.state == "test" then return end 
 			setProp(target,data.prop,value:GetChecked())
 		end
 		

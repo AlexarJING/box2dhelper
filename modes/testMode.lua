@@ -6,13 +6,7 @@ test.mouseMode="std" --or ball
 
 test.pause=false
 test.modeIndex=1
-local mouseModes={"std","power","ball","key","scissor"}
-local mouseType={
-	love.mouse.getSystemCursor("arrow"),
-	love.mouse.getSystemCursor("sizeall"),
-	love.mouse.getSystemCursor("hand"),
-	love.mouse.getSystemCursor("arrow"),
-}
+local mouseModes={"std","power","ball","key","scissor","grab"}
 
 function test:new()
 	editor.action="start testing"
@@ -41,6 +35,8 @@ function test:update(dt)
 		self:downForce()
 	elseif self.mouseMode == "scissor" then
 		self:cutTest()
+	elseif self.mouseMode == "grab" then
+		self:grab()
 	end	
 end
 
@@ -136,16 +132,18 @@ function test:cutTest()
 
 end
 
-function test:toggleMouse()
+function test:toggleMouse(index)
 	if editor.state ~= "test" then return end
-	if mouseModes[self.modeIndex+1] then
-		self.modeIndex=self.modeIndex+1
-		
+	if index then
+		self.modeIndex = index
 	else
-		self.modeIndex=1
+		if mouseModes[self.modeIndex+1] then
+			self.modeIndex=self.modeIndex+1		
+		else
+			self.modeIndex=1
+		end
 	end
 	self.mouseMode = mouseModes[self.modeIndex]
-	love.mouse.setCursor(mouseType[self.modeIndex])
 
 	if self.mouseMode=="ball" then
 		if not self.mouseball or self.mouseBall.world~=editor.world  then
@@ -250,6 +248,25 @@ function test:draw()
 	end
 	love.graphics.print(self.mouseMode.." mode",editor.mouseX+10,editor.mouseY+10,0,2,2)
 end
+
+function test:grab()
+	local selection=editor.selector.selection
+	
+	local mouseX,mouseY=editor.mouseX,editor.mouseY
+	if love.mouse.isDown(1) and not self.grabing and selection then
+		self.grabing=true
+		self.grabBody = selection[1]
+		self.grabBody:setFixedRotation(true )
+		self.grabjoint= love.physics.newMouseJoint(self.grabBody, editor.mouseX,editor.mouseY)
+	elseif love.mouse.isDown(1) and self.grabing then
+		self.grabjoint:setTarget(editor.mouseX,editor.mouseY)
+	elseif not love.mouse.isDown(1) and self.grabing then
+		self.grabjoint:destroy()
+		self.grabing = false
+		self.grabBody:setFixedRotation(false)
+	end
+end
+
 
 return function(parent) 
 	editor=parent

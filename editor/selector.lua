@@ -192,7 +192,6 @@ function selector:bodyPointTest(key)
 		table.remove(self.selection,1)
 		table.insert(self.selection,1,target)
 		
-
 	end
 end
 

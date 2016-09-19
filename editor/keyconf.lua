@@ -54,7 +54,15 @@ local conf={
 	saveProject="alt+s",
 	loadProject="alt+l",
 	openSaveFolder="ctrl+home",
-	comboSet = "ctrl+u"
+	comboSet = "ctrl+u",
+	teststd = "kp0",
+	testpower = "kp1",
+	testball = "kp2",
+	testkey = "kp3",
+	testscissor = "kp4",
+	testgrab = "kp5"
 }
 
 return conf
+
+--{"std","power","ball","key","scissor","grab"}

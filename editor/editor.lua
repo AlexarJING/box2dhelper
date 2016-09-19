@@ -14,6 +14,7 @@ editor.helper = require "editor/box2dhelper"
 editor.Delaunay=require "libs/delaunay"
 editor.bloom=require "libs/bloom"(w()/2,h()/2)
 editor.trace = require "libs/trace".new(0.005)
+editor.meta = require "libs/metaball"
 editor.grid = require "libs/grid".new(editor)
 --------------------------------------------------
 editor.log = require "editor/log"(editor)
@@ -77,6 +78,7 @@ function editor:update(dt)
 		end
 	end
 	if self.action then
+		--print(self.action)
 		editor.log:push(self.action)
 		editor.system:pushUndo()
 		self.action=nil
@@ -86,8 +88,6 @@ function editor:update(dt)
 		self.world:update(dt)
 		self.helper.update(self.world,self)
 	end
-
-
 end
 
 
@@ -109,31 +109,12 @@ function editor:draw()
 	
     love.graphics.setCanvas(self.renderCanvas)
     love.graphics.clear()
-	self.cam:draw(function()
-		love.graphics.setLineWidth(1)
-		love.graphics.setColor(255, 0, 0, 255)
-		love.graphics.line(-editor.W/2,0,editor.W/2,0)
-		love.graphics.line(0, -editor.H/2, 0,editor.H/2)
-		love.graphics.setLineWidth(3)
+    love.graphics.setColor(255, 255, 255, 255)
+	self.cam:draw(function()	
 		self.helper.draw(self.world)
-
-		if self.state=="create" then
-			self.createMode:draw()
-		elseif self.state=="shape" then
-			self.shapeMode:draw()
-		elseif self.state=="test" then
-			self.testMode:draw()
-			self.selector:draw()
-		elseif self.state=="joint" then
-			self.jointMode:draw()
-		elseif self.state=="fixture" then
-			self.fixtureMode:draw()
-		elseif self.state=="body" then
-			self.bodyMode:draw()
-			self.selector:draw()
-		end	
 	end)
 	love.graphics.setCanvas()
+
 	love.graphics.setColor(255, 255, 255, 255)
 
 	if self.helper.visible.trace then
@@ -160,6 +141,29 @@ function editor:draw()
 
 	love.graphics.draw(self.renderCanvas)
 	
+	self.cam:draw(function()
+		love.graphics.setLineWidth(1)
+		love.graphics.setColor(255, 0, 0, 255)
+		love.graphics.line(-editor.W/2,0,editor.W/2,0)
+		love.graphics.line(0, -editor.H/2, 0,editor.H/2)
+		love.graphics.setLineWidth(3)
+		if self.state=="create" then
+			self.createMode:draw()
+		elseif self.state=="shape" then
+			self.shapeMode:draw()
+		elseif self.state=="test" then
+			self.testMode:draw()
+			self.selector:draw()
+		elseif self.state=="joint" then
+			self.jointMode:draw()
+		elseif self.state=="fixture" then
+			self.fixtureMode:draw()
+		elseif self.state=="body" then
+			self.bodyMode:draw()
+			self.selector:draw()
+		end	
+	end)
+
 	self.units:draw()
 	self.log:draw()
 	love.graphics.setColor(155, 155, 155, 255)
@@ -207,7 +211,10 @@ function editor:mousereleased(x, y, button)
 
 		if self.state=="body" then
 			editor.selector:click(button)
-		elseif self.state=="test" and (self.testMode.mouseMode=="power" or self.testMode.mouseMode=="key")then
+		elseif self.state=="test" and 
+			(self.testMode.mouseMode=="power" 
+				or self.testMode.mouseMode=="key"
+				or self.testMode.mouseMode == "grab") then
 			editor.selector:click(button)
 		elseif self.state=="fixture" then
 			editor.fixtureMode:click(button)
@@ -489,7 +496,25 @@ function editor:keyBound()
 			local path = love.filesystem.getAppdataDirectory( )
 			if proj then path = path.."/LOVE/ABE/"..proj end
 			love.system.openURL(path)
-		end
+		end,
+		teststd = function()
+			self.testMode:toggleMouse(1)
+		end,
+		testpower = function()
+			self.testMode:toggleMouse(2)
+		end,
+		testball = function()
+			self.testMode:toggleMouse(3)
+		end,
+		testkey = function()
+			self.testMode:toggleMouse(4)
+		end,
+		testscissor = function()
+			self.testMode:toggleMouse(5)
+		end,
+		testgrab = function()
+			self.testMode:toggleMouse(6)
+		end,
 	}
 
 	local keys ={}
@@ -501,33 +526,7 @@ function editor:keyBound()
 	
 	self.keys= keys
 end
---[[
-local data  = love.image.newImageData("1.png")
-local width, height = data:getDimensions()
-local brickW=1
-local brickH=1
-local offx
-local count=0
-local scale=5
-local step=5
 
-for x=0,width-3,step do
-	for y=0, height-3,step do
-		if y%2==0 then 
-			offx=0
-		else
-			offx=1
-		end
-		local r,g,b,a=data:getPixel( x, y )
-		
-		if r<250 or b<250 or g<250 then
-			local body = love.physics.newBody(editor.world, x*scale-width*scale/2, y*scale-height*scale/2,"dynamic")
-			local shape = love.physics.newRectangleShape(brickW*scale*step,brickH*scale*step)
-			local fixture = love.physics.newFixture(body, shape)
-		end
-	end
-end
-]]
 
 return editor
 

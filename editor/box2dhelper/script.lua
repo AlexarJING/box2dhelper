@@ -53,6 +53,13 @@ function script.set(body)
 			if helper.getProperty(fixture,"name") == name then return fixture end
 		end
 	end
+	
+	env.copyBody = function(body,x,y)
+		local angle = body:getAngle()
+		local copied= helper.getWorldData({body},body:getX(),body:getY())
+		local group = helper.createWorld(helper.world, copied,x,y)
+		return group[1].body
+	end
 	--draw/update/load/startcoll/endcoll/presolve/postsolve
 
 	local func = loadstring(file)

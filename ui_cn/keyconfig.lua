@@ -9,7 +9,7 @@ function keyconf:create()
 	local frame =ui.Create("frame")
 	self.frame=frame
 	frame:SetName("按键设定")
-	frame:SetSize(740,640)
+	frame:SetSize(740,700)
 	frame:CenterWithinArea(0,0,w(),h())
 
 
@@ -26,11 +26,11 @@ function keyconf:create()
 		list:SetPos(10+(i-1)*250, 30)
 		list:SetCellWidth(100)
 		list:SetCellHeight(20)
-		list:SetRows(20)
+		list:SetRows(22)
 		list:SetColumns(2)
 		list:SetItemAutoSize(true)
 		table.insert(self.lists, list)
-		for i = 1, 20 do
+		for i = 1, 22 do
 			index= index+1
 			if not self.keys[index] then break end
 			local key = ui.Create("textinput")
