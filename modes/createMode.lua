@@ -635,7 +635,9 @@ end
 function creator:getBodies()
 	local selection=editor.selector.selection
 	if not selection then return end
-	return selection[1],selection[2]
+	if selection[1] and selection[2] then
+		return selection[1],selection[2]
+	end
 end
 
 function creator:getContBodies()

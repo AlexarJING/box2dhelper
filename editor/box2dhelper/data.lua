@@ -89,6 +89,9 @@ end
 
 
 function dataMode.getProperty(obj,key)
+	if not obj:getUserData() then
+		obj:setUserData({})
+	end
 	if not dataMode.propBuffer[obj] then
 		dataMode.propBuffer[obj]={}
 	end

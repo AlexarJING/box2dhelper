@@ -1,4 +1,4 @@
-local ref
+local ref = {}
 local _newWorld = love.physics.newWorld
 function love.physics.newWorld(...)
 	ref = {}

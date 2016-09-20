@@ -33,6 +33,11 @@ function layout:create()
 		function(obj) interface:setVisible("property",obj.toggle) end,true)
 	menu:AddDivider()
 
+	
+	menu:AddOption("镜头重置", false, 
+		function() editor.cam:reset() end)
+	menu:AddDivider()
+
 	menu:AddOption("隐藏所有", false, function() 
 			for k,v in pairs(interface.visible) do
 				if k~="system" then

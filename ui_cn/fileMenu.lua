@@ -14,6 +14,7 @@ function file:create()
 		function() 
 			editor.system:saveAsProject() 
 		end)
+	menu:AddOption("存储位置", false, function() editor.openSave()end)
 	menu:AddDivider()
 
 	menu:AddOption("新建场景", false, function() editor.system:newScene()end)

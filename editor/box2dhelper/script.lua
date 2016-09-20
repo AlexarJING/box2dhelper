@@ -1,7 +1,9 @@
 local helper
 local script = {}
+local ref = {}
 
 function script.load()
+	ref = {}
 	for i,body in ipairs(helper.world:getBodyList()) do
 		script.set(body)
 		local scription = helper.getProperty(body,"scription")
@@ -10,13 +12,27 @@ function script.load()
 		end
 	end
 end
-
+--[[
 function script.update()
 	for i,body in ipairs(helper.world:getBodyList()) do
 		local scription = helper.getProperty(body,"scription")
 		if scription then
 			if scription.update then scription.update(love.timer.getDelta()) end
 		end
+	end
+end]]
+
+function script.update()
+	for handle,body in pairs(ref) do
+		local scription = helper.getProperty(body,"scription")
+		if body:isDestroyed() then
+			if scription.destroy then scription.destroy() end
+		else
+			if scription.update then scription.update(love.timer.getDelta()) end
+		end
+		
+		
+		
 	end
 end
 
@@ -33,6 +49,9 @@ function script.set(body)
 	local file = helper.getProperty(body,"script_file")
 	
 	if not file then return end
+	local func = loadstring(file)
+	if not func then return end
+	ref[body] = body
 	local env = {}
 	env.helper = helper
 	env.editor = helper.editor
@@ -60,12 +79,17 @@ function script.set(body)
 		local group = helper.createWorld(helper.world, copied,x,y)
 		return group[1].body
 	end
+	
+	env.todo = function(func,...)
+		table.insert(helper.system.todo,{func,...})
+	end
+
+	env.delay = function(func,time,...)
+		helper.system.addDelay(func,time,...)
+	end
 	--draw/update/load/startcoll/endcoll/presolve/postsolve
 
-	local func = loadstring(file)
-	if not func then
-		return
-	end
+	
 	setfenv(func, env)
 	func()
 	helper.setProperty(body,"scription",env)

@@ -25,3 +25,7 @@ end
 function postC(a,b,c)
 
 end
+
+function destroy()
+
+end

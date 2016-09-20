@@ -5,7 +5,7 @@ local about={}
 
 local aboutText=[[
 					Alexar's Physics Editor						
-						版本 0.0.1
+						版本 0.0.2
 						程序: Alexar
 					All Right Reserved. 2016
 ]]

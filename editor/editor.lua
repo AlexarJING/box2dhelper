@@ -376,7 +376,13 @@ function editor:quit()
 
 end
 
-
+function editor:openSave()
+	local proj = editor.currentProject
+	local path = love.filesystem.getAppdataDirectory( )
+	local id = love.filesystem.getIdentity()
+	love.system.openURL(path.."/"..id)
+	love.system.openURL(path.."/LOVE/"..id)
+end
 
 
 function editor:keyBound()
@@ -492,10 +498,7 @@ function editor:keyBound()
 			editor.interface:setVisible("history", not editor.interface.visible.history)		
 		end,
 		openSaveFolder=function()
-			local proj = editor.currentProject
-			local path = love.filesystem.getAppdataDirectory( )
-			if proj then path = path.."/LOVE/ABE/"..proj end
-			love.system.openURL(path)
+			self:openSave()
 		end,
 		teststd = function()
 			self.testMode:toggleMouse(1)

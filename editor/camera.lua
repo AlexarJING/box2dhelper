@@ -84,7 +84,11 @@ end
 
 function cam:resize()
 	self:setWindow(0,0,editor.W,editor.H)
+end
 
+function cam:reset()
+	self:setPosition(0,0)
+	self:setScale(1)
 end
 
 return function(parent) cam.editor=parent; editor=parent return cam end

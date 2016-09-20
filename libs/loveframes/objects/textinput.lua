@@ -375,7 +375,7 @@ function newobject:mousepressed(x, y, button)
 			end
 			if not alltextselected then
 				local lastclicktime = self.lastclicktime
-				if (time > lastclicktime) and time < (lastclicktime + 0.25) then
+				if (time > lastclicktime) and time < (lastclicktime + 0.25) then --double click
 					if not self.multiline then
 						if self.lines[1] ~= "" then
 							self.alltextselected = true
@@ -390,6 +390,8 @@ function newobject:mousepressed(x, y, button)
 			self.focus = true
 			self.lastclicktime = time
 			self:GetTextCollisions(x, y)
+			self.selectStartPos = self.indicatornum
+			self.selectStartLine = self.line
 			if onfocusgained and not focus then
 				onfocusgained(self)
 			end
@@ -467,7 +469,14 @@ function newobject:mousereleased(x, y, button)
 	for k, v in ipairs(internals) do
 		v:mousereleased(x, y, button)
 	end
-	
+	self.selectEndPos = self.indicatornum
+	self.selectEndLine = self.line
+	if self.selectStart>self.selectEnd then
+		local tmp = self.selectStart
+		self.selectStart = self.selectEnd
+		self.selectEnd = tmp
+	end
+	self.selectString = string.sub()
 end
 
 --[[---------------------------------------------------------
