@@ -112,7 +112,7 @@ function newobject:update(dt)
 				local linky = v.y
 				local text = v.text
 				local twidth = font:getWidth(text)
-				local theight = font:getHeight()
+				local theight = font:getHeight("一")
 				local col = loveframes.util.BoundingBox(x + linkx, mx, y + linky, my, twidth, 1, theight, 1)
 				v.hover = false
 				if col then
@@ -213,7 +213,7 @@ function newobject:mousepressed(x, y, button)
 					local font = v.font
 					local text = v.text
 					local twidth = font:getWidth(text)
-					local theight = font:getHeight()
+					local theight = font:getHeight("一")
 					local col = loveframes.util.BoundingBox(objx + linkx, x, objy + linky, y, twidth, 1, theight, 1)
 					if col then
 						local onclicklink = self.OnClickLink
@@ -296,8 +296,9 @@ function newobject:SetText(t)
 				v = v:gsub("\n", " ")
 			end
 			v = v:gsub(string.char(9), "    ")
-			v = v:gsub("\n", " \n ")
-			local parts = loveframes.util.SplitString(v, " ")
+			--v = v:gsub("\n", " \n ")
+			--local parts = loveframes.util.SplitString(v, " ")
+			local parts = string.toTable(v)
 			for i, j in ipairs(parts) do
 				table.insert(self.formattedtext, {
 					font = prevfont, 
@@ -400,7 +401,7 @@ function newobject:SetText(t)
 		if type(text) == "string" then
 			self.text = self.text .. text
 			local width = v.font:getWidth(text)
-			local height = v.font:getHeight("a")
+			local height = v.font:getHeight("一")
 			if height > largestheight then
 				largestheight = height
 				prevlargestheight = height
@@ -519,12 +520,12 @@ function newobject:DrawText()
 	
 	for k, v in ipairs(textdata) do
 		local textx = v.x
-		local texty = v.y
+		local texty = v.y 
 		local text = v.text
 		local color = v.color
 		local font = v.font
 		local link = v.link
-		local theight = font:getHeight("a")
+		local theight = font:getHeight("一")
 		if inlist then
 			local listy = list.y
 			local listhieght = list.height
@@ -547,6 +548,7 @@ function newobject:DrawText()
 					love.graphics.setColor(unpack(color))
 				end
 				love.graphics.print(text, x + textx, y + texty)
+				love.graphics.print(text, x + textx, y + texty+0.1)
 			end
 		else
 			love.graphics.setFont(font)
@@ -567,6 +569,7 @@ function newobject:DrawText()
 				love.graphics.setColor(unpack(color))
 			end
 			love.graphics.print(text, x + textx, y + texty)
+			love.graphics.print(text, x + textx, y + texty+0.1)
 		end
 	end
 	

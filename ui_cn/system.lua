@@ -60,7 +60,7 @@ function system:create()
 	list:AddItem(b)
 
 	local b= ui.Create("button")
-	b:SetText("支持")
+	b:SetText("赞助")
 	b.OnClick=function(button)
 		interface.donate:create()
 	end

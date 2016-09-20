@@ -46,6 +46,7 @@ function tutor:createRead()
 	
 	local text = ui.Create("text")
 	text:SetPos(10,30)
+	text:SetFont(font)
 	text:SetText(tutorText[0].content)
 	self.content = text
 	list:AddItem(text)
