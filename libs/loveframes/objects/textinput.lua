@@ -272,6 +272,10 @@ function newobject:update(dt)
 		update(self, dt)
 	end
 	
+
+	if self.hover and self.selectStartPos and love.mouse.isDown(1) then
+		self:checkSelection()
+	end
 end
 
 --[[---------------------------------------------------------
@@ -390,6 +394,7 @@ function newobject:mousepressed(x, y, button)
 			self.focus = true
 			self.lastclicktime = time
 			self:GetTextCollisions(x, y)
+			self.selectStr = nil
 			self.selectStartPos = self.indicatornum
 			self.selectStartLine = self.line
 			if onfocusgained and not focus then
@@ -447,6 +452,89 @@ function newobject:mousepressed(x, y, button)
 	
 end
 
+function newobject:checkSelection()
+	local x, y = love.mouse.getPosition()
+	self:GetTextCollisions(x, y)
+
+	self.selectEndPos = self.indicatornum
+	self.selectEndLine = self.line
+	
+	local startPos = self.selectStartPos
+	local startLine = self.selectStartLine
+	local endPos = self.selectEndPos
+	local endLine = self.selectEndLine
+
+
+	self.selectBefore = ""
+	self.selectStr = ""
+	self.selectAfter = ""
+	if startLine>endLine then
+		local tmp = startLine
+		startLine = endLine
+		endLine = tmp
+		tmp = startPos
+		startPos = endPos
+		endPos = tmp
+	elseif startLine == endLine then
+		if startPos>endPos then
+			local tmp = startPos
+			startPos = endPos
+			endPos = tmp	
+		end
+		local curLine = self.lines[startLine]
+		self.selectBefore = string.sub(curLine,0,startPos)
+		self.selectStr =  string.sub(curLine,startPos+1,endPos)
+		self.selectAfter = string.sub(curLine,endPos+1,-1)
+		self.startLine = startLine
+		self.startPos = startPos
+		self.endLine = endLine
+		self.endPos = endPos
+		if self.selectStr == "" then self.selectStr = nil end
+		return
+	end
+	
+	
+	for i = 1 , startLine do
+		local curLine = self.lines[i]
+	
+		if i == startLine then
+			self.selectBefore = self.selectBefore .. string.sub(curLine,0,startPos)
+		else
+			self.selectBefore = self.selectBefore .. curLine .. "\n"
+		end
+	end
+
+
+	for i = startLine , endLine do
+		local curLine = self.lines[i]
+		
+		if i == startLine then
+			self.selectStr = self.selectStr .. string.sub(curLine,startPos+1,string.len(curLine)) .. "\n"
+		elseif i == endLine then
+			self.selectStr = self.selectStr .. string.sub(curLine,0,endPos)
+		else
+			self.selectStr = self.selectStr .. curLine .. "\n"
+		end
+		
+	end
+
+	for i = endLine , #self.lines do
+		local curLine = self.lines[i]
+		if i == endLine then
+			self.selectAfter = self.selectAfter .. string.sub(curLine,endPos+1,string.len(curLine)) .. "\n"
+		else
+			self.selectAfter = self.selectAfter .. curLine .. "\n"
+		end
+	end
+
+	self.startLine = startLine
+	self.startPos = startPos
+	self.endLine = endLine
+	self.endPos = endPos
+	if self.selectStr == "" then self.selectStr = nil end
+
+end
+
 --[[---------------------------------------------------------
 	- func: mousereleased(x, y, button)
 	- desc: called when the player releases a mouse button
@@ -469,14 +557,16 @@ function newobject:mousereleased(x, y, button)
 	for k, v in ipairs(internals) do
 		v:mousereleased(x, y, button)
 	end
-	self.selectEndPos = self.indicatornum
-	self.selectEndLine = self.line
-	if self.selectStart>self.selectEnd then
-		local tmp = self.selectStart
-		self.selectStart = self.selectEnd
-		self.selectEnd = tmp
+	
+
+	if self.alltextselected then
+		return
 	end
-	self.selectString = string.sub()
+	
+	if self.selectStartPos then
+		self:checkSelection()
+		self.selectStartPos = nil
+	end
 end
 
 --[[---------------------------------------------------------

@@ -1050,6 +1050,12 @@ function skin.DrawTextInput(object)
 	local highlightbarcolor = skin.controls.textinput_highlight_bar_color
 	local indicatorcolor = skin.controls.textinput_indicator_color
 	local color = object.color
+	local selected = object.selectStr
+	local startPos = object.startPos
+	local startLine = object.startLine
+	local endPos = object.endPos
+	local endLine = object.endLine
+
 	love.graphics.setColor(bodycolor)
 	love.graphics.rectangle("fill", x, y, width, height)
 	
@@ -1082,6 +1088,32 @@ function skin.DrawTextInput(object)
 		end
 	end
 	
+	if selected then
+		love.graphics.setColor(highlightbarcolor)
+		if startLine == endLine then
+			local twidth = font:getWidth(selected)
+			local swidth = font:getWidth(string.sub(object.lines[startLine],0,startPos))
+			love.graphics.rectangle("fill", textx+swidth, texty + (startLine-1)*theight , twidth, theight)
+		else
+			local right = font:getWidth(string.sub(object.lines[startLine],startPos+1,-1))
+			local left = font:getWidth(string.sub(object.lines[endLine],0,endPos))
+			local cheight = texty + (startLine-2)*theight
+			for i = startLine, endLine do
+				cheight = cheight + theight
+				local lineWidth = font:getWidth(object.lines[i])
+				if i == startLine then
+					love.graphics.rectangle("fill", textx+(lineWidth-right), cheight , right, theight)
+				elseif i == endLine then
+					love.graphics.rectangle("fill", textx , cheight , left, theight)
+				else
+					love.graphics.rectangle("fill", textx , cheight , lineWidth, theight)
+				end
+				love.graphics.rectangle("fill", textx , cheight , lineWidth, theight)
+			end
+		end
+		
+	end
+
 	if showindicator and focus then
 		love.graphics.setColor(indicatorcolor)
 		love.graphics.rectangle("fill", indicatorx, indicatory, 1, theight)
@@ -1139,7 +1171,7 @@ function skin.DrawTextInput(object)
 	
 	love.graphics.setFont(font)
 	
-	if alltextselected then
+	if alltextselected or selected then
 		love.graphics.setColor(textselectedcolor)
 	elseif #lines == 1 and lines[1] == "" then
 		love.graphics.setColor(textplaceholdercolor)
@@ -1152,14 +1184,62 @@ function skin.DrawTextInput(object)
 
 	local str = ""
 	if multiline then
-		for i=1, #lines do
-			str = lines[i]
-			if masked then
-				local maskchar = object:GetMaskChar()
-				str = str:gsub(".", maskchar)
+		if selected then
+			for i=1, #lines do							
+				str = lines[i]
+				if masked then
+					local maskchar = object:GetMaskChar()
+					str = str:gsub(".", maskchar)
+				end
+				if i == startLine and i == endLine then		
+					local line  = str
+					love.graphics.setColor(textnormalcolor)
+					str = string.sub(line,0,startPos)
+					if masked then
+						local maskchar = object:GetMaskChar()
+						str = str:gsub(".", maskchar)
+					end
+					local left = font:getWidth(str)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)
+					love.graphics.setColor(textselectedcolor)
+					str = selected
+					if masked then
+						local maskchar = object:GetMaskChar()
+						str = str:gsub(".", maskchar)
+					end
+					local mid = font:getWidth(str)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx + left, texty + theight * i - theight)
+					
+					str = string.sub(line,endPos+1,-1)
+					if masked then
+						local maskchar = object:GetMaskChar()
+						str = str:gsub(".", maskchar)
+					end				
+					love.graphics.setColor(textnormalcolor)
+					
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx + left + mid, texty + theight * i - theight)
+					
+				elseif i == startLine then
+
+				elseif i == endLine then
+
+				else			
+					love.graphics.setColor(textnormalcolor)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)
+				end
 			end
-			love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)
+		else
+			for i=1, #lines do	
+				str = lines[i]
+				if masked then
+					local maskchar = object:GetMaskChar()
+					str = str:gsub(".", maskchar)
+				end
+				love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)
+			end
 		end
+
+
 	else
 		str = lines[1]
 		if masked then
@@ -1167,6 +1247,23 @@ function skin.DrawTextInput(object)
 			str = str:gsub(".", maskchar)
 		end
 		love.graphics.print(#str > 0 and str or placeholder, textx, texty)
+		if selected then
+			local twidth = font:getWidth(selected)
+			local swidth = font:getWidth(string.sub(object.lines[startLine],0,startPos))
+			love.graphics.setColor(textnormalcolor)
+			local str = object.selectBefore
+			if masked then
+				local maskchar = object:GetMaskChar()
+				str = str:gsub(".", maskchar)
+			end	
+			love.graphics.print(#str > 0 and str or placeholder, textx, texty)
+			local str = object.selectAfter
+			if masked then
+				local maskchar = object:GetMaskChar()
+				str = str:gsub(".", maskchar)
+			end
+			love.graphics.print(#str > 0 and str or placeholder, textx+twidth+swidth, texty)
+		end
 	end
 	
 	love.graphics.setColor(230, 230, 230, 255)
