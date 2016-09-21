@@ -72,12 +72,14 @@ function system:returnTo(index)
 	editor:cancel()
 end
 
-function system:copyProject(source)
-	local files = love.filesystem.getDirectoryItems(source.."/units")
+function system:copyProject(source,path)
+	local files = love.filesystem.getDirectoryItems(source.."/units")	
 	if files then
 		for i,name in ipairs(files) do
-			local from = love.filesystem.newFile(source.."/units/"..name, "r")
-			local to = love.filesystem.newFile(editor.currentProject.."/units/"..name, "w")
+			local from = love.filesystem.newFile(
+				source.."/units/"..name, "r",path)
+			local to = love.filesystem.newFile(
+				editor.currentProject.."/units/"..name, "w",editor.savingDir)
 			to:write(from:read())
 			from:close()
 			to:close()
@@ -86,8 +88,10 @@ function system:copyProject(source)
 	local files = love.filesystem.getDirectoryItems(source.."/scenes")
 	if files then
 		for i,name in ipairs(files) do
-			local from = love.filesystem.newFile(source.."/scenes/"..name, "r")
-			local to = love.filesystem.newFile(editor.currentProject.."/scenes/"..name, "w")
+			local from = love.filesystem.newFile(
+				source.."/scenes/"..name, "r",path)
+			local to = love.filesystem.newFile(
+				editor.currentProject.."/scenes/"..name, "w",editor.savingDir)
 			to:write(from:read())
 			from:close()
 			to:close()
@@ -96,8 +100,10 @@ function system:copyProject(source)
 	local files = love.filesystem.getDirectoryItems(source.."/textures")
 	if files then
 		for i,name in ipairs(files) do
-			local from = love.filesystem.newFile(source.."/textures/"..name, "r")
-			local to = love.filesystem.newFile(editor.currentProject.."/textures/"..name, "w")
+			local from = love.filesystem.newFile(
+				source.."/textures/"..name, "r",path)
+			local to = love.filesystem.newFile(
+				editor.currentProject.."/textures/"..name, "w",editor.savingDir)
 			to:write(from:read())
 			from:close()
 			to:close()
@@ -121,18 +127,16 @@ end
 
 function system:saveProject()
 
-
 	if editor.currentProject=="default" then
 		system:newProject()
 		return
 	end
 	
 	local text=editor.currentProject
-	love.filesystem.createDirectory(text.."/units")
-	love.filesystem.createDirectory(text.."/scenes")
-	love.filesystem.createDirectory(text.."/textures")
-	local project = love.filesystem.newFile(text..".proj", "w")
-	
+	--love.filesystem.createDirectory(text.."/units")
+	--love.filesystem.createDirectory(text.."/scenes")
+	--love.filesystem.createDirectory(text.."/textures")
+	local project = love.filesystem.newFile(editor.currentProject..".proj", "w",editor.savingDir)
 	local data={
 		projectName=editor.currentProject,
 		currentScene=editor.currentScene,
@@ -143,7 +147,10 @@ function system:saveProject()
 		createTime=editor.createTime,
 		lastEditTime=os.date("%c"),
 		groupIndex=editor.groupIndex,
-		colorstyle = editor.helper.drawMode.defaultStyle
+		colorstyle = editor.helper.drawMode.defaultStyle,
+		scenes = editor.scenes,
+		textures = editor.textures,
+		units = editor.units
 	}
 	project:write(table.save(data))
 	project:close()	
@@ -181,6 +188,7 @@ function system:loadProject()
 	end
 
 	local data = loadstring(file:read())()
+	file:close()
 	if not data then
 		editor.loadProject = nil
 		system:newProject()
@@ -188,6 +196,9 @@ function system:loadProject()
 	end
 	editor.currentProject=data.projectName
 	editor.currentScene=data.currentScene
+	editor.scenes = data.scenes or {}
+	editor.units = data.units or {}
+	editor.textures = data.textures or {}
 	system:loadScene(editor.currentScene..".scene")
 
 	--editor.keyconf=data.keyconf
@@ -233,9 +244,16 @@ function system:saveScene()
 		return
 	end
 
-	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..editor.currentScene..".scene","w")
+	local file = love.filesystem.newFile(
+		editor.currentProject.."/scenes/"..editor.currentScene..".scene",
+		"w",editor.savingDir)
+	
 	file:write(table.save(editor.system.undoStack[editor.system.undoIndex].world))
 	file:close()
+	if not table.getIndex(editor.scenes,editor.currentScene) then
+		table.insert(editor.scenes,editor.currentScene)
+	end
+
 	editor.interface.system:updateProj()
 	system:saveProject()
 	editor.log:push("scene saved")
@@ -243,9 +261,10 @@ end
 
 function system:loadScene(name,remainMode)
 	if string.sub(name,-6,-1)~=".scene" then name=name..".scene" end
-	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..name,"r")
+	local file = love.filesystem.newFile(editor.currentProject.."/scenes/"..name,"r",editor.savingDir)
 	if not file then return end
 	local func = loadstring(file:read())
+	file:close()
 	local data
 	if func then 
 		data = func()

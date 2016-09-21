@@ -38,17 +38,17 @@ function unit:create()
 				love.filesystem.remove( editor.currentProject.."/units/"..b:GetText() )
 				frame:Remove()
 				self:create()
-				editor.units:showPreview(false)
+				editor.unitManage:showPreview(false)
 			else
-				editor.units:load(b:GetText())
+				editor.unitManage:load(b:GetText())
 			end
 		end
 		b.OnMouseEnter=function()
-			editor.units:showPreview(b:GetText())
+			editor.unitManage:showPreview(b:GetText())
 		end
 
 		b.OnMouseExit=function()
-			editor.units:showPreview(false)
+			editor.unitManage:showPreview(false)
 		end
 	end
 

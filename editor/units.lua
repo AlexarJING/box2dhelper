@@ -27,8 +27,9 @@ end
 
 function units:showPreview(text)
 	if not text then self.target=nil ;return end
-	local file = love.filesystem.newFile(editor.currentProject.."/units/"..text)
-	file:open("r")
+	text = text .. ".unit"
+	local file = love.filesystem.newFile(
+		editor.currentProject.."/units/"..text,"r",editor.savingDir)
 	self.target=loadstring(file:read())()
 	file:close()
 	self.world=love.physics.newWorld(0, 0, true)
@@ -55,10 +56,11 @@ function units:save()
 		end
 	end
 	local data=editor.helper.getWorldData(editor.selector.selection)
-	local file = love.filesystem.newFile(editor.currentProject.."/units/"..name..".lua")
-	file:open("w")
+	local file = love.filesystem.newFile(
+		editor.currentProject.."/units/"..name..".unit","w",editor.savingDir)
 	file:write(table.save(data))
 	file:close()
+	table.insert(editor.units,name)
 	editor.saveUnit=nil
 
 end
@@ -87,8 +89,8 @@ end
 
 
 function units:load(text)
-	local file = love.filesystem.newFile(editor.currentProject.."/units/"..text)
-	file:open("r")
+	text = text..".unit"
+	local file = love.filesystem.newFile(editor.currentProject.."/units/"..text,"r",editor.savingDir)
 	local tab=loadstring(file:read())()
 	file:close()
 	if not tab then return end

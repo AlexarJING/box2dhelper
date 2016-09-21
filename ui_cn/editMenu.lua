@@ -12,7 +12,7 @@ function edit:create()
 	menu:AddOption("重做", false, function() editor.system:redo() end)
 	menu:AddOption("复制", false, function() editor.bodyMode:copy() end)
 	menu:AddOption("粘贴", false, function() editor.bodyMode:paste() end)
-	menu:AddOption("保存单位", false, function() editor.units:save() end)
+	menu:AddOption("保存单位", false, function() editor.unitManage:save() end)
 
 	menu:AddDivider()
 

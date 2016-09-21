@@ -17,6 +17,28 @@ if __TESTING then
 	end
 end
 
+local newFile = love.filesystem.newFile
+function love.filesystem.newFile(path,mode,fullpath)
+	if mode == "r" then
+		local file = newFile(path,mode)
+		if file then 
+			return file
+		else
+			if string.sub(path,1,1) ~= "/" then path = "/"..path end
+			return io.open(fullpath..path,mode)
+		end
+	elseif mode == "w" then
+		if fullpath then
+			if string.sub(path,1,1) ~= "/" then path = "/"..path end
+			io.open(fullpath..path,mode)
+		else
+			return newFile(path,mode)
+		end
+	else
+		return newFile(path)
+	end
+end
+
 function love.graphics.hexagon(mode, x,y,l)
 	local i=(l/2)*3^0.5
 	love.graphics.polygon(mode, x,y,x+l,y,x+1.5*l,y+i,x+l,y+2*i,x,y+2*i,x-l*0.5,y+i)

@@ -11,7 +11,10 @@ function scene:create()
 		interface.visible.scene=self.frame:GetVisible()
 		self.frame:Remove() 
 	end
-	local files = love.filesystem.getDirectoryItems(editor.currentProject.."/scenes")
+	
+	local files = editor.scenes
+
+	--local files = love.filesystem.getDirectoryItems(editor.currentProject.."/scenes")
 	local frame =ui.Create("frame")
 	self.frame=frame
 	local count=#files
@@ -31,11 +34,12 @@ function scene:create()
 	list:SetPadding(3)
 	for i,v in ipairs(files) do
 		local b= ui.Create("button")
-		b:SetText(string.sub(v,1,-7))
+		b:SetText(v)
 		list:AddItem(b)
 		b.OnClick=function() --copy to editor.selector.copied
 			if love.keyboard.isDown("lctrl") and love.keyboard.isDown("lalt") then
-				love.filesystem.remove( editor.currentProject.."/scenes/"..b:GetText()..".scene" )
+				table.removeItem(files,b:GetText())
+				--love.filesystem.remove( editor.currentProject.."/scenes/"..b:GetText()..".scene" )
 				frame:Remove()
 				self:create()
 			else

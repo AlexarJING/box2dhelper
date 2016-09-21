@@ -11,7 +11,7 @@ function unit:create()
 		interface.visible.unit=self.frame:GetVisible()
 		self.frame:Remove() 
 	end
-	local files = love.filesystem.getDirectoryItems(editor.currentProject.."/units")
+	local files = editor.units
 	local frame =ui.Create("frame")
 	self.frame=frame
 	local count=#files
@@ -35,20 +35,21 @@ function unit:create()
 		list:AddItem(b)
 		b.OnClick=function() --copy to editor.selector.copied
 			if love.keyboard.isDown("lctrl") and love.keyboard.isDown("lalt") then
-				love.filesystem.remove( editor.currentProject.."/units/"..b:GetText() )
+				--love.filesystem.remove( editor.currentProject.."/units/"..b:GetText() )
+				table.removeItem(files,b:GetText())
 				frame:Remove()
 				self:create()
-				editor.units:showPreview(false)
+				editor.unitManage:showPreview(false)
 			else
-				editor.units:load(b:GetText())
+				editor.unitManage:load(b:GetText())
 			end
 		end
 		b.OnMouseEnter=function()
-			editor.units:showPreview(b:GetText())
+			editor.unitManage:showPreview(b:GetText())
 		end
 
 		b.OnMouseExit=function()
-			editor.units:showPreview(false)
+			editor.unitManage:showPreview(false)
 		end
 	end
 
