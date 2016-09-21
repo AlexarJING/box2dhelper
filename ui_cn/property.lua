@@ -438,7 +438,7 @@ end
 function property:createScriptEditFrame(target,new)
 	
 	local frame = ui.Create("frame")
-	frame:SetName("Text Input")
+	frame:SetName("scription for "..(editor.helper.getProperty(target , "name") or "").." "..tostring(target))
 	frame:SetSize(800, 700)
 	frame:CenterWithinArea(0,0,w(),h())
 	

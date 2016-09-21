@@ -291,7 +291,7 @@ end
 
 
 function drawMode.draw(world,colorStyle,offx,offy,offr)
-	
+	helper.editor = helper.editor or editor
 	--collectgarbage("stop")
 	love.graphics.push( )
 	if offx then

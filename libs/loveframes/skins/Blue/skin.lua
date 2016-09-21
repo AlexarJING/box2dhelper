@@ -1108,7 +1108,7 @@ function skin.DrawTextInput(object)
 				else
 					love.graphics.rectangle("fill", textx , cheight , lineWidth, theight)
 				end
-				love.graphics.rectangle("fill", textx , cheight , lineWidth, theight)
+				--love.graphics.rectangle("fill", textx , cheight , lineWidth, theight)
 			end
 		end
 		
@@ -1220,9 +1220,43 @@ function skin.DrawTextInput(object)
 					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx + left + mid, texty + theight * i - theight)
 					
 				elseif i == startLine then
+					local line  = str
+					love.graphics.setColor(textnormalcolor)
+					str = string.sub(line,0,startPos)
+					if masked then
+						local maskchar = object:GetMaskChar()
+						str = str:gsub(".", maskchar)
+					end
+					local left = font:getWidth(str)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)
+					str = string.sub(line,startPos+1,-1)
+					if masked then
+						local maskchar = object:GetMaskChar()
+						str = str:gsub(".", maskchar)
+					end
+					love.graphics.setColor(textselectedcolor)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx + left, texty + theight * i - theight)
 
 				elseif i == endLine then
-
+					local line  = str
+					love.graphics.setColor(textselectedcolor)
+					str = string.sub(line,0,endPos)
+					if masked then
+						local maskchar = object:GetMaskChar()
+						str = str:gsub(".", maskchar)
+					end
+					local left = font:getWidth(str)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)
+					str = string.sub(line,endPos+1,-1)
+					if masked then
+						local maskchar = object:GetMaskChar()
+						str = str:gsub(".", maskchar)
+					end
+					love.graphics.setColor(textnormalcolor)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx + left, texty + theight * i - theight)
+				elseif i>startLine and i<endLine then
+					love.graphics.setColor(textselectedcolor)
+					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)
 				else			
 					love.graphics.setColor(textnormalcolor)
 					love.graphics.print(#str > 0 and str or (#lines == 1 and placeholder or ""), textx, texty + theight * i - theight)

@@ -30,9 +30,8 @@ function system.updateTodo()
 end
 
 
-function system.update(world,editor)
+function system.update(world)
 	if world==helper.world then
-		helper.editor = editor
 		helper.script.update()
 		helper.reactMode.update()
 		system.updateDelay()

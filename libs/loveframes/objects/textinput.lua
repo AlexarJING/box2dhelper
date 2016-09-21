@@ -439,11 +439,13 @@ function newobject:mousepressed(x, y, button)
 		end
 	else
 		if inputobject == self then
-			loveframes.inputobject = false
+			loveframes.inputobject = false		
 			if onfocuslost then
 				onfocuslost(self)
 			end
 		end
+		self.selectStr = nil
+		self.selectStartPos = nil
 	end
 	
 	for k, v in ipairs(internals) do
@@ -482,9 +484,16 @@ function newobject:checkSelection()
 			endPos = tmp	
 		end
 		local curLine = self.lines[startLine]
-		self.selectBefore = string.sub(curLine,0,startPos)
+		for i = 1,startLine-1 do
+			self.selectBefore = self.selectBefore .. self.lines[i].."\n"
+		end
+		self.selectBefore = self.selectBefore .. string.sub(curLine,0,startPos)
 		self.selectStr =  string.sub(curLine,startPos+1,endPos)
 		self.selectAfter = string.sub(curLine,endPos+1,-1)
+		for i = endLine+1,#self.lines do
+			self.selectAfter = self.selectAfter .."\n" ..self.lines[i]
+		end
+
 		self.startLine = startLine
 		self.startPos = startPos
 		self.endLine = endLine
@@ -592,7 +601,11 @@ function newobject:keypressed(key, isrepeat)
 	local repeatdelay = self.repeatdelay
 	local alltextselected = self.alltextselected
 	local editable = self.editable
-	
+	local selected = self.selectStr
+	local selectBefore = self.selectBefore
+	local selectAfter = self.selectAfter
+
+
 	self.delay = time + repeatdelay
 	self.keydown = key
 	
@@ -612,6 +625,12 @@ function newobject:keypressed(key, isrepeat)
 			if oncopy then
 				oncopy(self, text)
 			end
+		elseif key == "c" and selected then
+			local oncopy = self.OnCopy
+			love.system.setClipboardText(selected)
+			if oncopy then
+				oncopy(self, selected)
+			end
 		elseif key == "x" and alltextselected and editable then
 			local text = self:GetText()
 			local oncut = self.OnCut
@@ -620,6 +639,14 @@ function newobject:keypressed(key, isrepeat)
 				oncut(self, text)
 			else
 				self:SetText("")
+			end
+		elseif key == "x" and selected and editable then
+			local oncut = self.OnCut
+			love.system.setClipboardText(selected)
+			if oncut then
+				oncut(self, selected)
+			else
+				self:SetText(selectBefore..selectAfter)
 			end
 		elseif key == "v" and editable then
 			self:Paste()
@@ -700,9 +727,18 @@ function newobject:RunKey(key, istext)
 	local initialtext = self:GetText()
 	local ontextchanged = self.OnTextChanged
 	local onenter = self.OnEnter
-	
+	local selected = self.selectStr
+	local selectBefore = self.selectBefore
+	local selectAfter = self.selectAfter
+	local startLine = self.startLine
+	local endLine = self.endLine
+	local startPos = self.startPos
+	local endPos = self.endPos
+
 	if not istext then
 		if key == "left" then
+			self.selectStr = nil
+			self.selectBefore =nil
 			indicatornum = self.indicatornum
 			if not multiline then
 				self:MoveIndicator(-1)
@@ -731,6 +767,8 @@ function newobject:RunKey(key, istext)
 			end
 			return
 		elseif key == "right" then
+			self.selectStr = nil
+			self.selectBefore =nil
 			indicatornum = self.indicatornum
 			if not multiline then
 				self:MoveIndicator(1)
@@ -758,6 +796,8 @@ function newobject:RunKey(key, istext)
 			end
 			return
 		elseif key == "up" then
+			self.selectStr = nil
+			self.selectBefore =nil
 			if multiline then
 				if line > 1 then
 					self.line = line - 1
@@ -768,6 +808,8 @@ function newobject:RunKey(key, istext)
 			end
 			return
 		elseif key == "down" then
+			self.selectStr = nil
+			self.selectBefore =nil
 			if multiline then
 				if line < #lines then
 					self.line = line + 1
@@ -790,6 +832,13 @@ function newobject:RunKey(key, istext)
 				self:Clear()
 				self.alltextselected = false
 				indicatornum = self.indicatornum
+			elseif selected then
+				self:SetText(selectBefore..selectAfter)
+				self.selectStr = nil
+			    self.selectBefore =nil
+			    self.indicatornum = startPos
+			    self.line = startLine
+			    return
 			else
 				if text ~= "" and indicatornum ~= 0 then
 					text = self:RemoveFromText(indicatornum)
@@ -834,6 +883,13 @@ function newobject:RunKey(key, istext)
 				self:Clear()
 				self.alltextselected = false
 				indicatornum = self.indicatornum
+			elseif selected then
+				self:SetText(selectBefore..selectAfter)
+				self.selectStr = nil
+			    self.selectBefore =nil
+			    self.indicatornum = startPos
+			    self.line = startLine
+			    return
 			else
 				if text ~= "" and indicatornum < string.len(text) then
 					text = self:RemoveFromText(indicatornum + 1)
@@ -861,6 +917,13 @@ function newobject:RunKey(key, istext)
 					self:Clear()
 					indicatornum = self.indicatornum
 					line = self.line
+				elseif selected then
+					self:SetText(selectBefore.."\n"..selectAfter)
+					self.selectStr = nil
+				    self.selectBefore =nil
+				    self.indicatornum = startPos
+				    self.line = startLine
+				    return
 				end
 				local newtext = "" 
 				if indicatornum == 0 then
@@ -884,7 +947,9 @@ function newobject:RunKey(key, istext)
 				end
 			end
 		elseif key == "tab" then
-			if alltextselected then
+			self.selectStr = nil
+		    self.selectBefore =nil
+			if alltextselected or selected then
 				return
 			end
 			ckey = key
@@ -930,6 +995,13 @@ function newobject:RunKey(key, istext)
 			text = ""
 			lines = self.lines
 			line = self.line
+		elseif selected then
+			self:SetText(selectBefore..selectAfter)
+			self.selectStr = nil
+		    self.selectBefore =nil
+		    self.indicatornum = startPos
+		    self.line = startLine
+		    return self:RunKey(key, istext)
 		end
 
 		if indicatornum ~= 0 and indicatornum ~= string.len(text) then
@@ -1366,6 +1438,7 @@ function newobject:SetFocus(focus)
 			onfocusgained(self)
 		end
 	else
+
 		if inputobject == self then
 			loveframes.inputobject = false
 		end

@@ -10,7 +10,7 @@ editor.groupIndex=1
 love.physics.setMeter(editor.meter)
 ------------------------------------------------------
 editor.LoveFrames= require "libs.loveframes"
-editor.helper = require "editor/box2dhelper"
+editor.helper = require "editor/box2dhelper"(editor)
 editor.Delaunay=require "libs/delaunay"
 editor.bloom=require "libs/bloom"(w()/2,h()/2)
 editor.trace = require "libs/trace".new(0.005)
@@ -86,7 +86,7 @@ function editor:update(dt)
 
 	if self.state=="test" and not self.testMode.pause then 
 		self.world:update(dt)
-		self.helper.update(self.world,self)
+		self.helper.update(editor,self.world)
 	end
 end
 

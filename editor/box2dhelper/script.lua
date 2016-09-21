@@ -60,6 +60,7 @@ function script.set(body)
 	env.set = helper.setProperty
 	env.get = helper.getProperty
 	env.fixtures = body:getFixtureList()
+	env.print = helper.editor.log.print
 	setmetatable(env, {__index = _G}) 
 
 	env.getBody = function(name)

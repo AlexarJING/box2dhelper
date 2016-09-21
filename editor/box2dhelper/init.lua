@@ -1,7 +1,5 @@
-
-------------------------------------
 local helper={}
-local path=...
+local path =...
 require(path.."/patch")
 require(path.."/system")(helper)
 require(path.."/draw")(helper)
@@ -38,5 +36,8 @@ helper.press=helper.reactMode.press
 helper.click=helper.reactMode.click
 
 helper.setMaterial=helper.materialMode.setMaterial
-
-return helper
+helper.editor = editor
+return function(editor)
+	helper.editor = editor
+	return helper
+end

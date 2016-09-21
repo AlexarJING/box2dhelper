@@ -12,6 +12,11 @@ function log:push(text)
 	if #log.lines>log.maxLine then table.remove(log.lines, #log.lines) end
 end
 
+function log.print(text)
+	table.insert(log.lines,1,os.date("%X").."->"..tostring(text))
+	if #log.lines>log.maxLine then table.remove(log.lines, #log.lines) end
+end
+
 
 function log:clear()
 	log.lines={}
