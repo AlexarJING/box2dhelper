@@ -131,19 +131,13 @@ end
 function creator:importFromImage(file)
 	
 	local name=string.stripfilename(file:getFilename())
-	--love.filesystem.createDirectory("texture")
-	local file2 = love.filesystem.newFile(editor.currentProject..
-		"/texture/"..name,"w",editor.savingDir)
+	love.filesystem.createDirectory("texture")
+	local file2 = love.filesystem.newFile("texture/"..name)
+	file2:open("w")
 	file2:write(file:read())
 	file2:close()
-	table.insert(editor.textures,name)
-	self:getImageBoundingBox(file,name)
-end
 
-
-
-function creator:getImageBoundingBox(file,name)
-	local Point  = editor.Delaunay.Point
+	local Point    = editor.Delaunay.Point
 	local points = {}
 	local test,imageData = pcall(love.image.newImageData,file)
 	local imageW = imageData:getWidth()
@@ -159,46 +153,8 @@ function creator:getImageBoundingBox(file,name)
 	end
 	 
 	imageData:mapPixel(sample)
-	if love.keyboard.isDown("lctrl") then
-		self:getConvexHull(points,imageData,name)
-	else
-		self:getConvexHull(points,imageData,name)
-	end
-end
-
-function creator:getConvexHull(points,imageData)
-	local verts = {}
-	for i,v in ipairs(points) do
-		table.insert(verts,v.x)
-		table.insert(verts,v.y)
-	end
-	local polygon = math.convexHull(verts)
 	local image = love.graphics.newImage(imageData)
-	local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
-	editor.helper.setProperty(body,"texture",image)
-	editor.helper.setProperty(body,"texturePath",editor.currentProject.."/texture/"..name)
-	--scale/anchorx,anchory
 	
-	for i,v in ipairs(target) do
-		local test,triangles = pcall(love.math.triangulate,v)
-		if test then
-			for i,v in ipairs(triangles) do
-				local rt,shape = pcall(love.physics.newPolygonShape,
-					math.polygonTrans(-imageW/2,-imageH/2,0,1,v))
-				if rt then
-					local fixture = love.physics.newFixture(body, shape)
-					self:setMaterial(fixture,"wood")
-				else
-					
-				end
-			end
-		end
-	end
-	editor.action="importFromImage"
-
-end
-
-function creator:getConcaveHull(points,imageData,name)
 	local triangles = editor.Delaunay.triangulate(points)
 
 	for i=#triangles,1,-1 do
@@ -274,11 +230,11 @@ function creator:getConcaveHull(points,imageData,name)
 		end
 	end
 
-	local image = love.graphics.newImage(imageData)
+
 	local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
-	editor.helper.setProperty(body,"texture",image)
-	editor.helper.setProperty(body,"texturePath",editor.currentProject.."/texture/"..name)
-	
+	body:setUserData({})
+	table.insert(body:getUserData(), {prop="texture",value=image})
+	table.insert(body:getUserData(), {prop="texturePath",value="texture/"..name})
 	for i,v in ipairs(target) do
 		local test,triangles = pcall(love.math.triangulate,v)
 		if test then

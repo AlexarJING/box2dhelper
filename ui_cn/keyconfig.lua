@@ -3,72 +3,6 @@ local ui
 local interface
 local keyconf={}
 
-local keyOrder = {
-	cancel=21,
-	createCircle=1,
-	createBox=2,
-	createLine=3,
-	createEdge=4,
-	createPolygon=5,
-	createFreeline=6,
-	createText=7,
-	createSoftRope=8,
-	createSoftCircle=9,
-	createSoftPolygon=10,
-	createSoftBox=11,
-	createWater=12,
-	createBoom=13,
-	createDistance=14,
-	createRope=15,
-	createWeld=16,
-	createRevolute=17,
-	createPrismatic=18,
-	createWheel=19,
-	createPully=20,
-	selectAll=22,
-	selectNone=23,
-	alineHorizontal=24,
-	alineVerticle=25,
-	clear=26,
-	removeBody=27,
-	removeJoint=28,
-	copy=29,
-	paste=30,
-	combine=31,
-	divide=32,
-	undo=33,
-	redo=34,
-	toggleBodyType=35,
-	nextPropTab=36,
-	bodyMode=37,
-	fixtureMode=38,
-	shapeMode=39,
-	jointMode=40,
-	test=41,
-	pause=42,
-	toggleMouse=43,
-	reset=44,
-	toggleSystem=45,
-	toggleGrid=46,
-	toggleBuild=47,
-	toggleProperty=48,
-	toggleUnit=49,
-	toggleHistroy=50,	
-	saveScene=51,
-	saveUnit=52,
-	saveProject=53,
-	loadProject=54,
-	openSaveFolder=55,
-	comboSet = 56,
-	teststd = 57,
-	testpower = 58,
-	testball = 59,
-	testkey = 60,
-	testscissor = 61,
-	testgrab = 62
-}
-
-
 
 function keyconf:create()
 	if self.frame then self.frame:Remove() end
@@ -83,8 +17,7 @@ function keyconf:create()
 	self.keyconf = editor.keyconf or require "editor/keyconf"
 	self.keys = {}
 	for action,key in pairs(self.keyconf) do
-		--table.insert(self.keys, )
-		self.keys[keyOrder[action]] = {action=action,key=key}
+		table.insert(self.keys, {action=action,key=key})
 	end
 
 	local index = 0
@@ -149,4 +82,3 @@ return function(parent)
 	ui=editor.LoveFrames
 	return keyconf
 end
-

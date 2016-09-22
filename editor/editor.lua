@@ -22,7 +22,7 @@ editor.bg = require "editor/bg"(editor)
 editor.cam = require "editor/camera"(editor)
 editor.selector= require "editor/selector"(editor)
 editor.system= require "editor/system"(editor)
-editor.unitManage = require "editor/units"(editor)
+editor.units = require "editor/units"(editor)
 editor.interface= require "editor/interface"(editor)
 -------------------------------------------------------------
 editor.createMode=require "modes/createMode"(editor)
@@ -37,9 +37,7 @@ editor.renderCanvas = love.graphics.newCanvas()
 
 
 function editor:init()
-	self.scenes = {}
-	self.textures = {}
-	self.units ={}
+
 	self.W = w()
 	self.H = h()
 	self.interface:init()
@@ -166,7 +164,7 @@ function editor:draw()
 		end	
 	end)
 
-	self.unitManage:draw()
+	self.units:draw()
 	self.log:draw()
 	love.graphics.setColor(155, 155, 155, 255)
 	local str = self.state.. " mode"
@@ -326,6 +324,7 @@ function editor:changeMode(which)
 end
 
 function editor:beforeStart()
+	
 	local file = love.filesystem.newFile("appData", "r")
 	if not file then
 		love.window.showMessageBox("firstMet", "This is our firstMet.\nfor more details QQ1643386616", "info")
@@ -333,20 +332,10 @@ function editor:beforeStart()
 		return 
 	end
 	local data=loadstring(file:read())()
-	if not data then 
-		love.window.showMessageBox("firstMet", "This is our firstMet.\nfor more details QQ1643386616", "info")
-		editor.system.newProject()
-		return 
-	end
 	editor.loadProject=data.project
 	editor.system:loadProject()
 	
 end
-
-function editor:setSavingDir(dir)
-	self.savingDir = dir
-end
-
 
 function editor:resize()
 	editor.W=w()
@@ -362,7 +351,7 @@ end
 
 function editor:beforeQuit()
 	local file = love.filesystem.newFile("appData", "w")
-	local data={project=editor.currentProject,scene=editor.currentScene,dir = editor.projectPath }
+	local data={project=editor.currentProject,scene=currentScene}
 	file:write(table.save(data))
 	file:close()
 end
@@ -479,8 +468,8 @@ function editor:keyBound()
 		saveWorld=function() self.system:saveToFile() end,
 		saveScene=function() self.system:saveScene() end,
 		saveProject=function() self.system:saveProject() end,
-		saveUnit=function() self.unitManage:save() end,
-		quickSave=function() self.unitManage:quickSave() end,
+		saveUnit=function() self.units:save() end,
+		quickSave=function() self.units:quickSave() end,
 
 
 

@@ -154,10 +154,8 @@ function dataMode.createWorld(world,data,offx,offy,editor)
 		setUserData(obj.body,v.body.userdata)
 
 		local path = helper.getProperty(obj.body,"texturePath")
-
 		if path then 
-			local file = love.filesystem.newFile(path,"r",helper.editor.savingDir)
-			helper.setProperty(obj.body,"texture",love.graphics.newImage(file))
+			helper.setProperty(obj.body,"texture",love.graphics.newImage(path))
 		end
 		
 

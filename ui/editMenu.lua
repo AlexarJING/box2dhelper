@@ -12,7 +12,7 @@ function edit:create()
 	menu:AddOption("redo", false, function() editor.system:redo() end)
 	menu:AddOption("copy", false, function() editor.bodyMode:copy() end)
 	menu:AddOption("past", false, function() editor.bodyMode:paste() end)
-	menu:AddOption("save unit", false, function() editor.unitManage:save() end)
+	menu:AddOption("save unit", false, function() editor.units:save() end)
 
 	menu:AddDivider()
 

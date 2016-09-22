@@ -2,16 +2,10 @@ if arg[#arg] == "-debug" then require("mobdebug").start() end
 __TESTING = true
 __LANGUAGE = "cn"
 require "libs.util"
-
 local editor=require "editor/editor"
 function love.filedropped( file )
 	editor.createMode:importFromImage(file)
 end
-
-function love.directorydropped(dir)
-	editor:setSavingDir(dir)
-end
-
 function love.resize()
 	editor:resize()
 end
