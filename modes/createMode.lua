@@ -127,24 +127,41 @@ function creator:getPoint()
 	end
 end
 
-
 function creator:importFromImage(file)
 	
 	local name=string.stripfilename(file:getFilename())
-	love.filesystem.createDirectory("texture")
-	local file2 = love.filesystem.newFile("texture/"..name)
-	file2:open("w")
+	local file2 = love.filesystem.newFile(editor.currentProject.."/texture/"..name,"w")
 	file2:write(file:read())
 	file2:close()
-
-	local Point    = editor.Delaunay.Point
-	local points = {}
 	local test,imageData = pcall(love.image.newImageData,file)
-	local imageW = imageData:getWidth()
-	local imageH = imageData:getHeight()
+	
+	local image = love.graphics.newImage(imageData)
+	local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
+	editor.helper.setProperty(body,"texture",image)
+	editor.helper.setProperty(body,"textureData",imageData)
+	editor.helper.setProperty(body,"texturePath",editor.currentProject.."/texture/"..name)
+	local shape = love.physics.newCircleShape(10)
+	local fixture = love.physics.newFixture(body, shape)
+	--self:getImageBoundingBox(file,name)
+	editor.action="import texture from file"
+end
 
+
+local imageW
+local imageH
+function creator:getImageBoundingBox(fast)
+	local selection=editor.selector.selection
+	if not selection then return end
+	if selection[1]:type() ~="Body" then return end
+	local body = selection[1]
+	local imageData = editor.helper.getProperty(body,"textureData")
+	if not imageData  then return end
+	imageW = imageData:getWidth()
+	imageH = imageData:getHeight()
+	local Point  = editor.Delaunay.Point
+	local points = {}
 	local rate=imageW/32 > 1 and math.ceil(imageW/32) or 1
-	local threshold= imageW/10
+	
 	local function sample( x, y, r, g, b, a )
 	   if x%rate==0 and y%rate==0 then
 	   		if a~=0 then table.insert(points,Point(x,y)) end
@@ -153,41 +170,75 @@ function creator:importFromImage(file)
 	end
 	 
 	imageData:mapPixel(sample)
-	local image = love.graphics.newImage(imageData)
-	
-	local triangles = editor.Delaunay.triangulate(points)
+	local target
+	if fast then
+		target = {self:getConvexHull(points)}
+	else
+		target = self:getConcaveHull(points)
+	end
 
+	for i,v in ipairs(target) do
+		local test,triangles = pcall(love.math.triangulate,v)
+		if test then
+			for i,f in ipairs(body:getFixtureList()) do
+				f:destroy()
+			end
+
+			for i,v in ipairs(triangles) do
+				local rt,shape = pcall(love.physics.newPolygonShape,
+					math.polygonTrans(-imageW/2,-imageH/2,0,1,v))
+				if rt then
+					local fixture = love.physics.newFixture(body, shape)
+					self:setMaterial(fixture,"wood")
+				else
+					
+				end
+			end
+		end
+	end
+	editor.action="bounding BB"
+end
+
+function creator:getConvexHull(points)
+	local verts = {}
+	
+	for i,v in ipairs(points) do
+		table.insert(verts,v.x)
+		table.insert(verts,v.y)
+	end
+	global = verts
+	local polygon = math.convexHull(verts)
+
+	return polygon
+end
+
+function creator:getConcaveHull(points)
+	local threshold= imageW/10
+	local triangles = editor.Delaunay.triangulate(points)
 	for i=#triangles,1,-1 do
 		if triangles[i]:getCircumRadius()>threshold then
 			table.remove(triangles, i)
 		end
 	end
-
-
 	local edges={}
 	for i,t in ipairs(triangles) do
 		table.insert(edges,t.e1)
 		table.insert(edges,t.e2)
 		table.insert(edges,t.e3)
 	end
-
-
-	for i,t in ipairs(triangles) do
-		
+	for i,t in ipairs(triangles) do	
 		for j,e in ipairs(edges) do
 			if t.e1:same(e) and e~=t.e1 then
 				table.remove(edges, j)	
 				break
 			end
-		end
-		
+		end		
 		for j,e in ipairs(edges) do
 			if t.e2:same(e) and e~=t.e2 then
 				table.remove(edges, j)
 				break
 			end
 		end
-
 		for j,e in ipairs(edges) do
 			if t.e3:same(e) and e~=t.e3 then
 				table.remove(edges, j)	
@@ -230,27 +281,8 @@ function creator:importFromImage(file)
 		end
 	end
 
-
-	local body = love.physics.newBody(editor.world, 0, 0, "dynamic")
-	body:setUserData({})
-	table.insert(body:getUserData(), {prop="texture",value=image})
-	table.insert(body:getUserData(), {prop="texturePath",value="texture/"..name})
-	for i,v in ipairs(target) do
-		local test,triangles = pcall(love.math.triangulate,v)
-		if test then
-			for i,v in ipairs(triangles) do
-				local rt,shape = pcall(love.physics.newPolygonShape,
-					math.polygonTrans(-imageW/2,-imageH/2,0,1,v))
-				if rt then
-					local fixture = love.physics.newFixture(body, shape)
-					self:setMaterial(fixture,"wood")
-				else
-					
-				end
-			end
-		end
-	end
-	editor.action="importFromImage"
+	return target
+	
 end
 
 local cat = require "libs/matcat".new("libs/matrix.txt")
@@ -606,18 +638,19 @@ function creator:polygon()
 		local mainFixture
 		for i,triangle in ipairs(triangles) do
 			local verts=polygonTrans(-x, -y,0,1,triangle)
-			local shape = love.physics.newPolygonShape(verts)
-			local fixture = love.physics.newFixture(body, shape)
-			self:setMaterial(fixture,"wood")
-			if i==1 then
-				editor.helper.setProperty(fixture,"mainFixture",true)
-				editor.helper.setProperty(fixture,"fixturesOutline",
-					getLocalPoints(body,self.createVerts))
-				mainFixture=fixture
-			else
-				editor.helper.setProperty(fixture,"subFixture",mainFixture)
+			local test ,shape = pcall(love.physics.newPolygonShape,verts)
+			if test then
+				local fixture = love.physics.newFixture(body, shape)
+				self:setMaterial(fixture,"wood")
+				if i==1 then
+					editor.helper.setProperty(fixture,"mainFixture",true)
+					editor.helper.setProperty(fixture,"fixturesOutline",
+						getLocalPoints(body,self.createVerts))
+					mainFixture=fixture
+				else
+					editor.helper.setProperty(fixture,"subFixture",mainFixture)
+				end
 			end
-			
 		end
 	else
 		local x,y=math.getPolygonArea(self.createVerts)

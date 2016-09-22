@@ -1032,7 +1032,7 @@ end
 string.byte    = utf8unicode
 string.char    = utf8char
 string.dump    = dump
-string.find    = utf8find
+--string.find    = utf8find
 string.format  = format
 string.gmatch  = utf8gmatch
 string.gsub    = utf8gsub

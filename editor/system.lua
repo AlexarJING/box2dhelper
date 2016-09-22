@@ -5,7 +5,20 @@ system.undoStack={}
 system.undoIndex=0
 system.maxUndo=20
 
+local json = require "libs/dkjson"
 
+function system:exportAsJson()
+	local state = editor.system.undoStack[editor.system.undoIndex].world
+	local encoded = json.encode(state)
+	local path = love.filesystem.getAppdataDirectory( )
+	local id = love.filesystem.getIdentity()
+	local name = "output.json"
+	local file, errorstr = love.filesystem.newFile(name, "w")
+	file:write(encoded)
+	file:close()
+	love.system.openURL(path.."/"..id.."/")
+	love.system.openURL(path.."/LOVE/"..id.."/")
+end
 
 function system:clear()
 	editor.world =love.physics.newWorld()
@@ -93,11 +106,11 @@ function system:copyProject(source)
 			to:close()
 		end
 	end
-	local files = love.filesystem.getDirectoryItems(source.."/textures")
+	local files = love.filesystem.getDirectoryItems(source.."/texture")
 	if files then
 		for i,name in ipairs(files) do
-			local from = love.filesystem.newFile(source.."/textures/"..name, "r")
-			local to = love.filesystem.newFile(editor.currentProject.."/textures/"..name, "w")
+			local from = love.filesystem.newFile(source.."/texture/"..name, "r")
+			local to = love.filesystem.newFile(editor.currentProject.."/texture/"..name, "w")
 			to:write(from:read())
 			from:close()
 			to:close()
@@ -130,7 +143,7 @@ function system:saveProject()
 	local text=editor.currentProject
 	love.filesystem.createDirectory(text.."/units")
 	love.filesystem.createDirectory(text.."/scenes")
-	love.filesystem.createDirectory(text.."/textures")
+	love.filesystem.createDirectory(text.."/texture")
 	local project = love.filesystem.newFile(text..".proj", "w")
 	
 	local data={

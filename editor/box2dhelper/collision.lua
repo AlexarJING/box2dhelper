@@ -115,9 +115,11 @@ func.explosion=function(boomV,a,b,coll)
 			fixture:setDensity(99)
 			--fixture:setFriction(99)
 			fixture:setRestitution(0.5)
+			fixture:setGroupIndex(-1)
 			local angle= love.math.random()*math.pi*2
 			body:setLinearVelocity(math.sin(angle)*boomV,math.cos(angle)*boomV)
-			body:setLinearDamping(3)
+			--body:setLinearDamping(3)
+			body:setBullet(true)
 			body:setUserData({{prop="anticount",value=love.math.random()*2}})
 			helper.reactMode.addBody(body)
 			table.insert(frags, body)
@@ -499,6 +501,7 @@ function func.magnet(power,a,b,coll)
 end
 
 function func.destroyOnHit(threshold,a,b,c,np)
+	
 	if not threshold then return end
 	if np<threshold then return end
 	local func=function(a) 
@@ -519,7 +522,10 @@ function func.creator(toggle,a,b,c)
 	local y = helper.getProperty(a,"creatorY") or 0
 	local body = helper.getProperty(a,"creatorBody")
 	local data = body and helper.getStatus(body) or collMode.defaultObject()
-	table.insert(helper.system.todo,{helper.createWorld,helper.world,data,x,y} )
+	local func = function()
+		helper.createWorld(helper.world,data,x,y)
+	end
+	table.insert(helper.system.todo,{func,true} )
 end
 
 local polygonClip = require "libs/polybool"
@@ -693,7 +699,7 @@ collMode.collisionType={
 		bullet=collMode.collisionFunc.bulletPre,
 		buoyancy=collMode.collisionFunc.buoyancy,
 		magnetField=collMode.collisionFunc.magnet,
-		destroyOnHit=collMode.collisionFunc.destroyOnHit,
+		--destroyOnHit=collMode.collisionFunc.destroyOnHit,
 		--destructor = collMode.collisionFunc.destructor
 		
 	},
@@ -701,18 +707,21 @@ collMode.collisionType={
 		crashable=collMode.collisionFunc.crash,
 		embed=collMode.collisionFunc.embed,
 		toPixel = collMode.collisionFunc.toPixel,
-		breakup = collMode.collisionFunc.breakup
+		breakup = collMode.collisionFunc.breakup,
+		destroyOnHit=collMode.collisionFunc.destroyOnHit,
 	}	
 }
 
 collMode.defaultObject=function() 
 	local world = love.physics.newWorld(0,0)
 	local body = love.physics.newBody(world,0,0,"dynamic")
-	local shape = love.physics.newCircleShape(30)
+	local shape = love.physics.newCircleShape(10)
 	local fixture = love.physics.newFixture(body, shape)
 	body:setUserData({prop="anticount",value=10})
-	body:setLinearVelocity(love.math.random()*100,love.math.random()*100)
-	fixture:setUserData({{prop="explosion",value=5000}})
+	body:setLinearVelocity(love.math.random()*10,love.math.random()*10)
+	helper.setProperty(fixture,"explosion",1000)
+	helper.setProperty(fixture,"destroyOnHit",1)
+
 	return helper.getWorldData({body})
 end
 

@@ -60,7 +60,10 @@ local conf={
 	testball = "kp2",
 	testkey = "kp3",
 	testscissor = "kp4",
-	testgrab = "kp5"
+	testgrab = "kp5",
+	getConvex = "[",
+	getConcave = "]",
+	exportJson = "0"
 }
 
 return conf

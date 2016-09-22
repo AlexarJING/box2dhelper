@@ -34,6 +34,25 @@ end
 
 local fixColor={255, 0, 255, 255}
 
+function fMode:removeFixture()
+	if not self.selectedFixture then return end
+	self.selectedFixture:destroy()
+	self.selectedFixture = nil
+	editor.selector.selection = nil
+	editor.action="remove fixture"
+end
+
+function fMode:comboSet()
+	if not self.selectedFixture then return end
+	local fixture = self.selectedFixture
+	local body = fixture:getBody()
+	local data=editor.helper.getStatus(fixture,"fixture")
+	for i,v in ipairs(body:getFixtureList()) do
+		editor.helper.setStatus(v,"fixture",data)
+	end
+	editor.action="combo set fixture"
+end
+
 
 function fMode:draw()
 	if not self.selectedFixture or self.selectedFixture:isDestroyed() then return end

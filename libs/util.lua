@@ -69,52 +69,66 @@ end
 function math.convexHull(verts)
 	local v={}
 	local rt={}
-	local lastK=0
+
+	for i=1,#verts/2 do
+		v[i]={}
+		v[i].x=verts[i*2-1]
+		v[i].y=verts[i*2]
+	end
+	local minY=-1/0
+	local minX=1/0
+	local startIndex
+	for i,v in ipairs(v) do
+		if v.x<minX then
+			startIndex = i
+			minY = v.y
+			minX = v.x
+		elseif v.x == minX and v.y> minY then			
+			startIndex = i
+			minY =v.y		
+		end	
+	end
+
+	local lastI=0
 	local lastX=0
 	local lastY=0
 	local lastRad=0
-	local v_c=#verts/2
-	for i=1,v_c do
-		v[i]={}
-		v[i].x=verts[i*2-2]
-		v[i].y=verts[i*2-1]
-	end
-	local maxY=-1/0
-	local oK=0
-	for k,v in pairs(v) do
-		if v.y>maxY then
-			maxY=v.y
-			oK=k
-		end	
-	end
-	lastK=oK
-	lastX=v[lastK].x
-	lastY=v[lastK].y
-	table.insert(rt,v[lastK].x)
-	table.insert(rt,v[lastK].y)
-	local i=0
-	while i<100 do
-		i=i+1
-		local minRad=2*math.pi
-		local minK=0
-		for k,v in pairs(v) do
-			local rad=math.getRot(lastX,lastY,v.x,v.y,true)
-			if rad and rad>lastRad then
-				if rad<minRad then
-					minRad=rad
-					minK=k
+	
+	lastI=startIndex
+	lastX=v[lastI].x
+	lastY=v[lastI].y
+	table.insert(rt,lastX)
+	table.insert(rt,lastY)
+	while true do
+		local minRad=10
+		local minIndex
+		local minDist = 1/0
+		for i,vert in ipairs(v) do
+			if i~= lastI then
+				local rad=math.getRot(lastX,lastY,vert.x,vert.y)
+				if rad>=lastRad then
+					if rad<minRad then
+						minRad=rad
+						minIndex=i
+					elseif rad == minRad then
+						local dist = math.getDistance(lastX,lastY,vert.x,vert.y)
+						if dist<minDist then
+							minDist = dist
+							minRad = rad
+							minIndex =i 
+						end
+					end
 				end
 			end
 		end
-		if minK==maxK or minK==0 then return rt end
-		lastK=minK
-		lastRad=minRad
-		lastX=v[lastK].x
-		lastY=v[lastK].y
-		table.insert(rt,v[lastK].x)
-		table.insert(rt,v[lastK].y)
+		if not minIndex or minIndex == startIndex then return rt end
+		lastI = minIndex
+		lastRad = minRad
+		lastX = v[lastI].x
+		lastY = v[lastI].y
+		table.insert(rt,lastX)
+		table.insert(rt,lastY)
 	end
-
 end
 
 function math.randomPolygon(count,size)

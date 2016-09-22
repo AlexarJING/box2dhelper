@@ -385,10 +385,9 @@ function dataMode.setStatus(obj,objType,data)
 	for i,prop in ipairs(dataMode.properties[objType]) do
 		local func=obj["set"..prop]
 		local value=data[prop]
-
 		if func and value then
 			if type(value)=="table" then
-				func(obj,unpack(data[prop]))					
+				func(obj,unpack(data[prop] or {}))					
 			else
 				func(obj,data[prop])
 			end
@@ -458,7 +457,6 @@ dataMode.properties={
 	"UpperLimit",
 	"CollideConnected",
 	"Type",
-	"UserData",
 	"DampingRatio",
 	"Frequency",
 	"Length",

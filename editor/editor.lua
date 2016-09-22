@@ -86,7 +86,7 @@ function editor:update(dt)
 
 	if self.state=="test" and not self.testMode.pause then 
 		self.world:update(dt)
-		self.helper.update(editor,self.world)
+		self.helper.update(self.world)
 	end
 end
 
@@ -112,6 +112,11 @@ function editor:draw()
     love.graphics.setColor(255, 255, 255, 255)
 	self.cam:draw(function()	
 		self.helper.draw(self.world)
+		love.graphics.setColor(255, 0, 0, 255)
+		if global then
+			--print(#global)
+			love.graphics.points(global)
+		end
 	end)
 	love.graphics.setCanvas()
 
@@ -323,11 +328,29 @@ function editor:changeMode(which)
 	
 end
 
+function editor:copyTutorial()
+	local function recursiveEnumerate(folder)
+		local lfs = love.filesystem
+		local filesTable = lfs.getDirectoryItems(folder)
+		for i,v in ipairs(filesTable) do
+			local file = folder.."/"..v
+			if lfs.isFile(file) then
+				lfs.write(folder,lfs.read(file))
+			elseif lfs.isDirectory(file) then
+				love.filesystem.createDirectory(file)
+				recursiveEnumerate(file)
+			end
+		end
+	end
+	recursiveEnumerate("tutorial")
+end
+
 function editor:beforeStart()
 	
 	local file = love.filesystem.newFile("appData", "r")
 	if not file then
 		love.window.showMessageBox("firstMet", "This is our firstMet.\nfor more details QQ1643386616", "info")
+		editor:copyTutorial()
 		editor.system.newProject()
 		return 
 	end
@@ -425,7 +448,7 @@ function editor:keyBound()
 			if self.state == "body" then
 
 			elseif self.state == "fixture" then
-
+				self.fixtureMode:comboSet()
 			elseif self.state == "joint" then
 				self.jointMode:comboSet()
 			end
@@ -438,6 +461,8 @@ function editor:keyBound()
 		removeBody=function()
 			if self.state == "body" then
 				self.bodyMode:removeBody()
+			elseif self.state == "fixture" then
+				self.fixtureMode:removeFixture()
 			elseif self.state == "joint" then
 				self.jointMode:removeJoint()
 			end 
@@ -518,6 +543,15 @@ function editor:keyBound()
 		testgrab = function()
 			self.testMode:toggleMouse(6)
 		end,
+		getConvex =  function()
+			self.createMode:getImageBoundingBox(true)
+		end,
+		getConcave =  function()
+			self.createMode:getImageBoundingBox()
+		end,
+		exportJson = function()
+			self.system:exportAsJson()
+		end
 	}
 
 	local keys ={}

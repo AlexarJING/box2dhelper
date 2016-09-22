@@ -31,6 +31,7 @@ end
 
 
 function system.update(world)
+
 	if world==helper.world then
 		helper.script.update()
 		helper.reactMode.update()
