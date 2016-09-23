@@ -329,21 +329,23 @@ function editor:changeMode(which)
 end
 
 function editor:copyTutorial()
-	local function recursiveEnumerate(folder)
+	local function recursiveEnumerate(folder,target)
 		local lfs = love.filesystem
 		local filesTable = lfs.getDirectoryItems(folder)
 		for i,v in ipairs(filesTable) do
 			local file = folder.."/"..v
+			local nextTarget = target .. "/" .. v
 			if lfs.isFile(file) then
-				lfs.write(folder,lfs.read(file))
+				lfs.write(nextTarget,lfs.read(file))
 			elseif lfs.isDirectory(file) then
-				love.filesystem.createDirectory(file)
-				recursiveEnumerate(file)
+				love.filesystem.createDirectory(nextTarget)
+				recursiveEnumerate(file,nextTarget)
 			end
 		end
 	end
-	recursiveEnumerate("tutorial")
+	recursiveEnumerate("tutorial","")
 end
+
 
 function editor:beforeStart()
 	
